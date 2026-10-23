@@ -333,7 +333,15 @@ sendBtn.onclick=function(){
    if(j.ok)return done(req,j.mailed);
    if(j.error==="slot_taken"){selSlot=null;show("Questo orario è stato appena prenotato da qualcun altro: scegline un altro.","err");return load().then(refresh)}
    show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})
-  .catch(function(){show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})
+  .catch(function(){
+   // Alcuni browser (es. Safari in navigazione privata) non riescono a leggere la risposta dello script
+   // anche quando la prenotazione è stata salvata: ricontrollo l'agenda per capire com'è andata.
+   var day=key(selDay),ora=selSlot;show("Sto verificando la prenotazione…","ok");
+   return new Promise(function(r){setTimeout(r,1500)}).then(function(){return fetch(BOOKING_URL+"?action=slots&_="+Date.now())}).then(function(r){return r.json()}).then(function(j){
+    var free=(j.slots&&j.slots[day])||[];
+    if(free.indexOf(ora)<0){avail=j.slots;return done(req,!!req.email)}
+    show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})
+   .catch(function(){show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})})
   .then(function(){sendBtn.disabled=false})};
 })();
 </script>
