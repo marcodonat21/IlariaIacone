@@ -378,6 +378,7 @@ sendBtn.onclick=function(){
  var v=function(i){return $(i).value.trim()};
  if(!selDay||!selSlot)return show("Seleziona un giorno e un orario.","err");
  if(!v("nome")||!v("tel"))return show("Inserisci almeno nome e telefono.","err");
+ if(v("tel").replace(/\D/g,"").length<6)return show("Il numero di telefono sembra incompleto: controllalo e riprova.","err");
  if(!$("priv").checked)return show("Serve il consenso al trattamento dei dati.","err");
  var req={nome:v("nome"),telefono:v("tel"),email:v("mail"),tipo:v("tipo"),sede:v("sede"),note:v("note"),data:key(selDay),ora:selSlot,origin:location.origin};
  if(!BOOKING_URL){console.log("Richiesta appuntamento",req);return done(req)}
@@ -387,7 +388,7 @@ sendBtn.onclick=function(){
    if(j.ok&&j.pay&&j.url){show("Ti porto alla pagina di pagamento sicura…","ok");location.href=j.url;return}
    if(j.ok)return done(req,j.mailed,j.ev,j.t);
    if(j.error==="slot_taken"){selSlot=null;show("Questo orario è stato appena prenotato da qualcun altro: scegline un altro.","err");return load().then(refresh)}
-   show(j.error==="pay_error"?"Il pagamento online non è al momento disponibile: riprova tra poco o scrivimi su WhatsApp.":"Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})
+   show(j.error==="bad_request"?"Alcuni dati non sono validi: controlla il numero di telefono e riprova.":j.error==="pay_error"?"Il pagamento online non è al momento disponibile: riprova tra poco o scrivimi su WhatsApp.":"Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})
   .catch(function(){show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})
   .then(function(){sendBtn.disabled=false})};
 })();
