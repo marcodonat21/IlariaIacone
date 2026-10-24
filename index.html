@@ -206,9 +206,14 @@ footer a{color:#fff}
 <div class="f"><label for="mail">Email</label><input id="mail" type="email" autocomplete="email" placeholder="nome@email.it"></div>
 <div class="f"><label for="sede">Sede</label><select id="sede" disabled><option value="">Scegli prima la sede</option></select></div>
 <div class="f"><label for="tipo">Tipo di visita</label><select id="tipo"><option>Prima visita</option><option>Visita di controllo</option><option>Dieta per sportivi</option><option>Adipometria / bioimpedenziometria</option></select></div>
+<div class="f full"><label for="cf">Codice fiscale</label><input id="cf" autocomplete="off" maxlength="16" autocapitalize="characters" style="text-transform:uppercase" placeholder="16 caratteri"></div>
+<div class="f full"><label for="ind">Indirizzo di residenza</label><input id="ind" autocomplete="street-address" placeholder="Via, numero civico"></div>
+<div class="f"><label for="cap">CAP</label><input id="cap" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="Es. 80055"></div>
+<div class="f"><label for="citta">Città</label><input id="citta" autocomplete="address-level2" placeholder="Es. Portici"></div>
+<div class="f"><label for="prov">Provincia (sigla)</label><input id="prov" maxlength="2" autocapitalize="characters" style="text-transform:uppercase" placeholder="NA"></div>
 <div class="f full"><label for="note">Note (facoltative)</label><textarea id="note" rows="3" placeholder="Es. orario preferito, domande per Ilaria"></textarea><small class="hint">Non inserire informazioni sanitarie: ne parleremo in visita.</small></div>
 </div>
-<label class="chk"><input type="checkbox" id="priv"><span>Ho letto l'<a href="#privacy" data-legal="privacy">informativa privacy</a> e acconsento al trattamento dei miei dati per essere ricontattato/a e gestire l'appuntamento.</span></label>
+<label class="chk"><input type="checkbox" id="priv"><span>Ho letto l'<a href="#privacy" data-legal="privacy">informativa privacy</a> e acconsento al trattamento dei miei dati per gestire l'appuntamento, ricevere il promemoria via email ed emettere la fattura.</span></label>
 <button class="btn" id="send" type="button">Richiedi appuntamento</button>
 <p class="note">Ti ricontatto entro 24 ore per la conferma. Per prenotare o disdire serve un preavviso di almeno 24 ore.</p>
 </div>
@@ -227,12 +232,12 @@ footer a{color:#fff}
 <article id="l-privacy" hidden><h2>Informativa privacy</h2>
 <p>Informativa sul trattamento dei dati personali ai sensi degli artt. 13 e 14 del Regolamento UE 2016/679 (GDPR).</p>
 <h3>Titolare del trattamento</h3><p>Ilaria Iacone, biologa nutrizionista &middot; P.IVA 10110241218 &middot; email dott.ssaiacone@gmail.com.</p>
-<h3>Dati trattati</h3><p>Nome e cognome, telefono, email, sede, tipo di visita, data e ora richieste ed eventuali note che inserisci nel modulo di prenotazione. Ti chiediamo di non inserire informazioni sanitarie nel campo note.</p>
-<h3>Finalit&agrave; e base giuridica</h3><p>Ricontattarti per confermare e gestire l'appuntamento richiesto (esecuzione di misure precontrattuali su tua richiesta, art. 6.1.b GDPR) e, per quanto necessario, sulla base del tuo consenso (art. 6.1.a).</p>
-<h3>Conservazione</h3><p>I dati della richiesta di appuntamento (nome, telefono, email e note) sono conservati per 1 anno dalla richiesta; successivamente vengono cancellati, compresi l'evento in agenda e le email collegate. Se la visita ha luogo, i dati entrano nella documentazione professionale della titolare e sono conservati per i tempi previsti dagli obblighi di legge applicabili.</p>
-<h3>Destinatari</h3><p>I dati sono trattati dal titolare e da fornitori che operano per suo conto: Google (calendario e posta elettronica) e i servizi che ospitano il sito (Netlify e GitHub). Alcuni fornitori hanno sede fuori dall'Unione Europea: i trasferimenti avvengono con le garanzie previste dalla normativa.</p>
+<h3>Dati trattati</h3><p>Nome e cognome, telefono, email, codice fiscale, indirizzo di residenza, sede, tipo di visita, data e ora richieste ed eventuali note che inserisci nel modulo di prenotazione. Ti chiediamo di non inserire informazioni sanitarie nel campo note.</p>
+<h3>Finalit&agrave; e base giuridica</h3><p>Ricontattarti per confermare e gestire l'appuntamento richiesto (esecuzione di misure precontrattuali su tua richiesta, art. 6.1.b GDPR) e, per quanto necessario, sulla base del tuo consenso (art. 6.1.a), anche per inviarti via email il riepilogo e un promemoria il giorno prima della visita. Codice fiscale e indirizzo di residenza servono per emettere la fattura della visita e adempiere agli obblighi fiscali (art. 6.1.c GDPR).</p>
+<h3>Conservazione</h3><p>I dati della richiesta di appuntamento (nome, telefono, email e note) sono conservati per 1 anno dalla richiesta; successivamente vengono cancellati, compresi l'evento in agenda e le email collegate. Se la visita ha luogo, i dati entrano nella documentazione professionale della titolare e sono conservati per i tempi previsti dagli obblighi di legge applicabili; i dati usati per la fatturazione sono conservati per i tempi previsti dalla normativa fiscale.</p>
+<h3>Destinatari</h3><p>I dati sono trattati dal titolare e da fornitori che operano per suo conto: Google (calendario, posta elettronica e foglio di calcolo dei clienti) e i servizi che ospitano il sito (Netlify e GitHub). Alcuni fornitori hanno sede fuori dall'Unione Europea: i trasferimenti avvengono con le garanzie previste dalla normativa.</p>
 <h3>I tuoi diritti</h3><p>Puoi chiedere accesso, rettifica, cancellazione, limitazione, opposizione e portabilit&agrave; dei dati, e revocare il consenso in qualsiasi momento, scrivendo all'indirizzo email del titolare. Hai inoltre il diritto di proporre reclamo al Garante per la protezione dei dati personali (garanteprivacy.it).</p>
-<h3>Conferimento dei dati</h3><p>Il conferimento &egrave; facoltativo, ma senza nome e recapito non &egrave; possibile gestire la richiesta di appuntamento.</p>
+<h3>Conferimento dei dati</h3><p>Il conferimento &egrave; facoltativo, ma senza nome, recapito, codice fiscale e residenza non &egrave; possibile gestire la prenotazione ed emettere la fattura.</p>
 </article>
 <article id="l-cookie" hidden><h2>Cookie</h2>
 <p>Questo sito non utilizza cookie di profilazione n&eacute; strumenti di tracciamento o statistica di terze parti. Pu&ograve; usare solo strumenti tecnici strettamente necessari al funzionamento, per i quali non serve il consenso.</p>
@@ -258,6 +263,10 @@ var today=new Date();today.setHours(0,0,0,0);
 var view=new Date(today.getFullYear(),today.getMonth(),1);
 function key(dt){return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0")}
 function label(dt){return DN[dt.getDay()]+" "+dt.getDate()+" "+MESI[dt.getMonth()]}
+function cfOk(cf){if(!/^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-EHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$/.test(cf))return false;
+ var odd=[1,0,5,7,9,13,15,17,19,21,2,4,18,20,11,3,6,8,12,14,16,10,22,25,24,23],s=0;
+ for(var i=0;i<15;i++){var c=cf.charAt(i),n=/\d/.test(c)?+c:c.charCodeAt(0)-65;s+=i%2?n:odd[n]}
+ return String.fromCharCode(65+s%26)===cf.charAt(15)}
 function show(t,c){msg.className="msg "+c;msg.textContent=t}
 function freeFor(dt){if(!BOOKING_URL)return hoursFor(dt);return avail?(avail[key(dt)]||[]):[]}
 function maxDate(){var m=new Date(today);
@@ -323,14 +332,21 @@ function done(req,mailed){
 sendBtn.onclick=function(){
  var v=function(i){return $(i).value.trim()};
  if(!selDay||!selSlot)return show("Seleziona un giorno e un orario.","err");
- if(!v("nome")||!v("tel"))return show("Inserisci almeno nome e telefono.","err");
+ if(!v("nome")||!v("tel"))return show("Inserisci nome e telefono.","err");
+ if(v("tel").replace(/\D/g,"").length<6)return show("Il numero di telefono sembra incompleto: controllalo e riprova.","err");
+ var cf=v("cf").toUpperCase().replace(/\s/g,""),prov=v("prov").toUpperCase();
+ if(!cfOk(cf))return show("Il codice fiscale non sembra corretto: controllalo e riprova.","err");
+ if(!v("ind")||!v("citta"))return show("Inserisci indirizzo di residenza e città.","err");
+ if(!/^\d{5}$/.test(v("cap")))return show("Il CAP deve avere 5 cifre.","err");
+ if(!/^[A-Z]{2}$/.test(prov))return show("Inserisci la sigla della provincia (es. NA).","err");
  if(!$("priv").checked)return show("Serve il consenso al trattamento dei dati.","err");
- var req={nome:v("nome"),telefono:v("tel"),email:v("mail"),tipo:v("tipo"),sede:v("sede"),note:v("note"),data:key(selDay),ora:selSlot};
+ var req={nome:v("nome"),telefono:v("tel"),email:v("mail"),tipo:v("tipo"),sede:v("sede"),note:v("note"),cf:cf,indirizzo:v("ind"),cap:v("cap"),citta:v("citta"),prov:prov,data:key(selDay),ora:selSlot};
  if(!BOOKING_URL){console.log("Richiesta appuntamento",req);return done(req)}
  sendBtn.disabled=true;
  fetch(BOOKING_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(req)})
   .then(function(r){return r.json()}).then(function(j){
    if(j.ok)return done(req,j.mailed);
+   if(j.error==="cf_invalid")return show("Il codice fiscale non sembra corretto: controllalo e riprova.","err");
    if(j.error==="slot_taken"){selSlot=null;show("Questo orario è stato appena prenotato da qualcun altro: scegline un altro.","err");return load().then(refresh)}
    show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})
   .catch(function(){
