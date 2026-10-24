@@ -471,7 +471,7 @@ document.addEventListener("click",function(e){var b=e.target.closest&&e.target.c
   if(b.classList.contains("sedebtn")){val(1,b.getAttribute("data-s"));val(2,"");val(3,"");reached=2;open(2,true)}
   else if(p==="cg"){val(2,lab);val(3,"");reached=3;open(3,true)}
   else if(p==="slots"&&b.classList.contains("slot")){val(3,"ore "+txt);open(4,true)}
- },0)});
+ },0)},true);
 /* se l'orario viene preso da qualcun altro mentre compili, torna alla scelta dell'orario */
 var msg=document.getElementById("msg");
 if(msg)new MutationObserver(function(){if(/appena prenotato/.test(msg.textContent)){val(3,"");open(3,true)}}).observe(msg,{childList:true,characterData:true,subtree:true});
