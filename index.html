@@ -130,6 +130,11 @@ footer a{color:#fff}
 
 .fcard .note.sendwait{margin:10px 0 0;font-weight:600;color:var(--red)}
 
+/* Chi sono: su computer la foto è alta quanto il testo, senza spazi vuoti */
+@media(min-width:701px){
+#chi-sono .about{grid-template-columns:1fr 1.15fr;align-items:stretch;gap:48px}
+#chi-sono .about .photo{aspect-ratio:auto;height:100%;min-height:560px}
+}
 /* Chi sono: testo della stessa grandezza della Formazione, citazioni e invito più ordinati */
 #chi-sono .about p{font-size:.93rem;line-height:1.65;margin:0 0 14px;max-width:none}
 #chi-sono .about .askq{font-family:"Playfair Display",Georgia,serif;font-weight:700;font-size:1.2rem;color:var(--text);margin:4px 0 10px}
