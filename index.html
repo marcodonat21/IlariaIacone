@@ -106,6 +106,26 @@ footer a{color:#fff}
 #servizi .card.svc:hover,#servizi .card.svc:focus-visible,#servizi .card.svc.open{z-index:7;border-color:var(--line);border-bottom-color:transparent;border-radius:18px 18px 0 0;box-shadow:0 18px 30px rgba(0,0,0,.12)}
 #servizi .card.svc:hover .svcmore,#servizi .card.svc:focus-visible .svcmore,#servizi .card.svc.open .svcmore{opacity:1;visibility:visible;transform:none}
 @media(hover:none){#servizi .card.svc:hover:not(.open){border-bottom-color:var(--line);border-radius:18px;box-shadow:none}#servizi .card.svc:hover:not(.open) .svcmore{opacity:0;visibility:hidden}}
+
+/* agenda a passi: è aperto solo il punto corrente, ogni scelta apre il successivo */
+.book>div{min-width:0}
+.step{background:var(--card);border:1px solid var(--line);border-radius:20px;margin-bottom:12px;scroll-margin-top:90px;box-shadow:0 6px 22px rgba(182,36,50,.06)}
+.stephead{width:100%;display:flex;align-items:center;gap:12px;background:none;border:0;padding:16px 18px;font:inherit;color:var(--text);text-align:left;cursor:pointer;border-radius:20px}
+.stephead:disabled{cursor:default;opacity:.5}
+.stepn{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--blush);color:var(--red);font-weight:700;font-size:.9rem}
+.step.done .stepn{background:var(--green);color:#fff}
+.step.cur .stepn{background:var(--red);color:#fff}
+.stept{font-weight:700}
+.stepv{margin-left:auto;color:var(--red);font-weight:600;font-size:.9rem;text-align:right}
+.stepc{flex:none;color:var(--muted);transition:transform .2s}
+.step.cur .stepc{transform:rotate(180deg)}
+.stepbody{padding:0 18px 18px}
+.step:not(.cur) .stepbody{display:none}
+.stepbody>.cal:first-child,.stepbody>.sedes:first-child{margin-top:0}
+#calhint{display:none!important}
+.book.booked .step{display:none}
+#sum{margin:0 0 10px}
+@media(max-width:560px){.stephead{padding:14px}.stepbody{padding:0 14px 14px}.stepv{font-size:.82rem}}
 </style>
 </head>
 <body>
@@ -191,19 +211,22 @@ footer a{color:#fff}
 <p class="lead" id="plead">Scegli giorno e orario che preferisci: riceverai un contatto per la conferma definitiva. Se preferisci, puoi anche <a href="https://www.miodottore.it/profilo/ilaria-iacone" target="_blank" rel="noopener" style="color:var(--red)">prenotare su MioDottore</a>.</p>
 <div class="book">
 <div>
-<b>1. Scegli la sede</b>
+<div class="step" data-step="1"><button type="button" class="stephead" aria-expanded="false"><span class="stepn">1</span><span class="stept">Scegli la sede</span><span class="stepv"></span><span class="stepc" aria-hidden="true">▾</span></button><div class="stepbody">
 <div class="sedes"><button type="button" class="slot sedebtn" data-s="Portici"><b>Portici</b><small>mar · ven</small></button><button type="button" class="slot sedebtn" data-s="Volla"><b>Volla</b><small>lun · mer · sab</small></button><button type="button" class="slot sedebtn" data-s="Napoli"><b>Napoli</b><small>gio</small></button></div>
 <p class="note" id="sedehint" style="margin:0 0 6px">Scegli prima la sede: poi si illuminano i giorni in cui Ilaria riceve lì.</p>
-<b style="display:block;margin-top:16px">2. Scegli il giorno</b>
+</div></div>
+<div class="step" data-step="2"><button type="button" class="stephead" aria-expanded="false"><span class="stepn">2</span><span class="stept">Scegli il giorno</span><span class="stepv"></span><span class="stepc" aria-hidden="true">▾</span></button><div class="stepbody">
 <p class="calhint" style="margin:8px 0 10px" id="calhint">Scegli prima la sede (punto 1) per vedere i giorni disponibili. <button type="button" id="gosede">Vai alla scelta della sede</button></p>
 <div class="cal"><div class="calh"><button type="button" id="prev" aria-label="Mese precedente">&#8249;</button><span id="mtitle"></span><button type="button" id="next" aria-label="Mese successivo">&#8250;</button></div>
 <div class="cw"><span>lun</span><span>mar</span><span>mer</span><span>gio</span><span>ven</span><span>sab</span><span>dom</span></div><div class="cg" id="cg"></div></div>
-<b style="display:block;margin-top:18px">3. Scegli l'orario</b>
+</div></div>
+<div class="step" data-step="3"><button type="button" class="stephead" aria-expanded="false"><span class="stepn">3</span><span class="stept">Scegli l'orario</span><span class="stepv"></span><span class="stepc" aria-hidden="true">▾</span></button><div class="stepbody">
 <div class="cal" id="tcard"><div class="thead" id="thead"></div><div class="slots" id="slots"></div></div>
-<div class="sum" id="sum" role="status"></div>
+</div></div>
 </div>
 <div>
-<b id="ftitle">4. I tuoi dati</b>
+<div class="step" data-step="4"><button type="button" class="stephead" id="ftitle" aria-expanded="false"><span class="stepn">4</span><span class="stept">I tuoi dati</span><span class="stepv"></span><span class="stepc" aria-hidden="true">▾</span></button><div class="stepbody">
+<div class="sum" id="sum" role="status"></div>
 <div id="fbox" class="cal fcard">
 <div class="fgrid">
 <div class="f full"><label for="nome">Nome e cognome</label><input id="nome" autocomplete="name" placeholder="Es. Maria Rossi"></div>
@@ -222,6 +245,7 @@ footer a{color:#fff}
 <button class="btn" id="send" type="button">Richiedi appuntamento</button>
 <p class="note">Ti ricontatto entro 24 ore per la conferma. Per prenotare o disdire serve un preavviso di almeno 24 ore.</p>
 </div>
+</div></div>
 <div class="msg" id="msg" role="status"></div>
 </div></div>
 </div></section>
@@ -429,6 +453,28 @@ svc.forEach(function(c){c.addEventListener("keydown",function(e){if(e.key==="Ent
 /* Domande frequenti: aprendone una si chiudono le altre */
 var det=[].slice.call(document.querySelectorAll(".faq details"));
 det.forEach(function(d){d.addEventListener("toggle",function(){if(d.open)det.forEach(function(x){if(x!==d)x.open=false})})});
+})();
+</script>
+<script>
+(function(){
+/* Agenda a passi */
+var steps=[].slice.call(document.querySelectorAll(".book .step"));if(!steps.length)return;
+var reached=1;
+function st(n){return steps[n-1]}
+function val(n,t){st(n).querySelector(".stepv").textContent=t||"";st(n).classList.toggle("done",!!t)}
+function open(n,scroll){reached=Math.max(reached,n);steps.forEach(function(s,i){var k=i+1,h=s.querySelector(".stephead");s.classList.toggle("cur",k===n);h.setAttribute("aria-expanded",k===n?"true":"false");h.disabled=k>reached});
+ if(scroll){var s=st(n);setTimeout(function(){var r=s.getBoundingClientRect();if(r.top<70||r.top>window.innerHeight*.6)s.scrollIntoView({behavior:"smooth",block:"start"})},60)}}
+steps.forEach(function(s,i){s.querySelector(".stephead").addEventListener("click",function(){var n=i+1;if(n<=reached)open(n,false)})});
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("button");if(!b||b.disabled)return;
+ setTimeout(function(){
+  if(b.classList.contains("sedebtn")){val(1,b.getAttribute("data-s"));val(2,"");val(3,"");reached=2;open(2,true)}
+  else if(b.parentNode&&b.parentNode.id==="cg"){val(2,b.getAttribute("aria-label"));val(3,"");reached=3;open(3,true)}
+  else if(b.parentNode&&b.parentNode.id==="slots"&&b.classList.contains("slot")){val(3,"ore "+b.textContent);open(4,true)}
+ },0)});
+/* se l'orario viene preso da qualcun altro mentre compili, torna alla scelta dell'orario */
+var msg=document.getElementById("msg");
+if(msg)new MutationObserver(function(){if(/appena prenotato/.test(msg.textContent)){val(3,"");open(3,true)}}).observe(msg,{childList:true,characterData:true,subtree:true});
+open(1,false);
 })();
 </script>
 </body>
