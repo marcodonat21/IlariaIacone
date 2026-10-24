@@ -126,6 +126,8 @@ footer a{color:#fff}
 .book.booked .step{display:none}
 #sum{margin:0 0 10px}
 @media(max-width:560px){.stephead{padding:14px}.stepbody{padding:0 14px 14px}.stepv{font-size:.82rem}}
+
+.fcard .note.sendwait{margin:10px 0 0;font-weight:600;color:var(--red)}
 </style>
 </head>
 <body>
@@ -229,12 +231,13 @@ footer a{color:#fff}
 <div class="sum" id="sum" role="status"></div>
 <div id="fbox" class="cal fcard">
 <div class="fgrid">
-<div class="f full"><label for="nome">Nome e cognome</label><input id="nome" autocomplete="name" placeholder="Es. Maria Rossi"></div>
+<div class="f"><label for="nome">Nome</label><input id="nome" autocomplete="given-name" placeholder="Es. Maria"></div>
+<div class="f"><label for="cognome">Cognome</label><input id="cognome" autocomplete="family-name" placeholder="Es. Rossi"></div>
 <div class="f"><label for="tel">Telefono</label><input id="tel" type="tel" autocomplete="tel" placeholder="Es. 333 123 4567"></div>
 <div class="f"><label for="mail">Email</label><input id="mail" type="email" autocomplete="email" placeholder="nome@email.it"></div>
 <div class="f"><label for="sede">Sede</label><select id="sede" disabled><option value="">Scegli prima la sede</option></select></div>
 <div class="f"><label for="tipo">Tipo di visita</label><select id="tipo"><option>Prima visita</option><option>Visita di controllo</option><option>Dieta per sportivi</option><option>Adipometria / bioimpedenziometria</option></select></div>
-<div class="f full"><label for="cf">Codice fiscale</label><input id="cf" autocomplete="off" maxlength="16" autocapitalize="characters" style="text-transform:uppercase" placeholder="16 caratteri"></div>
+<div class="f full"><label for="cf">Codice fiscale</label><input id="cf" autocomplete="off" maxlength="16" autocapitalize="characters" style="text-transform:uppercase" placeholder="Es. RSSMRA85T10A562S"></div>
 <div class="f full"><label for="ind">Indirizzo di residenza</label><input id="ind" autocomplete="street-address" placeholder="Via, numero civico"></div>
 <div class="f"><label for="cap">CAP</label><input id="cap" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="Es. 80055"></div>
 <div class="f"><label for="citta">Città</label><input id="citta" autocomplete="address-level2" placeholder="Es. Portici"></div>
@@ -243,6 +246,7 @@ footer a{color:#fff}
 </div>
 <label class="chk"><input type="checkbox" id="priv"><span>Ho letto l'<a href="#privacy" data-legal="privacy">informativa privacy</a> e acconsento al trattamento dei miei dati per gestire l'appuntamento, ricevere il promemoria via email ed emettere la fattura.</span></label>
 <button class="btn" id="send" type="button">Richiedi appuntamento</button>
+<p class="note sendwait">Dopo aver cliccato, attendi qualche secondo per la conferma.</p>
 <p class="note">Ti ricontatto entro 24 ore per la conferma. Per prenotare o disdire serve un preavviso di almeno 24 ore.</p>
 </div>
 </div></div>
@@ -361,7 +365,8 @@ function done(req,mailed){
 sendBtn.onclick=function(){
  var v=function(i){return $(i).value.trim()};
  if(!selDay||!selSlot)return show("Seleziona un giorno e un orario.","err");
- if(!v("nome")||!v("tel"))return show("Inserisci nome e telefono.","err");
+ if(!v("nome")||!v("cognome"))return show("Inserisci nome e cognome.","err");
+ if(!v("tel"))return show("Inserisci il numero di telefono.","err");
  if(v("tel").replace(/\D/g,"").length<6)return show("Il numero di telefono sembra incompleto: controllalo e riprova.","err");
  var cf=v("cf").toUpperCase().replace(/\s/g,""),prov=v("prov").toUpperCase();
  if(!cfOk(cf))return show("Il codice fiscale non sembra corretto: controllalo e riprova.","err");
@@ -369,9 +374,9 @@ sendBtn.onclick=function(){
  if(!/^\d{5}$/.test(v("cap")))return show("Il CAP deve avere 5 cifre.","err");
  if(!/^[A-Z]{2}$/.test(prov))return show("Inserisci la sigla della provincia (es. NA).","err");
  if(!$("priv").checked)return show("Serve il consenso al trattamento dei dati.","err");
- var req={nome:v("nome"),telefono:v("tel"),email:v("mail"),tipo:v("tipo"),sede:v("sede"),note:v("note"),cf:cf,indirizzo:v("ind"),cap:v("cap"),citta:v("citta"),prov:prov,data:key(selDay),ora:selSlot};
+ var req={nome:v("nome")+" "+v("cognome"),telefono:v("tel"),email:v("mail"),tipo:v("tipo"),sede:v("sede"),note:v("note"),cf:cf,indirizzo:v("ind"),cap:v("cap"),citta:v("citta"),prov:prov,data:key(selDay),ora:selSlot};
  if(!BOOKING_URL){console.log("Richiesta appuntamento",req);return done(req)}
- sendBtn.disabled=true;
+ sendBtn.disabled=true;sendBtn.textContent="Invio in corso…";
  fetch(BOOKING_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(req)})
   .then(function(r){return r.json()}).then(function(j){
    if(j.ok)return done(req,j.mailed);
@@ -387,7 +392,7 @@ sendBtn.onclick=function(){
     if(free.indexOf(ora)<0){avail=j.slots;return done(req,!!req.email)}
     show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})
    .catch(function(){show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})})
-  .then(function(){sendBtn.disabled=false})};
+  .then(function(){sendBtn.disabled=false;sendBtn.textContent="Richiedi appuntamento"})};
 })();
 </script>
 <script>
