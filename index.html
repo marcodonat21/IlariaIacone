@@ -96,18 +96,16 @@ footer a{color:#fff}
 #sedi .grid .card .hrs{min-height:0;margin-bottom:14px}
 #sedi .grid .card .minimap{margin-top:auto}
 #sedi .grid .card .mapsel{margin-top:0;padding-top:14px}
-/* servizi: nome + pulsante "+" che apre la nuvoletta con descrizione e prezzo */
-#servizi .card.svc{position:relative;align-items:center;text-align:center}
-#servizi .card.svc.open{z-index:6}
+/* servizi: passando sopra (o toccando su telefono) il riquadro si allarga e mostra descrizione e prezzo */
+#servizi .card.svc{position:relative;align-items:center;text-align:center;transition:box-shadow .2s,border-radius .2s;outline:none}
 #servizi .card.svc h3{margin:0}
-.plus{margin-top:12px;background:none;border:0;padding:6px 10px;min-height:36px;color:var(--red);font:700 .95rem Inter,system-ui,sans-serif;letter-spacing:.02em;cursor:pointer;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:4px;transition:text-decoration-color .2s}
-.plus:hover,.plus:focus-visible,.plus[aria-expanded="true"]{text-decoration-color:currentColor}
-.bubble{position:absolute;left:10px;right:10px;top:calc(100% + 10px);z-index:6;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:0 14px 34px rgba(0,0,0,.16);text-align:left}
-.bubble[hidden]{display:none}
-.bubble:before{content:"";position:absolute;top:-8px;left:calc(50% - 7px);width:14px;height:14px;background:var(--card);border-left:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg)}
-.bubble p{margin:0 0 10px;color:var(--muted);font-size:.95rem;line-height:1.55}
-.bubble .price{margin:0;font-family:"Playfair Display",Georgia,serif;color:var(--red);font-size:1.3rem;font-weight:700}
-.bubble small{display:block;margin-top:6px;color:var(--muted);font-size:.8rem;line-height:1.45}
+.svcmore{position:absolute;left:-1px;right:-1px;top:calc(100% - 6px);z-index:7;padding:6px 24px 22px;background:var(--card);border:1px solid var(--line);border-top:0;border-radius:0 0 18px 18px;box-shadow:0 18px 30px rgba(0,0,0,.12);opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .2s,transform .2s,visibility .2s}
+.svcmore p{margin:0 0 10px;color:var(--muted);font-size:.95rem;line-height:1.55}
+.svcmore .price{margin:0;font-family:"Playfair Display",Georgia,serif;color:var(--red);font-size:1.3rem;font-weight:700}
+.svcmore small{display:block;margin-top:6px;color:var(--muted);font-size:.8rem;line-height:1.45}
+#servizi .card.svc:hover,#servizi .card.svc:focus-visible,#servizi .card.svc.open{z-index:7;border-color:var(--line);border-bottom-color:transparent;border-radius:18px 18px 0 0;box-shadow:0 18px 30px rgba(0,0,0,.12)}
+#servizi .card.svc:hover .svcmore,#servizi .card.svc:focus-visible .svcmore,#servizi .card.svc.open .svcmore{opacity:1;visibility:visible;transform:none}
+@media(hover:none){#servizi .card.svc:hover:not(.open){border-bottom-color:var(--line);border-radius:18px;box-shadow:none}#servizi .card.svc:hover:not(.open) .svcmore{opacity:0;visibility:hidden}}
 </style>
 </head>
 <body>
@@ -139,11 +137,11 @@ footer a{color:#fff}
 <div class="tag">Servizi</div><h2>Come posso aiutarti</h2>
 <p class="lead">Dalla prima visita al monitoraggio nel tempo, un supporto costante e su misura.</p>
 <div class="grid">
-<div class="card svc"><i class="dot"></i><h3>Prima visita nutrizionale</h3><button type="button" class="plus" aria-expanded="false" aria-controls="svc1" aria-label="Descrizione e prezzo: Prima visita nutrizionale">Info</button><div class="bubble" id="svc1" role="region" aria-label="Prima visita nutrizionale" hidden><p>Anamnesi, valutazione dello stile di vita e definizione degli obiettivi insieme.</p><p class="price">85 – 120 €</p><small>Il costo esatto dipende dalla durata e dagli obiettivi: lo confermo al telefono in fase di prenotazione.</small></div></div>
-<div class="card svc"><i class="dot"></i><h3>Visita di controllo</h3><button type="button" class="plus" aria-expanded="false" aria-controls="svc2" aria-label="Descrizione e prezzo: Visita di controllo">Info</button><div class="bubble" id="svc2" role="region" aria-label="Visita di controllo" hidden><p>Verifica dei progressi e aggiustamenti del piano lungo il percorso.</p><p class="price">40 – 60 €</p></div></div>
-<div class="card svc"><i class="dot"></i><h3>Dieta per sportivi</h3><button type="button" class="plus" aria-expanded="false" aria-controls="svc3" aria-label="Descrizione e prezzo: Dieta per sportivi">Info</button><div class="bubble" id="svc3" role="region" aria-label="Dieta per sportivi" hidden><p>Piano alimentare pensato per chi pratica sport, amatoriale o agonistico.</p><p class="price">100 €</p></div></div>
-<div class="card svc"><i class="dot"></i><h3>Adipometria</h3><button type="button" class="plus" aria-expanded="false" aria-controls="svc4" aria-label="Descrizione e prezzo: Adipometria">Info</button><div class="bubble" id="svc4" role="region" aria-label="Adipometria" hidden><p>Misurazione della massa grassa per monitorare i cambiamenti nel tempo.</p><p class="price">40 €</p></div></div>
-<div class="card svc"><i class="dot"></i><h3>Esame bioimpedenziometrico</h3><button type="button" class="plus" aria-expanded="false" aria-controls="svc5" aria-label="Descrizione e prezzo: Esame bioimpedenziometrico">Info</button><div class="bubble" id="svc5" role="region" aria-label="Esame bioimpedenziometrico" hidden><p>Analisi della composizione corporea in modo semplice e non invasivo.</p><p class="price">40 €</p></div></div>
+<div class="card svc" tabindex="0"><i class="dot"></i><h3>Prima visita nutrizionale</h3><div class="svcmore"><p>Anamnesi, valutazione dello stile di vita e definizione degli obiettivi insieme.</p><p class="price">85 – 120 €</p><small>Il costo esatto dipende dalla durata e dagli obiettivi: lo confermo al telefono in fase di prenotazione.</small></div></div>
+<div class="card svc" tabindex="0"><i class="dot"></i><h3>Visita di controllo</h3><div class="svcmore"><p>Verifica dei progressi e aggiustamenti del piano lungo il percorso.</p><p class="price">40 – 60 €</p></div></div>
+<div class="card svc" tabindex="0"><i class="dot"></i><h3>Dieta per sportivi</h3><div class="svcmore"><p>Piano alimentare pensato per chi pratica sport, amatoriale o agonistico.</p><p class="price">100 €</p></div></div>
+<div class="card svc" tabindex="0"><i class="dot"></i><h3>Adipometria</h3><div class="svcmore"><p>Misurazione della massa grassa per monitorare i cambiamenti nel tempo.</p><p class="price">40 €</p></div></div>
+<div class="card svc" tabindex="0"><i class="dot"></i><h3>Esame bioimpedenziometrico</h3><div class="svcmore"><p>Analisi della composizione corporea in modo semplice e non invasivo.</p><p class="price">40 €</p></div></div>
 </div>
 <div class="chips"><span class="chip on">Sport</span><span class="chip on">Ricomposizione corporea</span><span class="chip on">Dimagrimento</span></div>
 <p class="lead" style="margin:22px auto 0">Mi rivolgo ad adulti di ogni età e a ragazzi a partire dai 10–12 anni.<br>Alla prima visita porta le ultime analisi del sangue e gli eventuali referti passati pertinenti.</p>
@@ -423,13 +421,11 @@ document.addEventListener("click",function(e){if(!n.contains(e.target)&&!b.conta
 window.addEventListener("resize",function(){if(window.innerWidth>700)set(false)})})();</script>
 <script>
 (function(){
-/* Servizi: un solo "+" aperto alla volta; si chiude cliccando fuori o con Esc */
-var plus=[].slice.call(document.querySelectorAll(".plus"));
-function closeSvc(except){plus.forEach(function(b){if(b===except)return;b.setAttribute("aria-expanded","false");document.getElementById(b.getAttribute("aria-controls")).hidden=true;b.closest(".card").classList.remove("open")})}
-plus.forEach(function(b){b.addEventListener("click",function(e){e.stopPropagation();var bub=document.getElementById(b.getAttribute("aria-controls")),open=bub.hidden;closeSvc(b);bub.hidden=!open;b.setAttribute("aria-expanded",open?"true":"false");b.closest(".card").classList.toggle("open",open)})});
-document.querySelectorAll(".bubble").forEach(function(x){x.addEventListener("click",function(e){e.stopPropagation()})});
-document.addEventListener("click",function(){closeSvc()});
-document.addEventListener("keydown",function(e){if(e.key==="Escape")closeSvc()});
+/* Servizi: su telefono (senza mouse) il riquadro si apre toccandolo; uno alla volta */
+var svc=[].slice.call(document.querySelectorAll(".card.svc")),touch=window.matchMedia("(hover:none)").matches;
+function closeSvc(except){svc.forEach(function(c){if(c!==except)c.classList.remove("open")})}
+if(touch){svc.forEach(function(c){c.addEventListener("click",function(e){e.stopPropagation();closeSvc(c);c.classList.toggle("open")})});document.addEventListener("click",function(){closeSvc()})}
+svc.forEach(function(c){c.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();closeSvc(c);c.classList.toggle("open")}if(e.key==="Escape"){c.classList.remove("open");c.blur()}})});
 /* Domande frequenti: aprendone una si chiudono le altre */
 var det=[].slice.call(document.querySelectorAll(".faq details"));
 det.forEach(function(d){d.addEventListener("toggle",function(){if(d.open)det.forEach(function(x){if(x!==d)x.open=false})})});
