@@ -370,6 +370,64 @@ body{min-height:100vh}
 .tico{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:rgba(182,36,50,.08);color:#B62432;margin-bottom:6px}.tico svg{width:22px;height:22px}
 .tb{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 @media(max-width:600px){.tl{grid-template-columns:1fr}.tl>div{flex-direction:row;gap:10px;justify-content:flex-start;text-align:left}.tl .tico{margin:0}.tl b:after{content:" ·"}}
+/* prenotazione a passi, animata */
+.bk{max-width:760px;margin:0 auto;border-radius:30px;padding:22px 24px 26px;background:rgba(255,255,255,.58);border:.5px solid rgba(255,255,255,.85);-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 26px 60px -30px rgba(120,30,40,.4)}
+.bkhead{display:flex;align-items:center;gap:10px;min-height:36px}
+.bkback[hidden]{display:none!important}
+.bkback{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:rgba(118,118,128,.12);color:#B62432;display:grid;place-items:center;cursor:pointer;animation:bkin .3s ease}
+.bksteps{display:flex;gap:4px;list-style:none;margin:0;padding:0;flex:1;justify-content:space-between;counter-reset:s}
+.bksteps li{flex:1;text-align:center;font-size:.78rem;font-weight:600;color:#a1a1a6;transition:color .3s}
+.bksteps li.on{color:#B62432}.bksteps li.done{color:#3a3a3c}
+.bkbar{height:4px;border-radius:4px;background:rgba(118,118,128,.14);margin:10px 0 14px;overflow:hidden}
+.bkbar i{display:block;height:100%;width:20%;border-radius:4px;background:linear-gradient(90deg,#d0404f,#B62432);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.bkchips{display:flex;flex-wrap:wrap;gap:6px;min-height:0}
+.bkchips button{border:0;border-radius:999px;padding:6px 12px;font-size:.8rem;font-weight:600;color:#B62432;background:rgba(182,36,50,.09);cursor:pointer;animation:bkpop .35s cubic-bezier(.2,.9,.3,1.3)}
+.bkchips button:after{content:" ✎";opacity:.6}
+.bkview{position:relative;transition:height .45s cubic-bezier(.2,.8,.2,1)}
+.bkp{display:none;padding-top:12px}
+.bkp.on{display:block;animation:bkin .45s cubic-bezier(.2,.8,.2,1)}
+.bkp.back.on{animation-name:bkinb}
+.bkp h3{font-size:1.35rem;font-weight:700;letter-spacing:-.02em;margin:0 0 16px;color:#1d1d1f}
+@keyframes bkin{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes bkinb{from{opacity:0;transform:translateX(-40px)}to{opacity:1;transform:none}}
+@keyframes bkpop{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:none}}
+@keyframes bkup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.bkgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.bkopt{position:relative;display:block;width:100%;text-align:left;border:1.5px solid transparent;border-radius:20px;padding:16px 18px;background:rgba(255,255,255,.75);cursor:pointer;color:#1d1d1f;font:inherit;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s,border-color .2s;animation:bkup .45s cubic-bezier(.2,.8,.2,1) both;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 8px 20px -14px rgba(120,30,40,.35)}
+.bkopt:hover{transform:translateY(-3px);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 18px 32px -18px rgba(120,30,40,.45)}
+.bkopt:active{transform:scale(.98)}
+.bkopt.sel{border-color:#B62432}
+.bkopt b{display:block;font-size:1.05rem}.bkopt small{display:block;color:#6e6e73;font-size:.84rem;margin-top:2px}
+.bkopt .bkic{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:rgba(182,36,50,.08);color:#B62432;margin-bottom:10px}
+.bkgroup{font-size:.78rem;font-weight:700;color:#6e6e73;text-transform:uppercase;letter-spacing:.04em;margin:16px 4px 8px}.bkgroup:first-child{margin-top:0}
+.bklist{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bktipo{display:flex;align-items:center;gap:12px}
+.bktipo .bkn{flex:1;min-width:0}
+.bktipo .bkm{flex:none;text-align:right}
+.bktipo .bkm em{display:block;font-style:normal;font-weight:700;color:#B62432;font-size:1.05rem}
+.bktipo .bkm span{display:inline-block;margin-top:3px;font-size:.74rem;font-weight:600;color:#3a3a3c;background:rgba(118,118,128,.12);border-radius:999px;padding:2px 8px}
+.bkdays{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
+.bkday{text-align:center;padding:12px 6px}
+.bkday small:first-child{margin:0;text-transform:capitalize}
+.bkday b{font-size:1.5rem;letter-spacing:-.03em;margin:2px 0}
+.bkday .bkfree{display:inline-block;margin-top:4px;font-size:.7rem;font-weight:600;color:#1f8a43;background:rgba(52,199,89,.14);border-radius:999px;padding:1px 7px}
+.bkmonth{grid-column:1/-1;font-size:.82rem;font-weight:700;color:#6e6e73;margin:6px 4px 0;text-transform:capitalize}
+.bktimes{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.bktime{text-align:center;padding:14px 6px}.bktime b{font-size:1.15rem}
+.bkload{color:#6e6e73;grid-column:1/-1}
+.bkload:before{content:"";display:inline-block;width:14px;height:14px;margin-right:8px;vertical-align:-2px;border-radius:50%;border:2px solid rgba(182,36,50,.25);border-top-color:#B62432;animation:bkspin .8s linear infinite}
+@keyframes bkspin{to{transform:rotate(360deg)}}
+.bksum{display:flex;flex-wrap:wrap;gap:6px 14px;padding:14px 16px;border-radius:18px;background:rgba(182,36,50,.07);color:#3a3a3c;font-size:.92rem;margin-bottom:16px}.bksum b{color:#B62432}
+.bksend{width:100%;margin-top:6px;padding:15px 24px!important;font-size:1.05rem!important}
+.bkok{text-align:center;padding:18px 6px 6px}
+.bkcheck svg{width:84px;height:84px;fill:none;stroke:#34c759;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.bkcheck circle{stroke-dasharray:151;stroke-dashoffset:151;animation:bkdraw .7s ease forwards}
+.bkcheck path{stroke-dasharray:36;stroke-dashoffset:36;animation:bkdraw .45s .6s ease forwards}
+@keyframes bkdraw{to{stroke-dashoffset:0}}
+.bkok p{color:#3a3a3c;max-width:480px;margin:6px auto 18px}
+#prenota .msg{max-width:760px;margin:14px auto 0}
+@media(max-width:700px){.bk{padding:18px 16px 22px;border-radius:26px;margin:0 -4px}.bkgrid3{grid-template-columns:1fr}.bklist{grid-template-columns:1fr}.bksteps li{font-size:.7rem}.bkgrid3 .bkopt{display:flex;align-items:center;gap:12px}.bkgrid3 .bkopt .bkic{margin:0}}
+@media(prefers-reduced-motion:reduce){.bkp.on,.bkopt,.bkchips button{animation:none}}
 </style>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Person", "@id": "https://www.nutrizionistaiacone.it/#ilaria", "name": "Ilaria Iacone", "jobTitle": "Biologa Nutrizionista", "url": "https://www.nutrizionistaiacone.it/", "alumniOf": {"@type": "CollegeOrUniversity", "name": "Università degli Studi di Napoli Federico II"}, "sameAs": ["https://www.instagram.com/nutrizionistaiacone/", "https://www.tiktok.com/@nutrizionistaiacone", "https://www.facebook.com/dott.ssaiacone", "https://www.miodottore.it/profilo/ilaria-iacone"]}, {"@type": "MedicalBusiness", "@id": "https://www.nutrizionistaiacone.it/#sede-portici", "name": "Ilaria Iacone, Biologa Nutrizionista – Portici (Studio Medico Secondulfo)", "url": "https://www.nutrizionistaiacone.it/", "image": "https://www.nutrizionistaiacone.it/og-image.png", "telephone": "+39 351 785 5930", "email": "dott.ssaiacone@gmail.com", "priceRange": "40–120 €", "address": {"@type": "PostalAddress", "streetAddress": "Corso Giuseppe Garibaldi 41", "postalCode": "80055", "addressLocality": "Portici", "addressRegion": "NA", "addressCountry": "IT"}, "geo": {"@type": "GeoCoordinates", "latitude": 40.8140764, "longitude": 14.3369589}, "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": "Tuesday", "opens": "14:00", "closes": "20:00"}, {"@type": "OpeningHoursSpecification", "dayOfWeek": "Friday", "opens": "09:00", "closes": "18:00"}], "employee": {"@id": "https://www.nutrizionistaiacone.it/#ilaria"}, "medicalSpecialty": "Dietetic", "hasMap": "https://www.google.com/maps/search/?api=1&query=Studio+Medico+Secondulfo,+Corso+Giuseppe+Garibaldi+41,+Portici"}, {"@type": "MedicalBusiness", "@id": "https://www.nutrizionistaiacone.it/#sede-volla", "name": "Ilaria Iacone, Biologa Nutrizionista – Volla (Movement & Performance)", "url": "https://www.nutrizionistaiacone.it/", "image": "https://www.nutrizionistaiacone.it/og-image.png", "telephone": "+39 351 785 5930", "email": "dott.ssaiacone@gmail.com", "priceRange": "40–120 €", "address": {"@type": "PostalAddress", "streetAddress": "Viale Vesuvio 138", "postalCode": "80040", "addressLocality": "Volla", "addressRegion": "NA", "addressCountry": "IT"}, "geo": {"@type": "GeoCoordinates", "latitude": 40.8746595, "longitude": 14.341598}, "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Wednesday"], "opens": "09:00", "closes": "12:00"}, {"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Wednesday"], "opens": "14:00", "closes": "19:30"}, {"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "09:00", "closes": "12:30"}], "employee": {"@id": "https://www.nutrizionistaiacone.it/#ilaria"}, "medicalSpecialty": "Dietetic", "hasMap": "https://www.google.com/maps/search/?api=1&query=Movement+&+Performance,+Viale+Vesuvio+138,+Volla"}, {"@type": "MedicalBusiness", "@id": "https://www.nutrizionistaiacone.it/#sede-napoli", "name": "Ilaria Iacone, Biologa Nutrizionista – Napoli (Full Face Academy)", "url": "https://www.nutrizionistaiacone.it/", "image": "https://www.nutrizionistaiacone.it/og-image.png", "telephone": "+39 351 785 5930", "email": "dott.ssaiacone@gmail.com", "priceRange": "40–120 €", "address": {"@type": "PostalAddress", "streetAddress": "Via Agostino Depretis 114", "postalCode": "80133", "addressLocality": "Napoli", "addressRegion": "NA", "addressCountry": "IT"}, "geo": {"@type": "GeoCoordinates", "latitude": 40.8406867, "longitude": 14.2537981}, "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": "Thursday", "opens": "15:00", "closes": "19:00"}], "employee": {"@id": "https://www.nutrizionistaiacone.it/#ilaria"}, "medicalSpecialty": "Dietetic", "hasMap": "https://www.google.com/maps/search/?api=1&query=Full+Face+Academy,+Via+Agostino+Depretis+114,+Napoli"}]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Devo venire a digiuno?", "acceptedAnswer": {"@type": "Answer", "text": "È preferibile concludere il pasto almeno 2 ore prima della visita, oppure fare un pasto più leggero del solito."}}, {"@type": "Question", "name": "Posso venire se ho il ciclo mestruale?", "acceptedAnswer": {"@type": "Answer", "text": "Certo, ne terremo conto. Se ti rende più tranquilla, puoi spostare l'appuntamento entro le 24 ore precedenti alla visita."}}, {"@type": "Question", "name": "Posso bere prima della visita?", "acceptedAnswer": {"@type": "Answer", "text": "Assolutamente sì."}}, {"@type": "Question", "name": "Cosa devo portare?", "acceptedAnswer": {"@type": "Answer", "text": "Le analisi del sangue più recenti: sono attendibili fino a 6 mesi prima, altrimenti è meglio rifarle."}}, {"@type": "Question", "name": "Posso venire dopo l'allenamento?", "acceptedAnswer": {"@type": "Answer", "text": "Devono passare almeno 12 ore."}}, {"@type": "Question", "name": "Come si disdice o si sposta un appuntamento?", "acceptedAnswer": {"@type": "Answer", "text": "Si può prenotare e disdire fino a 24 ore prima della visita, scrivendomi su WhatsApp."}}]}</script>
@@ -463,49 +521,42 @@ body{min-height:100vh}
 </div></section>
 
 <section id="prenota"><div class="wrap">
-<div class="tag">Agenda</div><h2>Prenota un appuntamento</h2>
-<p class="lead" id="plead">Scegli giorno e orario che preferisci: riceverai un contatto per la conferma definitiva. Se preferisci, puoi anche <a href="https://www.miodottore.it/profilo/ilaria-iacone" target="_blank" rel="noopener" style="color:var(--red)">prenotare su MioDottore</a>.</p>
-<div class="book">
-<div>
-<div class="step" data-step="1"><button type="button" class="stephead" aria-expanded="false"><span class="stepn">1</span><span class="stept">Scegli la sede</span><span class="stepv"></span><span class="stepc" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="stepbody">
-<div class="sedes"><button type="button" class="slot sedebtn" data-s="Portici"><b>Portici</b><small>mar · ven</small></button><button type="button" class="slot sedebtn" data-s="Volla"><b>Volla</b><small>lun · mer · sab</small></button><button type="button" class="slot sedebtn" data-s="Napoli"><b>Napoli</b><small>gio</small></button></div>
-<p class="note" id="sedehint" style="margin:0 0 6px">Scegli prima la sede: poi si illuminano i giorni in cui Ilaria riceve lì.</p>
-</div></div>
-<div class="step" data-step="2"><button type="button" class="stephead" aria-expanded="false"><span class="stepn">2</span><span class="stept">Scegli il giorno</span><span class="stepv"></span><span class="stepc" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="stepbody">
-<p class="calhint" style="margin:8px 0 10px" id="calhint">Scegli prima la sede (punto 1) per vedere i giorni disponibili. <button type="button" id="gosede">Vai alla scelta della sede</button></p>
-<div class="cal"><div class="calh"><button type="button" id="prev" aria-label="Mese precedente">&#8249;</button><span id="mtitle"></span><button type="button" id="next" aria-label="Mese successivo">&#8250;</button></div>
-<div class="cw"><span>lun</span><span>mar</span><span>mer</span><span>gio</span><span>ven</span><span>sab</span><span>dom</span></div><div class="cg" id="cg"></div></div>
-</div></div>
-<div class="step" data-step="3"><button type="button" class="stephead" aria-expanded="false"><span class="stepn">3</span><span class="stept">Scegli l'orario</span><span class="stepv"></span><span class="stepc" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="stepbody">
-<div class="cal" id="tcard"><div class="thead" id="thead"></div><div class="slots" id="slots"></div></div>
-</div></div>
+<div class="tag">Agenda</div><h2 id="ptit">Prenota un appuntamento</h2>
+<p class="lead" id="plead">Cinque passi e hai finito: ti ricontatto entro 24 ore per la conferma. Se preferisci, puoi anche <a href="https://www.miodottore.it/profilo/ilaria-iacone" target="_blank" rel="noopener" style="color:var(--red)">prenotare su MioDottore</a>.</p>
+<div class="bk" id="bk">
+ <div class="bkhead">
+  <button type="button" class="bkback" id="bkback" aria-label="Indietro" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <ol class="bksteps" id="bksteps"><li class="on">Sede</li><li>Visita</li><li>Giorno</li><li>Orario</li><li>Dati</li></ol>
+ </div>
+ <div class="bkbar"><i id="bkbar"></i></div>
+ <div class="bkchips" id="bkchips"></div>
+ <div class="bkview" id="bkview">
+  <div class="bkp on" data-p="0"><h3>Dove vuoi venire?</h3><div class="bkgrid3" id="bksedi"></div></div>
+  <div class="bkp" data-p="1"><h3>Che visita ti serve?</h3><div id="bktipi"></div></div>
+  <div class="bkp" data-p="2"><h3>Scegli il giorno</h3><div class="bkdays" id="bkdays"><p class="bkload">Cerco i giorni liberi…</p></div></div>
+  <div class="bkp" data-p="3"><h3 id="bkdaytit">Scegli l'orario</h3><div class="bktimes" id="bktimes"></div></div>
+  <div class="bkp" data-p="4"><h3>I tuoi dati</h3>
+   <div class="bksum" id="bksum"></div>
+   <div class="fgrid">
+    <div class="f"><label for="nome">Nome</label><input id="nome" autocomplete="given-name" placeholder="Es. Maria"></div>
+    <div class="f"><label for="cognome">Cognome</label><input id="cognome" autocomplete="family-name" placeholder="Es. Rossi"></div>
+    <div class="f"><label for="tel">Telefono</label><input id="tel" type="tel" autocomplete="tel" placeholder="Es. 333 123 4567"></div>
+    <div class="f"><label for="mail">Email</label><input id="mail" type="email" autocomplete="email" placeholder="nome@email.it"></div>
+    <div class="f full"><label for="cf">Codice fiscale</label><input id="cf" autocomplete="off" maxlength="16" autocapitalize="characters" style="text-transform:uppercase" placeholder="Es. RSSMRA85T10A562S"></div>
+    <div class="f full"><label for="ind">Indirizzo di residenza</label><input id="ind" autocomplete="street-address" placeholder="Via, numero civico"></div>
+    <div class="f"><label for="cap">CAP</label><input id="cap" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="Es. 80055"></div>
+    <div class="f"><label for="citta">Città</label><input id="citta" autocomplete="address-level2" placeholder="Es. Portici"></div>
+    <div class="f"><label for="prov">Provincia (sigla)</label><input id="prov" maxlength="2" autocapitalize="characters" style="text-transform:uppercase" placeholder="NA"></div>
+    <div class="f full"><label for="note">Note (facoltative)</label><textarea id="note" rows="3" placeholder="Es. domande per Ilaria"></textarea><small class="hint">Non inserire informazioni sanitarie: ne parleremo in visita.</small></div>
+   </div>
+   <label class="chk"><input type="checkbox" id="priv"><span>Ho letto l'<a href="#privacy" data-legal="privacy">informativa privacy</a> e acconsento al trattamento dei miei dati per gestire l'appuntamento, ricevere il promemoria via email ed emettere la fattura.</span></label>
+   <button class="btn bksend" id="send" type="button">Richiedi appuntamento</button>
+   <p class="note">Ti ricontatto entro 24 ore per la conferma. Per prenotare o disdire serve un preavviso di almeno 24 ore.</p>
+  </div>
+  <div class="bkp" data-p="5"><div class="bkok"><div class="bkcheck"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-15"/></svg></div><h3 id="bkoktit">Richiesta ricevuta</h3><p id="bkoktxt"></p><a class="btn" id="bkwa" target="_blank" rel="noopener">Scrivimi su WhatsApp</a></div></div>
+ </div>
+ <div class="msg" id="msg" role="status"></div>
 </div>
-<div>
-<div class="step" data-step="4"><button type="button" class="stephead" id="ftitle" aria-expanded="false"><span class="stepn">4</span><span class="stept">I tuoi dati</span><span class="stepv"></span><span class="stepc" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></button><div class="stepbody">
-<div class="sum" id="sum" role="status"></div>
-<div id="fbox" class="cal fcard">
-<div class="fgrid">
-<div class="f"><label for="nome">Nome</label><input id="nome" autocomplete="given-name" placeholder="Es. Maria"></div>
-<div class="f"><label for="cognome">Cognome</label><input id="cognome" autocomplete="family-name" placeholder="Es. Rossi"></div>
-<div class="f"><label for="tel">Telefono</label><input id="tel" type="tel" autocomplete="tel" placeholder="Es. 333 123 4567"></div>
-<div class="f"><label for="mail">Email</label><input id="mail" type="email" autocomplete="email" placeholder="nome@email.it"></div>
-<div class="f"><label for="sede">Sede</label><select id="sede" disabled><option value="">Scegli prima la sede</option></select></div>
-<div class="f"><label for="tipo">Tipo di visita</label><select id="tipo"><option>Prima visita</option><option>Visita di controllo</option><option>Dieta per sportivi</option><option>Adipometria / bioimpedenziometria</option></select></div>
-<div class="f full"><label for="cf">Codice fiscale</label><input id="cf" autocomplete="off" maxlength="16" autocapitalize="characters" style="text-transform:uppercase" placeholder="Es. RSSMRA85T10A562S"></div>
-<div class="f full"><label for="ind">Indirizzo di residenza</label><input id="ind" autocomplete="street-address" placeholder="Via, numero civico"></div>
-<div class="f"><label for="cap">CAP</label><input id="cap" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="Es. 80055"></div>
-<div class="f"><label for="citta">Città</label><input id="citta" autocomplete="address-level2" placeholder="Es. Portici"></div>
-<div class="f"><label for="prov">Provincia (sigla)</label><input id="prov" maxlength="2" autocapitalize="characters" style="text-transform:uppercase" placeholder="NA"></div>
-<div class="f full"><label for="note">Note (facoltative)</label><textarea id="note" rows="3" placeholder="Es. orario preferito, domande per Ilaria"></textarea><small class="hint">Non inserire informazioni sanitarie: ne parleremo in visita.</small></div>
-</div>
-<label class="chk"><input type="checkbox" id="priv"><span>Ho letto l'<a href="#privacy" data-legal="privacy">informativa privacy</a> e acconsento al trattamento dei miei dati per gestire l'appuntamento, ricevere il promemoria via email ed emettere la fattura.</span></label>
-<button class="btn" id="send" type="button">Richiedi appuntamento</button>
-<p class="note sendwait">Dopo aver cliccato, attendi qualche secondo per la conferma.</p>
-<p class="note">Ti ricontatto entro 24 ore per la conferma. Per prenotare o disdire serve un preavviso di almeno 24 ore.</p>
-</div>
-</div></div>
-<div class="msg" id="msg" role="status"></div>
-</div></div>
 </div></section>
 </main>
 
@@ -541,122 +592,7 @@ body{min-height:100vh}
 </article></div></dialog>
 
 
-<script>
-(function(){
-var BOOKING_URL="https://script.google.com/macros/s/AKfycbw7WKsvPiN0_uy5awoiwJ2OD_GnftdAC7VvNghuCbbwYwIgeumOpLIsodJmaPiY3K_0aA/exec";
-var SC={1:{s:"Volla",r:[["09:00","12:00"],["14:00","19:30"]]},2:{s:"Portici",r:[["14:00","20:00"]]},3:{s:"Volla",r:[["09:00","12:00"],["14:00","19:30"]]},4:{s:"Napoli",r:[["15:00","19:00"]]},5:{s:"Portici",r:[["09:00","18:00"]]},6:{s:"Volla",r:[["09:00","12:30"]]}};
-var PH=["09:00","10:00","11:00","14:00","15:00","16:00"],WA="393517855930";
-function mins(t){var p=t.split(":");return +p[0]*60+ +p[1]}
-function pad(n){return String(n).padStart(2,"0")}
-function hoursFor(dt){var c=SC[dt.getDay()],out=[];if(!c)return out;var min=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate()+1).getTime();
- c.r.forEach(function(r){for(var m=mins(r[0]);m+60<=mins(r[1]);m+=60){if(new Date(dt.getFullYear(),dt.getMonth(),dt.getDate(),0,m).getTime()>min)out.push(pad(Math.floor(m/60))+":"+pad(m%60))}});return out}
-var DN=["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"],MESI=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
-var $=function(i){return document.getElementById(i)};
-var thead=$("thead"),cg=$("cg"),mt=$("mtitle"),prev=$("prev"),next=$("next"),slotsEl=$("slots"),msg=$("msg"),sum=$("sum"),sendBtn=$("send");
-var selDay=null,selSlot=null,selSede=null,avail=null;
-var today=new Date();today.setHours(0,0,0,0);
-var view=new Date(today.getFullYear(),today.getMonth(),1);
-function key(dt){return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0")}
-function label(dt){return DN[dt.getDay()]+" "+dt.getDate()+" "+MESI[dt.getMonth()]}
-function cfOk(cf){if(!/^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-EHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$/.test(cf))return false;
- var odd=[1,0,5,7,9,13,15,17,19,21,2,4,18,20,11,3,6,8,12,14,16,10,22,25,24,23],s=0;
- for(var i=0;i<15;i++){var c=cf.charAt(i),n=/\d/.test(c)?+c:c.charCodeAt(0)-65;s+=i%2?n:odd[n]}
- return String.fromCharCode(65+s%26)===cf.charAt(15)}
-function show(t,c){msg.className="msg "+c;msg.textContent=t}
-function freeFor(dt){if(!BOOKING_URL)return hoursFor(dt);return avail?(avail[key(dt)]||[]):[]}
-function maxDate(){var m=new Date(today);
- if(!BOOKING_URL){m.setDate(m.getDate()+60);return m}
- var ks=avail?Object.keys(avail).sort():[];
- if(ks.length){var q=ks[ks.length-1].split("-");return new Date(+q[0],+q[1]-1,+q[2])}
- m.setDate(m.getDate()+21);return m}
-function render(){
- var mx=maxDate(),y=view.getFullYear(),mo=view.getMonth();
- mt.textContent=MESI[mo]+" "+y;
- $("calhint").style.display=selSede?"none":"block";
- prev.disabled=view<=new Date(today.getFullYear(),today.getMonth(),1);
- next.disabled=new Date(y,mo+1,1)>mx;
- cg.innerHTML="";
- var off=(new Date(y,mo,1).getDay()+6)%7,n=new Date(y,mo+1,0).getDate();
- for(var i=0;i<off;i++)cg.appendChild(document.createElement("i"));
- for(var d=1;d<=n;d++){(function(d){
-  var dt=new Date(y,mo,d),b=document.createElement("button");b.type="button";b.textContent=d;
-  
-  var ok=selSede&&SC[dt.getDay()]&&SC[dt.getDay()].s===selSede&&dt>today&&dt<=mx&&freeFor(dt).length>0;
-  b.disabled=!ok;if(ok)b.classList.add("av");
-  if(+dt===+today)b.classList.add("today");
-  if(selDay&&+dt===+selDay)b.classList.add("on");
-  b.setAttribute("aria-label",label(dt));
-  b.onclick=function(){selDay=dt;selSlot=null;render();slots();summary()};
-  cg.appendChild(b)})(d)}}
-function slots(){
- slotsEl.innerHTML="";
- thead.innerHTML=selDay?"Orari per <b>"+label(selDay)+"</b>":"Scegli prima la sede e il giorno";
- var list=selDay?freeFor(selDay):PH;
- if(selDay&&!list.length){slotsEl.innerHTML='<span class="note">Nessun orario disponibile in questo giorno.</span>';return}
- list.forEach(function(h){var s=document.createElement("button");s.type="button";s.className="slot";s.textContent=h;
-  if(!selDay)s.disabled=true;
-  else s.onclick=function(){selSlot=h;[].forEach.call(slotsEl.children,function(x){x.classList.remove("on")});s.classList.add("on");summary()};
-  slotsEl.appendChild(s)})}
-function summary(){
- if(selDay&&selSlot){sum.style.display="block";sum.innerHTML="Hai scelto: <b>"+label(selDay)+"</b>, ore <b>"+selSlot+"</b> (sede di "+SC[selDay.getDay()].s+")"}
- else sum.style.display="none"}
-$("gosede").onclick=function(){var e=document.querySelector(".sedes");e.scrollIntoView({behavior:"smooth",block:"center"})};
-prev.onclick=function(){view=new Date(view.getFullYear(),view.getMonth()-1,1);render()};
-next.onclick=function(){view=new Date(view.getFullYear(),view.getMonth()+1,1);render()};
-[].forEach.call(document.querySelectorAll(".sedebtn"),function(b){b.onclick=function(){
- selSede=b.getAttribute("data-s");selDay=null;selSlot=null;
- [].forEach.call(document.querySelectorAll(".sedebtn"),function(x){x.classList.toggle("on",x===b)});
- $("sede").innerHTML="<option>"+selSede+"</option>";$("sedehint").style.display="none";
- var d0=new Date(today);for(var i=0;i<75;i++){d0.setDate(d0.getDate()+1);if(SC[d0.getDay()]&&SC[d0.getDay()].s===selSede&&freeFor(d0).length){view=new Date(d0.getFullYear(),d0.getMonth(),1);break}}
- render();slots();summary()}});
-function load(){
- if(!BOOKING_URL)return Promise.resolve();
- return fetch(BOOKING_URL+"?action=slots").then(function(r){return r.json()}).then(function(j){avail=j.slots||{}})
-  .catch(function(){avail=null;var h=$("sedehint");h.style.display="block";h.style.color="var(--red)";h.textContent="Al momento non riesco a caricare gli orari disponibili. Ricarica la pagina tra poco.";show("Al momento non riesco a caricare gli orari disponibili. Riprova tra poco.","err")})}
-function refresh(){render();slots();summary()}
-render();slots();load().then(render);
-function done(req,mailed){
- $("fbox").style.display="none";$("ftitle").style.display="none";
- document.querySelector(".book").classList.add("booked");
- $("plead").style.display="none";document.querySelector("#prenota h2").textContent="Richiesta ricevuta";document.querySelector("#prenota .tag").textContent="Grazie";
- show("Grazie "+req.nome.split(" ")[0]+"! Richiesta ricevuta per "+label(selDay)+" alle "+req.ora+" a "+req.sede+". Ti ricontatto entro 24 ore per la conferma."+(mailed&&req.email?" Ti ho inviato un riepilogo via email a "+req.email+".":""),"ok");
- var a=document.createElement("a");a.className="btn";a.style.cssText="display:block;margin-top:14px;text-align:center";a.target="_blank";a.rel="noopener";
- a.href="https://wa.me/"+WA+"?text="+encodeURIComponent("Ciao Ilaria, sono "+req.nome+". Ho richiesto una visita per "+label(selDay)+" alle "+req.ora+" a "+req.sede+".");
- a.textContent="Scrivimi su WhatsApp";msg.appendChild(a);
- document.getElementById("prenota").scrollIntoView({behavior:"smooth"})}
-sendBtn.onclick=function(){
- var v=function(i){return $(i).value.trim()};
- if(!selDay||!selSlot)return show("Seleziona un giorno e un orario.","err");
- if(!v("nome")||!v("cognome"))return show("Inserisci nome e cognome.","err");
- if(!v("tel"))return show("Inserisci il numero di telefono.","err");
- if(v("tel").replace(/\D/g,"").length<6)return show("Il numero di telefono sembra incompleto: controllalo e riprova.","err");
- var cf=v("cf").toUpperCase().replace(/\s/g,""),prov=v("prov").toUpperCase();
- if(!cfOk(cf))return show("Il codice fiscale non sembra corretto: controllalo e riprova.","err");
- if(!v("ind")||!v("citta"))return show("Inserisci indirizzo di residenza e città.","err");
- if(!/^\d{5}$/.test(v("cap")))return show("Il CAP deve avere 5 cifre.","err");
- if(!/^[A-Z]{2}$/.test(prov))return show("Inserisci la sigla della provincia (es. NA).","err");
- if(!$("priv").checked)return show("Serve il consenso al trattamento dei dati.","err");
- var req={nome:v("nome")+" "+v("cognome"),telefono:v("tel"),email:v("mail"),tipo:v("tipo"),sede:v("sede"),note:v("note"),cf:cf,indirizzo:v("ind"),cap:v("cap"),citta:v("citta"),prov:prov,data:key(selDay),ora:selSlot};
- if(!BOOKING_URL){console.log("Richiesta appuntamento",req);return done(req)}
- sendBtn.disabled=true;sendBtn.textContent="Invio in corso…";
- fetch(BOOKING_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(req)})
-  .then(function(r){return r.json()}).then(function(j){
-   if(j.ok)return done(req,j.mailed);
-   if(j.error==="cf_invalid")return show("Il codice fiscale non sembra corretto: controllalo e riprova.","err");
-   if(j.error==="slot_taken"){selSlot=null;show("Questo orario è stato appena prenotato da qualcun altro: scegline un altro.","err");return load().then(refresh)}
-   show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})
-  .catch(function(){
-   // Alcuni browser (es. Safari in navigazione privata) non riescono a leggere la risposta dello script
-   // anche quando la prenotazione è stata salvata: ricontrollo l'agenda per capire com'è andata.
-   var day=key(selDay),ora=selSlot;show("Sto verificando la prenotazione…","ok");
-   return new Promise(function(r){setTimeout(r,1500)}).then(function(){return fetch(BOOKING_URL+"?action=slots&_="+Date.now())}).then(function(r){return r.json()}).then(function(j){
-    var free=(j.slots&&j.slots[day])||[];
-    if(free.indexOf(ora)<0){avail=j.slots;return done(req,!!req.email)}
-    show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})
-   .catch(function(){show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})})
-  .then(function(){sendBtn.disabled=false;sendBtn.textContent="Richiedi appuntamento"})};
-})();
-</script>
+
 <script>
 (function(){
   var btns = document.querySelectorAll('.mapbtn');
@@ -723,30 +659,99 @@ var det=[].slice.call(document.querySelectorAll(".faq details"));
 det.forEach(function(d){d.addEventListener("toggle",function(){if(d.open)det.forEach(function(x){if(x!==d)x.open=false})})});
 })();
 </script>
-<script>
-(function(){
-/* Agenda a passi */
-var steps=[].slice.call(document.querySelectorAll(".book .step"));if(!steps.length)return;
-var reached=1;
-function st(n){return steps[n-1]}
-function val(n,t){st(n).querySelector(".stepv").textContent=t||"";st(n).classList.toggle("done",!!t)}
-function open(n,scroll){reached=Math.max(reached,n);steps.forEach(function(s,i){var k=i+1,h=s.querySelector(".stephead");s.classList.toggle("cur",k===n);h.setAttribute("aria-expanded",k===n?"true":"false");h.disabled=k>reached});
- if(scroll){var s=st(n);setTimeout(function(){var r=s.getBoundingClientRect();if(r.top<70||r.top>window.innerHeight*.6)s.scrollIntoView({behavior:"smooth",block:"start"})},60)}}
-steps.forEach(function(s,i){s.querySelector(".stephead").addEventListener("click",function(){var n=i+1;if(n<=reached)open(n,false)})});
-document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("button");if(!b||b.disabled)return;
- var p=b.parentNode&&b.parentNode.id,lab=b.getAttribute("aria-label"),txt=b.textContent;  // letti subito: il calendario si ridisegna al clic
- setTimeout(function(){
-  if(b.classList.contains("sedebtn")){val(1,b.getAttribute("data-s"));val(2,"");val(3,"");reached=2;open(2,true)}
-  else if(p==="cg"){val(2,lab);val(3,"");reached=3;open(3,true)}
-  else if(p==="slots"&&b.classList.contains("slot")){val(3,"ore "+txt);open(4,true)}
- },0)},true);
-/* se l'orario viene preso da qualcun altro mentre compili, torna alla scelta dell'orario */
-var msg=document.getElementById("msg");
-if(msg)new MutationObserver(function(){if(/appena prenotato/.test(msg.textContent)){val(3,"");open(3,true)}}).observe(msg,{childList:true,characterData:true,subtree:true});
-open(1,false);
+
+<script>(function(){var h=document.querySelector("header");function f(){h.classList.toggle("hsm",window.scrollY>30)}window.addEventListener("scroll",f,{passive:true});f()})();</script><script>(function(){
+var URL="https://script.google.com/macros/s/AKfycbw7WKsvPiN0_uy5awoiwJ2OD_GnftdAC7VvNghuCbbwYwIgeumOpLIsodJmaPiY3K_0aA/exec",WA="393517855930";
+var SEDI=[{s:"Portici",n:"Studio Medico Secondulfo",g:[2,5],d:"martedì · venerdì"},{s:"Volla",n:"Movement & Performance",g:[1,3,6],d:"lunedì · mercoledì · sabato"},{s:"Napoli",n:"Full Face Academy",g:[4],d:"giovedì"}];
+var TIPI=[
+ {g:"Prima visita",t:"Prima visita nutrizionale",d:60,p:85,x:"Anamnesi, misure, bioimpedenziometria e piano alimentare"},
+ {g:"Prima visita",t:"Prima visita nutrizionale + adipometria",d:90,p:100,x:"La prima visita completa, con l'adipometria"},
+ {g:"Prima visita",t:"Prima visita nutrizione sportiva",d:90,p:100,x:"Per chi fa sport, con valutazione ISAK"},
+ {g:"Prima visita",t:"Prima visita sportiva + adipometria",d:100,p:120,x:"Nutrizione sportiva con ISAK e adipometria"},
+ {g:"Controllo",t:"Visita di controllo",d:30,p:40,x:"Progressi e aggiustamenti del piano"},
+ {g:"Controllo",t:"Visita di controllo + adipometria",d:40,p:60,x:"Il controllo con la misura del grasso"},
+ {g:"Controllo",t:"Visita di controllo + ISAK",d:40,p:60,x:"Il controllo con le misure ISAK"},
+ {g:"Solo esame",t:"Adipometria",d:30,p:40,x:"Spessore di grasso e muscolo con l'ecografia"},
+ {g:"Solo esame",t:"Esame bioimpedenziometrico",d:30,p:40,x:"Composizione corporea, semplice e non invasivo"}];
+var PIN='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>';
+var DN=["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"],DC=["dom","lun","mar","mer","gio","ven","sab"],MESI=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+var $=function(i){return document.getElementById(i)},view=$("bkview"),msg=$("msg");if(!view)return;
+var S={p:0,sede:null,tipo:null,day:null,ora:null,want:null},cache={};
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function dt(k){var p=k.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
+function lab(k){var d=dt(k);return DN[d.getDay()]+" "+d.getDate()+" "+MESI[d.getMonth()]}
+function show(t,c){msg.className="msg "+(c||"");msg.textContent=t||""}
+function go(p,back){var cur=view.querySelector(".bkp.on"),h0=view.offsetHeight;S.p=p;
+ [].forEach.call(view.querySelectorAll(".bkp"),function(x){x.classList.toggle("on",+x.dataset.p===p);x.classList.toggle("back",!!back)});
+ var h1=view.offsetHeight;view.style.height=h0+"px";view.offsetHeight;view.style.height=h1+"px";setTimeout(function(){view.style.height=""},480);
+ [].forEach.call($("bksteps").children,function(li,i){li.classList.toggle("on",i===p);li.classList.toggle("done",i<p)});
+ $("bkbar").style.width=Math.min(100,(p+1)*20)+"%";$("bkback").hidden=!(p>0&&p<5);chips();show("");
+ var r=$("bk").getBoundingClientRect();if(r.top<60||r.top>window.innerHeight*.5)$("bk").scrollIntoView({behavior:"smooth",block:"start"})}
+function chips(){var c=[];if(S.p>0&&S.sede)c.push([0,S.sede]);if(S.p>1&&S.tipo)c.push([1,S.tipo.t]);if(S.p>2&&S.day)c.push([2,lab(S.day)]);if(S.p>3&&S.ora)c.push([3,"ore "+S.ora]);
+ $("bkchips").innerHTML=S.p<5?c.map(function(x){return '<button type="button" data-go="'+x[0]+'">'+esc(x[1])+'</button>'}).join(""):"";$("bkchips").style.marginBottom=c.length&&S.p<5?"4px":"0"}
+$("bkchips").onclick=function(e){var b=e.target.closest("button");if(b)go(+b.dataset.go,true)};
+$("bkback").onclick=function(){go(S.p-1,true)};
+// 1 sede
+$("bksedi").innerHTML=SEDI.map(function(x,i){return '<button type="button" class="bkopt" style="animation-delay:'+i*60+'ms" data-s="'+x.s+'"><span class="bkic">'+PIN+'</span><span><b>'+x.s+'</b><small>'+x.n+'</small><small>'+x.d+'</small></span></button>'}).join("");
+$("bksedi").onclick=function(e){var b=e.target.closest(".bkopt");if(!b)return;S.sede=b.dataset.s;S.day=null;S.ora=null;mark(this,b);setTimeout(function(){go(1)},180)};
+function mark(box,b){[].forEach.call(box.querySelectorAll(".bkopt"),function(x){x.classList.toggle("sel",x===b)})}
+// 2 tipo
+var gs=[];TIPI.forEach(function(t){if(gs.indexOf(t.g)<0)gs.push(t.g)});var n=0;
+$("bktipi").innerHTML=gs.map(function(g){return '<div class="bkgroup">'+g+'</div><div class="bklist">'+TIPI.map(function(t,i){return t.g!==g?"":'<button type="button" class="bkopt bktipo" style="animation-delay:'+(n++)*45+'ms" data-i="'+i+'"><span class="bkn"><b>'+esc(t.t)+'</b><small>'+esc(t.x)+'</small></span><span class="bkm"><em>'+t.p+' €</em><span>'+t.d+' min</span></span></button>'}).join("")+'</div>'}).join("");
+$("bktipi").onclick=function(e){var b=e.target.closest(".bkopt");if(!b)return;S.tipo=TIPI[+b.dataset.i];mark(this,b);
+ if(S.want&&S.want.sede===S.sede){var w=S.want;S.want=null;slots(S.tipo.d).then(function(sl){if((sl[w.k]||[]).indexOf(w.h)>=0){S.day=w.k;S.ora=w.h;form();go(4)}else{days();go(2)}});return}
+ S.day=null;S.ora=null;setTimeout(function(){days();go(2)},180)};
+// slot dal server (per durata); se il server non conosce la durata, li ricavo dagli orari a ore
+function slots(dur){if(cache[dur])return Promise.resolve(cache[dur]);
+ return fetch(URL+"?action=slots&dur="+dur).then(function(r){return r.json()}).then(function(j){var sl=j.slots||{};
+  if(!j.dur&&dur>60){var o={};Object.keys(sl).forEach(function(k){o[k]=sl[k].filter(function(h){var n=(+h.slice(0,2)+1);return sl[k].indexOf((n<10?"0":"")+n+":"+h.slice(3))>=0})});sl=o}
+  return cache[dur]=sl})}
+function sedeOf(k){var g=dt(k).getDay();for(var i=0;i<SEDI.length;i++)if(SEDI[i].g.indexOf(g)>=0)return SEDI[i].s}
+// 3 giorni
+function days(){var box=$("bkdays");box.innerHTML='<p class="bkload">Cerco i giorni liberi…</p>';
+ slots(S.tipo.d).then(function(sl){var ks=Object.keys(sl).sort().filter(function(k){return sl[k].length&&sedeOf(k)===S.sede}),h="",m=-1,i=0;
+  if(!ks.length){box.innerHTML='<p class="bkload" style="--x:0">Nessun giorno libero nelle prossime settimane per questa visita a '+S.sede+'. Prova un\'altra sede o <a href="https://wa.me/'+WA+'" target="_blank" rel="noopener" style="color:var(--red)">scrivimi su WhatsApp</a>.</p>';box.querySelector(".bkload").className="note";return}
+  ks.forEach(function(k){var d=dt(k);if(d.getMonth()!==m){m=d.getMonth();h+='<div class="bkmonth">'+MESI[m]+'</div>'}
+   h+='<button type="button" class="bkopt bkday" style="animation-delay:'+(i++)*35+'ms" data-k="'+k+'"><small>'+DC[d.getDay()]+'</small><b>'+d.getDate()+'</b><span class="bkfree">'+sl[k].length+(sl[k].length===1?" posto":" posti")+'</span></button>'});
+  box.innerHTML=h;var vh=view.offsetHeight}).catch(function(){box.innerHTML='<p class="note">Al momento non riesco a leggere l\'agenda. Riprova tra poco o scrivimi su WhatsApp.</p>'})}
+$("bkdays").onclick=function(e){var b=e.target.closest(".bkopt");if(!b)return;S.day=b.dataset.k;S.ora=null;mark(this,b);setTimeout(function(){times();go(3)},180)};
+// 4 orari
+function times(){$("bkdaytit").textContent="Orari di "+lab(S.day);var sl=cache[S.tipo.d][S.day]||[];
+ $("bktimes").innerHTML=sl.map(function(h,i){var e=+h.slice(0,2)*60+ +h.slice(3)+S.tipo.d,f=String(Math.floor(e/60)).padStart(2,"0")+":"+String(e%60).padStart(2,"0");return '<button type="button" class="bkopt bktime" style="animation-delay:'+i*35+'ms" data-h="'+h+'"><b>'+h+'</b><small>fino alle '+f+'</small></button>'}).join("")}
+$("bktimes").onclick=function(e){var b=e.target.closest(".bkopt");if(!b)return;S.ora=b.dataset.h;mark(this,b);setTimeout(function(){form();go(4)},180)};
+// 5 dati
+function form(){$("bksum").innerHTML='<span><b>'+esc(S.tipo.t)+'</b></span><span>'+lab(S.day)+' · ore '+S.ora+'</span><span>'+S.sede+'</span><span>'+S.tipo.d+' min · '+S.tipo.p+' €</span>'}
+function cfOk(cf){if(!/^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-EHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$/.test(cf))return false;
+ var odd=[1,0,5,7,9,13,15,17,19,21,2,4,18,20,11,3,6,8,12,14,16,10,22,25,24,23],s=0;for(var i=0;i<15;i++){var c=cf.charAt(i),n=/\d/.test(c)?+c:c.charCodeAt(0)-65;s+=i%2?n:odd[n]}return String.fromCharCode(65+s%26)===cf.charAt(15)}
+function done(req,mailed){$("ptit").textContent="Richiesta ricevuta";$("plead").style.display="none";
+ $("bkoktxt").textContent="Grazie "+req.nome.split(" ")[0]+"! Ho ricevuto la tua richiesta per "+lab(req.data)+" alle "+req.ora+" a "+req.sede+" ("+req.tipo+"). Ti ricontatto entro 24 ore per la conferma."+(mailed&&req.email?" Ti ho inviato un riepilogo a "+req.email+".":"");
+ $("bkwa").href="https://wa.me/"+WA+"?text="+encodeURIComponent("Ciao Ilaria, sono "+req.nome+". Ho richiesto "+req.tipo+" per "+lab(req.data)+" alle "+req.ora+" a "+req.sede+".");
+ go(5);$("bkbar").style.width="100%";[].forEach.call($("bksteps").children,function(li){li.classList.remove("on");li.classList.add("done")})}
+var send=$("send");
+send.onclick=function(){var v=function(i){return $(i).value.trim()};
+ if(!v("nome")||!v("cognome"))return show("Inserisci nome e cognome.","err");
+ if(v("tel").replace(/\D/g,"").length<6)return show("Il numero di telefono sembra incompleto: controllalo e riprova.","err");
+ var cf=v("cf").toUpperCase().replace(/\s/g,""),prov=v("prov").toUpperCase();
+ if(!cfOk(cf))return show("Il codice fiscale non sembra corretto: controllalo e riprova.","err");
+ if(!v("ind")||!v("citta"))return show("Inserisci indirizzo di residenza e città.","err");
+ if(!/^\d{5}$/.test(v("cap")))return show("Il CAP deve avere 5 cifre.","err");
+ if(!/^[A-Z]{2}$/.test(prov))return show("Inserisci la sigla della provincia (es. NA).","err");
+ if(!$("priv").checked)return show("Serve il consenso al trattamento dei dati.","err");
+ var req={nome:v("nome")+" "+v("cognome"),telefono:v("tel"),email:v("mail"),tipo:S.tipo.t,durata:S.tipo.d,sede:S.sede,note:v("note"),cf:cf,indirizzo:v("ind"),cap:v("cap"),citta:v("citta"),prov:prov,data:S.day,ora:S.ora};
+ send.disabled=true;send.textContent="Invio in corso…";show("");
+ function fin(){send.disabled=false;send.textContent="Richiedi appuntamento"}
+ function taken(){fin();cache={};show("Questo orario è stato appena preso da qualcun altro: scegline un altro.","err");slots(S.tipo.d).then(function(){S.ora=null;times();go(3,true)})}
+ fetch(URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(req)}).then(function(r){return r.json()}).then(function(j){
+  if(j.ok){fin();return done(req,j.mailed)}if(j.error==="cf_invalid"){fin();return show("Il codice fiscale non sembra corretto: controllalo e riprova.","err")}if(j.error==="slot_taken")return taken();
+  fin();show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})
+ .catch(function(){show("Sto verificando la prenotazione…","ok");return new Promise(function(r){setTimeout(r,1500)}).then(function(){return fetch(URL+"?action=slots&dur="+S.tipo.d+"&_="+Date.now())}).then(function(r){return r.json()}).then(function(j){fin();
+  if(((j.slots||{})[S.day]||[]).indexOf(S.ora)<0)return done(req,!!req.email);show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")}).catch(function(){fin();show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})})};
+// dai "primi posti liberi" in alto: sede, giorno e ora già scelti, resta il tipo di visita
+window.bookPick=function(k,h){S.sede=sedeOf(k);S.want={sede:S.sede,k:k,h:h};mark($("bksedi"),$("bksedi").querySelector('[data-s="'+S.sede+'"]'));go(1);setTimeout(function(){show("Hai scelto "+lab(k)+" alle "+h+" a "+S.sede+": ora dimmi che visita ti serve.","ok")},50)};
+window.bookSlots=slots;
 })();
 </script>
-<script>(function(){var h=document.querySelector("header");function f(){h.classList.toggle("hsm",window.scrollY>30)}window.addEventListener("scroll",f,{passive:true});f()})();</script><script>(function(){
+<script>(function(){
 /* prenota fisso: compare dopo l'inizio, sparisce sulla sezione prenota */
 var mp=document.querySelector(".mprenota"),pr=document.getElementById("prenota"),hero=document.querySelector(".hero");
 function f(){if(!mp)return;var r=pr.getBoundingClientRect(),h=hero.getBoundingClientRect();mp.classList.toggle("on",h.bottom<80&&!(r.top<window.innerHeight&&r.bottom>0))}
@@ -755,21 +760,14 @@ window.addEventListener("scroll",f,{passive:true});f();
 var URL="https://script.google.com/macros/s/AKfycbw7WKsvPiN0_uy5awoiwJ2OD_GnftdAC7VvNghuCbbwYwIgeumOpLIsodJmaPiY3K_0aA/exec";
 var SEDE={1:"Volla",2:"Portici",3:"Volla",4:"Napoli",5:"Portici",6:"Volla"},DN=["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"],DC=["dom","lun","mar","mer","gio","ven","sab"],MESI=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
 function dt(k){var p=k.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
-fetch(URL+"?action=slots").then(function(r){return r.json()}).then(function(j){var sl=j.slots||{},out=[];
+(window.bookSlots?window.bookSlots(60):Promise.reject()).then(function(sl){var out=[];
  var ks=Object.keys(sl).sort().filter(function(k){return SEDE[dt(k).getDay()]&&(sl[k]||[]).length});ks.forEach(function(k){if(out.length<4)out.push([k,sl[k].slice().sort()[0]])});ks.forEach(function(k){sl[k].slice().sort().slice(1).forEach(function(h){if(out.length<4)out.push([k,h])})});out.sort(function(a,b){return (a[0]+a[1])<(b[0]+b[1])?-1:1});
  if(!out.length)return;var box=document.getElementById("hsl");
  out.forEach(function(o){var d=dt(o[0]),b=document.createElement("button");b.type="button";
   b.innerHTML="<small>"+DC[d.getDay()]+" "+d.getDate()+" "+MESI[d.getMonth()].slice(0,3)+"</small><b>"+o[1]+"</b><small>"+SEDE[d.getDay()]+"</small>";
   b.onclick=function(){pick(o[0],o[1])};box.appendChild(b)});
  document.getElementById("hslots").hidden=false}).catch(function(){});
-function pick(k,h){var d=dt(k),sede=SEDE[d.getDay()],lab=DN[d.getDay()]+" "+d.getDate()+" "+MESI[d.getMonth()],tries=0;
- document.getElementById("prenota").scrollIntoView({behavior:"smooth",block:"start"});
- var sb=document.querySelector('.sedebtn[data-s="'+sede+'"]');if(sb)sb.click();
- (function day(){var b=document.querySelector('#cg button[aria-label="'+lab+'"]');
-  if(b&&!b.disabled){b.click();setTimeout(function(){[].some.call(document.querySelectorAll("#slots .slot"),function(s){if(s.textContent===h){s.click();return true}})},120);return}
-  var mt=document.getElementById("mtitle"),nx=document.getElementById("next");
-  if(mt&&mt.textContent.indexOf(MESI[d.getMonth()])<0&&nx&&!nx.disabled)nx.click();
-  if(++tries<25)setTimeout(day,200)})()}
+function pick(k,h){if(window.bookPick){document.getElementById("prenota").scrollIntoView({behavior:"smooth",block:"start"});window.bookPick(k,h)}}
 })();</script><script>(function(){
 var Z=16;function px(la,lo){var n=256*Math.pow(2,Z),r=la*Math.PI/180;return[(lo+180)/360*n,(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*n]}
 function draw(a){if(a.dataset.done)return;a.dataset.done=1;var la=+a.dataset.lat,lo=+a.dataset.lon,W=a.clientWidth||320,H=a.clientHeight||132,p=px(la,lo),x0=p[0]-W/2,y0=p[1]-H/2,
