@@ -352,7 +352,8 @@ body{min-height:100vh}
 
 /* mappe vere (OpenStreetMap) */
 .minimap{position:relative;display:block;height:132px;overflow:hidden}
-.minimap svg{height:132px!important}
+.minimap>svg{height:132px!important}
+.mapt .pin{height:40px!important;width:30px!important}
 .mapt{position:absolute;inset:0;overflow:hidden;opacity:0;transition:opacity .4s}
 .mapt.ok{opacity:1}
 .mapt img{position:absolute;width:256px;height:256px;max-width:none;filter:saturate(.5) brightness(1.04)}
