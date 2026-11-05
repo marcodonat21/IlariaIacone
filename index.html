@@ -731,7 +731,7 @@ var URL="https://script.google.com/macros/s/AKfycbw7WKsvPiN0_uy5awoiwJ2OD_GnftdA
 var SEDE={1:"Volla",2:"Portici",3:"Volla",4:"Napoli",5:"Portici",6:"Volla"},DN=["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"],DC=["dom","lun","mar","mer","gio","ven","sab"],MESI=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
 function dt(k){var p=k.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
 fetch(URL+"?action=slots").then(function(r){return r.json()}).then(function(j){var sl=j.slots||{},out=[];
- Object.keys(sl).sort().forEach(function(k){(sl[k]||[]).slice().sort().forEach(function(h){if(out.length<4&&SEDE[dt(k).getDay()])out.push([k,h])})});
+ var ks=Object.keys(sl).sort().filter(function(k){return SEDE[dt(k).getDay()]&&(sl[k]||[]).length});ks.forEach(function(k){if(out.length<4)out.push([k,sl[k].slice().sort()[0]])});ks.forEach(function(k){sl[k].slice().sort().slice(1).forEach(function(h){if(out.length<4)out.push([k,h])})});out.sort(function(a,b){return (a[0]+a[1])<(b[0]+b[1])?-1:1});
  if(!out.length)return;var box=document.getElementById("hsl");
  out.forEach(function(o){var d=dt(o[0]),b=document.createElement("button");b.type="button";
   b.innerHTML="<small>"+DC[d.getDay()]+" "+d.getDate()+" "+MESI[d.getMonth()].slice(0,3)+"</small><b>"+o[1]+"</b><small>"+SEDE[d.getDay()]+"</small>";
