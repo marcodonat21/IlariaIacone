@@ -294,6 +294,18 @@ main,section,.hero,#chi-sono,.alt{background:transparent!important}
 input,select,textarea,.f input,.f select,.f textarea,.day,.slot,.mapbtn,.calh button{background:rgba(255,255,255,.6)}
 .btn.ghost{background:rgba(255,255,255,.55)!important;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 8px 20px -12px rgba(120,30,40,.3);padding-left:22px}
 footer{background:rgba(255,255,255,.45)!important;-webkit-backdrop-filter:saturate(180%) blur(22px);backdrop-filter:saturate(180%) blur(22px)}
+
+/* barra desktop: logo a sinistra, menu al centro, social a destra; scorrendo diventa una capsula che galleggia */
+@media(min-width:701px){
+ header{top:0;margin:0 auto;width:100%;border-radius:0;transition:width .35s cubic-bezier(.2,.8,.2,1),top .35s cubic-bezier(.2,.8,.2,1),border-radius .35s,box-shadow .35s}
+ header .wrap{max-width:1180px;gap:18px}
+ header nav{margin:0 auto;display:flex;align-items:center;gap:2px}
+ header nav a{margin:0;padding:7px 12px;border-radius:999px;transition:background .2s}
+ header nav a:not(.cta):hover{background:rgba(255,255,255,.16)}
+ header nav a.cta{margin-left:10px}
+ .hsoc{margin-left:0}
+ header.sm{top:12px;width:min(1080px,calc(100% - 40px));border-radius:999px;border-bottom:0;box-shadow:0 18px 40px -16px rgba(120,20,30,.55),inset 0 1px 0 rgba(255,255,255,.18)}
+ header.sm .wrap{padding:0 10px 0 22px}}
 </style>
 </head>
 <body>
