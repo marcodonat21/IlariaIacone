@@ -616,16 +616,24 @@ function fattHtml(f){var s=fisc(),tot=+f.importo+ +f.bollo;
     '<div>Pagamento: '+esc(f.metodo)+(f.metodo==="Bonifico"&&s.iban?" · IBAN "+esc(s.iban):"")+'</div>'+(f.opposizione_ts?'<div><small>Il paziente si è opposto alla trasmissione dei dati al Sistema Tessera Sanitaria.</small></div>':'')+
     '<div class="note">'+esc(s.nota1||"")+'<br>'+esc(s.nota2||"")+'</div></div>'}
 /* PDF vero (non la stampa) da allegare alla mail */
-var H2P=null;function h2p(){return H2P||(H2P=new Promise(function(ok,ko){var sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js";sc.onload=function(){ok(window.html2pdf)};sc.onerror=function(){H2P=null;ko(new Error("Non riesco a preparare il PDF: controlla la connessione."))};document.head.appendChild(sc)}))}
 function toPng(src,w,h){return new Promise(function(ok){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=Math.round(w*3);c.height=Math.round(h*3);var x=c.getContext("2d");x.scale(3,3);x.drawImage(im,0,0,w,h);try{ok(c.toDataURL("image/png"))}catch(e){ok(null)}};im.onerror=function(){ok(null)};im.src=src})}
 function rast(el){var J=[].map.call(el.querySelectorAll("svg"),function(sv){var r=sv.getBoundingClientRect(),c=sv.cloneNode(true);c.setAttribute("xmlns","http://www.w3.org/2000/svg");c.setAttribute("width",r.width);c.setAttribute("height",r.height);
     return toPng("data:image/svg+xml;charset=utf-8,"+encodeURIComponent(new XMLSerializer().serializeToString(c)),r.width,r.height).then(function(u){if(!u)return;var im=document.createElement("img");im.src=u;im.style.cssText="display:block;width:"+r.width+"px;height:"+r.height+"px";sv.parentNode.replaceChild(im,sv)})})
   .concat([].map.call(el.querySelectorAll('img[src$=".svg"]'),function(im){var r=im.getBoundingClientRect();return toPng(im.src,r.width,r.height).then(function(u){if(u)im.src=u})}));
   return Promise.all(J).then(function(){return new Promise(function(ok){setTimeout(ok,60)})})}
-function pdfB64(html){return h2p().then(function(h){return (document.fonts&&document.fonts.ready||Promise.resolve()).then(function(){return h})}).then(function(h){var el=document.createElement("div");el.className="pdfbox";el.innerHTML=html;document.body.appendChild(el);
-  var sy=window.scrollY,sx=window.scrollX;window.scrollTo(0,0);
-  return rast(el).then(function(){return h().set({margin:[12,12,12,12],image:{type:"jpeg",quality:.95},html2canvas:{scale:2,backgroundColor:"#ffffff",scrollX:0,scrollY:0},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"],avoid:["tr",".rcard",".rtile",".rinfo","h3"]}}).from(el.firstChild).outputPdf("datauristring")
-    .then(function(u){el.remove();window.scrollTo(sx,sy);return u.split(",")[1]},function(e){el.remove();window.scrollTo(sx,sy);throw e})})})}
+function loadJs(u){return new Promise(function(ok,ko){var sc=document.createElement("script");sc.src=u;sc.onload=ok;sc.onerror=function(){ko(new Error("Non riesco a preparare il PDF: controlla la connessione."))};document.head.appendChild(sc)})}
+var LIBS=null;function pdfLibs(){return LIBS||(LIBS=Promise.all(["https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js","https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"].map(loadJs)).catch(function(e){LIBS=null;throw e}))}
+/* il PDF si crea in una pagina a parte (invisibile), così non dipende da dove sei nell'agenda */
+function pdfB64(html){var fr;return pdfLibs().then(function(){return new Promise(function(ok){
+    fr=document.createElement("iframe");fr.setAttribute("aria-hidden","true");fr.style.cssText="position:fixed;left:-10000px;top:0;width:820px;height:1200px;border:0";document.body.appendChild(fr);
+    var d=fr.contentDocument;fr.onload=function(){ok(d)};
+    d.open();d.write('<!doctype html><html><head><meta charset="utf-8"><base href="'+location.href+'"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap"><link rel="stylesheet" href="app.css?v=9"><style>html,body{margin:0;padding:0;background:#fff;min-height:0}body:before{display:none}.pdfbox{position:static;left:0;padding:0}</style></head><body><div class="pdfbox">'+html+'</div></body></html>');d.close()})})
+  .then(function(d){return (d.fonts&&d.fonts.ready||Promise.resolve()).then(function(){return new Promise(function(ok){setTimeout(ok,150)})}).then(function(){return rast(d.querySelector(".pdfbox"))}).then(function(){
+    var P=[].slice.call(d.querySelectorAll(".rp"));if(!P.length)P=[d.querySelector(".pdfbox").firstElementChild];
+    var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",orientation:"portrait"}),i=0;
+    return P.reduce(function(pr,pg){return pr.then(function(){return window.html2canvas(pg,{scale:2,backgroundColor:"#ffffff",useCORS:true,logging:false,windowWidth:820})}).then(function(c){
+      var w=186,h=c.height*w/c.width;if(h>273){h=273;w=c.width*h/c.height}if(i++)pdf.addPage();pdf.addImage(c.toDataURL("image/jpeg",.93),"JPEG",(210-w)/2,12,w,h)})},Promise.resolve()).then(function(){return pdf.output("datauristring").split(",")[1]})})})
+  .then(function(b){fr&&fr.remove();return b},function(e){fr&&fr.remove();throw e})}
 function mailDoc(tipo,id,email,html,file){ask(tipo==="misure"?"Mandare il report per mail?":"Mandare la fattura per mail?","A "+email+", con il PDF allegato.","Sì, manda",function(){toast("Preparo il PDF…");
   pdfB64(html).then(function(b64){return sb.functions.invoke("mail",{body:{tipo:tipo,id:id,pdf:b64,file:file}})}).then(function(r){
     if(r.error||!r.data||!r.data.ok)return toast("Attenzione: la mail non è partita.");toast("Mail con il PDF inviata ✉️");if(tipo==="fattura"&&FM==="emesse")loadFatt()}).catch(function(e){toast(e&&e.message?e.message:"Attenzione: la mail non è partita.")})})}
