@@ -623,8 +623,9 @@ function rast(el){var J=[].map.call(el.querySelectorAll("svg"),function(sv){var 
   .concat([].map.call(el.querySelectorAll('img[src$=".svg"]'),function(im){var r=im.getBoundingClientRect();return toPng(im.src,r.width,r.height).then(function(u){if(u)im.src=u})}));
   return Promise.all(J).then(function(){return new Promise(function(ok){setTimeout(ok,60)})})}
 function pdfB64(html){return h2p().then(function(h){return (document.fonts&&document.fonts.ready||Promise.resolve()).then(function(){return h})}).then(function(h){var el=document.createElement("div");el.className="pdfbox";el.innerHTML=html;document.body.appendChild(el);
-  return rast(el).then(function(){return h().set({margin:[12,12,12,12],image:{type:"jpeg",quality:.95},html2canvas:{scale:2,backgroundColor:"#ffffff"},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"],avoid:["tr",".rcard",".rtile",".rinfo","h3"]}}).from(el.firstChild).outputPdf("datauristring")
-    .then(function(u){el.remove();return u.split(",")[1]},function(e){el.remove();throw e})})})}
+  var sy=window.scrollY,sx=window.scrollX;window.scrollTo(0,0);
+  return rast(el).then(function(){return h().set({margin:[12,12,12,12],image:{type:"jpeg",quality:.95},html2canvas:{scale:2,backgroundColor:"#ffffff",scrollX:0,scrollY:0},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"],avoid:["tr",".rcard",".rtile",".rinfo","h3"]}}).from(el.firstChild).outputPdf("datauristring")
+    .then(function(u){el.remove();window.scrollTo(sx,sy);return u.split(",")[1]},function(e){el.remove();window.scrollTo(sx,sy);throw e})})})}
 function mailDoc(tipo,id,email,html,file){ask(tipo==="misure"?"Mandare il report per mail?":"Mandare la fattura per mail?","A "+email+", con il PDF allegato.","Sì, manda",function(){toast("Preparo il PDF…");
   pdfB64(html).then(function(b64){return sb.functions.invoke("mail",{body:{tipo:tipo,id:id,pdf:b64,file:file}})}).then(function(r){
     if(r.error||!r.data||!r.data.ok)return toast("Attenzione: la mail non è partita.");toast("Mail con il PDF inviata ✉️");if(tipo==="fattura"&&FM==="emesse")loadFatt()}).catch(function(e){toast(e&&e.message?e.message:"Attenzione: la mail non è partita.")})})}
