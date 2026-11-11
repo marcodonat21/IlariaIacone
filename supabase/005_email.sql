@@ -45,12 +45,13 @@ end $$;
 create or replace function public.mail_prepara(p_tipo text, p_id uuid default null, p_prima text default null, p_cron text default null)
 returns jsonb language plpgsql volatile security definer set search_path = public as $$
 declare r record; out jsonb := '[]'::jsonb; lid uuid; lk text; ok boolean;
+        v_srv boolean := p_cron is not null and p_cron = (select decrypted_secret from vault.decrypted_secrets where name = 'mail_cron');
 begin
   if p_tipo not in ('ricevuta','confermato','spostato','annullato','promemoria','scheda') then
     return jsonb_build_object('ok', false, 'error', 'tipo');
   end if;
   if p_tipo = 'promemoria' and p_id is null then
-    if p_cron is null or p_cron is distinct from (select decrypted_secret from vault.decrypted_secrets where name = 'mail_cron') then
+    if not v_srv then
       return jsonb_build_object('ok', false, 'error', 'non_autorizzato');
     end if;
   end if;
@@ -71,7 +72,9 @@ begin
            and extract(hour from now() at time zone s.fuso) >= 18)   -- parte dalle 18 del giorno prima
   loop
     -- chi può chiederla
-    if p_tipo = 'ricevuta' then
+    if v_srv then
+      ok := true;                -- chiamata dal server (promemoria automatico o prova)
+    elsif p_tipo = 'ricevuta' then
       ok := r.origine = 'sito' and r.creato > now() - interval '15 minutes';
     elsif p_tipo = 'promemoria' and p_id is null then
       ok := true;
