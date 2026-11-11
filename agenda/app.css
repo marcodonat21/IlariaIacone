@@ -248,3 +248,32 @@ html.notte .kpi.green b{color:#93b597}
 .doc .tot td{font-weight:700;border-top:2px solid #111}
 .doc small{color:#555}
 .doc .note{font-size:9pt;color:#444;margin-top:18px}
+
+/* ---------- pazienti: elenco + scheda (come l'agenda Google) ---------- */
+.pgrid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:14px;align-items:start}
+.plist{position:sticky;top:34px;max-height:calc(100vh - 150px);overflow:auto}
+.pdet>.card+.card,.pdet>.kpis+.card,.pdet>.card+.kpis{margin-top:14px}
+.pdet .kpis{margin:14px 0 0}
+.pempty{text-align:center;padding:40px 20px}
+.prow.on{background:rgba(182,36,50,.08);border-radius:12px}
+.phead{display:flex;gap:14px;align-items:flex-start}
+.phead .av{width:56px;height:56px;flex:0 0 56px;font-size:1.2rem}
+.phead .pinfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.phead .pinfo small{color:var(--muted)}
+.phead .pacts{display:flex;gap:6px}
+.pback{display:none}
+.mform{display:grid;grid-template-columns:repeat(4,1fr);gap:0 10px}
+.chead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}.chead h2{margin:0}
+.chead .seg{margin:0;flex-wrap:wrap}
+.chead .seg button{flex:0 0 auto;padding:6px 10px;font-size:.8rem}
+.mtab td.mn{color:var(--muted);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtab th small{display:block;font-weight:500}
+@media(max-width:1100px){.mform{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:899px){
+  .pgrid{grid-template-columns:minmax(0,1fr)}
+  .plist{position:static;max-height:none}
+  .pdmode .plist,.pdmode .pbar,.pdmode .selbar{display:none!important}
+  section:not(.pdmode) .pdet{display:none}
+  .pback{display:inline-flex;margin-bottom:12px}
+  .mform{grid-template-columns:1fr 1fr}
+}

@@ -291,7 +291,7 @@ var pT=null,SEL={};$("pQ").oninput=function(){clearTimeout(pT);pT=setTimeout(loa
 function loadPaz(){var s=$("pQ").value.trim();var req=s.length>=2?cerca(s):q(sb.from("pazienti").select("id,nome,cognome,telefono,email").eq("studio_id",ST.id).order("cognome").order("nome").limit(500));
   req.then(function(L){$("lPaz").innerHTML=L.length?L.map(function(p){return '<div class="prow'+(SEL[p.id]?" sel":"")+'" data-pz="'+p.id+'"><span class="ck"></span><div class="av">'+esc(ini(p))+'</div><div class="chi"><b>'+esc(nomeP(p))+'</b><br><small>'+esc(p.telefono||"")+(p.email?' · '+esc(p.email):'')+'</small></div>'+
     (p.telefono?'<a class="icb" href="https://wa.me/'+waNum(p.telefono)+'" target="_blank" rel="noopener" aria-label="WhatsApp">'+WA+'</a>':'')+'</div>'}).join(""):'<div class="empty">'+(s?"Nessun paziente trovato.":"La rubrica è vuota: i pazienti si aggiungono da soli quando prenotano dal sito, oppure con + Paziente.")+'</div>';
-    $("lPaz").dataset.ids=L.map(function(p){return p.id}).join(",")}).catch(err)}
+    $("lPaz").dataset.ids=L.map(function(p){return p.id}).join(",");if(PZ){$$("#lPaz .prow").forEach(function(r){r.classList.toggle("on",r.dataset.pz===PZ)});if(!$("pDet").querySelector(".phead"))openPaz(PZ)}}).catch(err)}
 $("pSel").onclick=function(){SEL={};$("lPaz").classList.add("selmode");$("pSelBar").hidden=false;selN()};
 $("pSelEnd").onclick=function(){SEL={};$("lPaz").classList.remove("selmode");$("pSelBar").hidden=true;$$("#lPaz .prow").forEach(function(r){r.classList.remove("sel")})};
 $("pSelAll").onclick=function(){($("lPaz").dataset.ids||"").split(",").filter(Boolean).forEach(function(i){SEL[i]=1});$$("#lPaz .prow").forEach(function(r){r.classList.add("sel")});selN()};
@@ -314,45 +314,70 @@ function pazForm(p,done){sheet('<h2>'+(p.id?"Modifica paziente":"Nuovo paziente"
     var r=p.id?sb.from("pazienti").update(u).eq("id",p.id):sb.from("pazienti").insert(Object.assign({studio_id:ST.id},u));
     r.then(function(x){if(x.error)return err(x.error);toast("Paziente salvato.");close();done&&done()})}})}
 var MK=[["peso","Peso","kg"],["altezza","Altezza","cm"],["bmi","BMI",""],["vita","Vita","cm"],["fianchi","Fianchi","cm"],["massa_grassa","Massa grassa","%"],["massa_magra","Massa magra","kg"],["massa_muscolare","Massa muscolare","kg"],["acqua","Acqua corporea","%"],["grasso_viscerale","Grasso viscerale",""],["metabolismo","Metabolismo basale","kcal"]];
-function openPaz(id){Promise.all([q(sb.from("pazienti").select("*").eq("id",id).single()),q(sb.from("appuntamenti").select("*").eq("paziente_id",id).order("inizio",{ascending:false}).limit(50)),
-  q(sb.from("misurazioni").select("*").eq("paziente_id",id).order("data")),q(sb.from("incassi").select("*").eq("paziente_id",id).order("data",{ascending:false}))]).then(function(rs){
-  var p=rs[0],A=rs[1],M=rs[2],I=rs[3],tab="dati";
-  var close=sheet('<div class="hrow" style="margin-bottom:0"><h2 style="margin:0">'+esc(nomeP(p))+'</h2>'+(p.telefono?'<span><a class="icb" style="display:inline-grid" href="'+telHref(p.telefono)+'">'+TEL+'</a> <a class="icb" style="display:inline-grid" href="https://wa.me/'+waNum(p.telefono)+'" target="_blank" rel="noopener">'+WA+'</a></span>':'')+'</div>'+
-    '<div class="tabs2"><button data-t="dati" class="on">Dati</button><button data-t="mis">Misurazioni ('+M.length+')</button><button data-t="app">Appuntamenti ('+A.length+')</button><button data-t="inc">Pagamenti ('+I.length+')</button></div><div id="pzBody"></div>',function(box,cl){
-      function show(t){tab=t;$$(".tabs2 button",box).forEach(function(b){b.classList.toggle("on",b.dataset.t===t)});var B=box.querySelector("#pzBody");
-        if(t==="dati"){B.innerHTML=pazFields(p)+'<div class="hint" id="pdMsg"></div><div class="acts2"><button class="btn" data-save>Salva</button><button class="btn ghost" data-del>Elimina paziente</button></div>';
-          B.querySelector("[data-save]").onclick=function(){var u=readPaz(B),m=B.querySelector("#pdMsg");if(!u.nome){m.className="hint err";m.textContent="Il nome è obbligatorio.";return}if(u.cf&&!cfOk(u.cf)){m.className="hint err";m.textContent="Il codice fiscale non sembra corretto.";return}
-            sb.from("pazienti").update(u).eq("id",p.id).then(function(r){if(r.error)return err(r.error);Object.assign(p,u);toast("Paziente salvato.");if(VIEW==="paz")loadPaz()})};
-          B.querySelector("[data-del]").onclick=function(){ask("Eliminare "+nomeP(p)+"?","Vengono cancellate anche le misurazioni. Gli appuntamenti e gli incassi restano. Non si può annullare.","Sì, elimina",function(){
-            sb.from("pazienti").delete().eq("id",p.id).then(function(r){if(r.error)return err(r.error);cl();toast("Paziente eliminato.");if(VIEW==="paz")loadPaz()})})}}
-        if(t==="mis")misView(B,p,M,function(nm){M=nm;show("mis")});
-        if(t==="app")B.innerHTML=A.length?A.map(function(a){var s=new Date(a.inizio);return '<div class="app-row'+(a.stato==="annullato"?" ann":"")+'" style="--c:'+fam(a)+'" data-app="'+a.id+'"><div class="ora">'+pad(s.getDate())+'/'+pad(s.getMonth()+1)+'</div><div class="chi"><b>'+esc(a.tipo||"")+'</b><small>'+s.getFullYear()+' · '+hm(s)+' · '+esc(sedeNome(a.sede_id))+' · '+esc(a.stato.replace("_"," "))+(a.presenza?" · "+a.presenza:"")+'</small></div></div>'}).join(""):'<div class="empty">Nessun appuntamento.</div>';
-        if(t==="inc")B.innerHTML=I.length?I.map(function(x){return '<div class="irow"><div class="chi"><b>'+dmy(x.data)+' · '+esc(x.descrizione||"")+'</b><small>'+esc(x.metodo)+(x.fattura_num?' · fattura '+esc(x.fattura_num):' · fattura da emettere')+'</small></div><div class="imp">'+eur(x.importo)+'</div></div>'}).join(""):'<div class="empty">Nessun pagamento registrato.</div>'}
-      $$(".tabs2 button",box).forEach(function(b){b.onclick=function(){show(b.dataset.t)}});show("dati");
-      box.addEventListener("click",function(e){if(e.target.closest("[data-app]"))cl()})})}).catch(err)}
-
-/* misurazioni */
-function misView(B,p,M,reload){var last=M[M.length-1]||{};
-  B.innerHTML=(M.length>1?'<div class="seg" id="mSel">'+[["peso","Peso"],["massa_grassa","Grasso %"],["vita","Vita"],["bmi","BMI"]].map(function(k,i){return '<button data-k="'+k[0]+'"'+(i?'':' class="on"')+'>'+k[1]+'</button>'}).join("")+'</div><div id="mChart"></div>':'')+
-    (M.length?'<div class="scroll"><table class="mtab"><tr><th>Data</th><th>Peso</th><th>BMI</th><th>Vita</th><th>Fianchi</th><th>Grasso %</th><th>Muscolo</th><th></th></tr>'+M.slice().reverse().map(function(m){return '<tr><td>'+dmy(m.data)+'</td><td>'+(m.peso??"")+'</td><td>'+(m.bmi??"")+'</td><td>'+(m.vita??"")+'</td><td>'+(m.fianchi??"")+'</td><td>'+(m.massa_grassa??"")+'</td><td>'+(m.massa_muscolare??"")+'</td><td><button class="x" data-mdel="'+m.id+'" aria-label="Elimina">✕</button></td></tr>'}).join("")+'</table></div>':'<div class="empty">Nessuna misurazione ancora.</div>')+
-    '<h2 style="margin-top:18px">Nuova misurazione</h2><div class="row keep"><div><label>Data</label><input type="date" id="mData" value="'+ymd(new Date())+'"></div><div><label>Peso (kg)</label><input id="m_peso" inputmode="decimal"></div></div>'+
-    '<div class="row keep">'+MK.slice(1).map(function(k){return '<div><label>'+k[1]+(k[2]?" ("+k[2]+")":"")+'</label><input id="m_'+k[0]+'" inputmode="decimal"'+(k[0]==="altezza"&&last.altezza?' value="'+last.altezza+'"':'')+(k[0]==="bmi"?' placeholder="calcolato da solo"':'')+'></div>'}).join("")+'</div>'+
-    '<label>Note</label><input id="mNote"><div class="acts2"><button class="btn" id="mSave">Salva misurazione</button>'+(M.length?'<button class="btn ghost" id="mPdf">📄 Report PDF</button>':'')+'</div>';
-  function drawChart(k){var C=B.querySelector("#mChart");if(C)C.innerHTML=chartSvg(M,k)}
-  if(M.length>1){drawChart("peso");$$("#mSel button",B).forEach(function(b){b.onclick=function(){$$("#mSel button",B).forEach(function(x){x.classList.toggle("on",x===b)});drawChart(b.dataset.k)}})}
-  B.querySelector("#mSave").onclick=function(){var o={studio_id:ST.id,paziente_id:p.id,data:B.querySelector("#mData").value,note:B.querySelector("#mNote").value.trim()||null},any=false;
-    MK.forEach(function(k){var v=num(B.querySelector("#m_"+k[0]).value);o[k[0]]=v;if(v!=null&&k[0]!=="altezza")any=true});
+function bmiTxt(b){b=+b;if(!b)return"";return b<18.5?"sottopeso":b<25?"normopeso":b<30?"sovrappeso":"obesità"}
+function nf(v){return v==null||v===""?"–":String(Math.round(v*10)/10).replace(".",",")}
+var PZ=null,PK="peso";
+function openPaz(id){PZ=id;if(VIEW!=="paz"){go("paz");return}
+  $$("#lPaz .prow").forEach(function(r){r.classList.toggle("on",r.dataset.pz===id)});
+  document.querySelector('[data-view="paz"]').classList.add("pdmode");
+  $("pDet").innerHTML='<div class="card glass"><span class="spin"></span></div>';
+  Promise.all([q(sb.from("pazienti").select("*").eq("id",id).single()),q(sb.from("appuntamenti").select("*").eq("paziente_id",id).order("inizio",{ascending:false}).limit(50)),
+    q(sb.from("misurazioni").select("*").eq("paziente_id",id).order("data").order("creato")),q(sb.from("incassi").select("*").eq("paziente_id",id).order("data",{ascending:false}))]).then(function(rs){
+    if(PZ!==id)return;renderPaz(rs[0],rs[1],rs[2],rs[3])}).catch(err)}
+function renderPaz(p,A,M,I){var D=$("pDet");
+  function last(k){for(var i=M.length-1;i>=0;i--)if(M[i][k]!=null)return M[i][k];return null}
+  function first(k){for(var i=0;i<M.length;i++)if(M[i][k]!=null)return M[i][k];return null}
+  var pw=last("peso"),pw0=first("peso"),dv=pw!=null&&pw0!=null&&M.length>1?Math.round((pw-pw0)*10)/10:null,b=last("bmi"),g=last("massa_grassa");
+  var av=MK.filter(function(k){return M.some(function(m){return m[k[0]]!=null})}),met=av.filter(function(k){return k[0]!=="altezza"});
+  if(met.length&&!met.some(function(k){return k[0]===PK}))PK=met[0][0];
+  var passati=A.filter(function(a){return a.stato!=="annullato"&&new Date(a.inizio)<new Date()}),ult=passati[0],pros=A.filter(function(a){return a.stato!=="annullato"&&new Date(a.inizio)>=new Date()}).reverse();
+  var addr=p.indirizzo?p.indirizzo+(p.citta?", "+(p.cap?p.cap+" ":"")+p.citta+(p.prov?" ("+p.prov+")":""):""):"";
+  D.innerHTML='<button class="btn ghost small pback" data-pback>‹ Pazienti</button>'+
+    '<div class="card glass phead"><div class="av">'+esc(ini(p))+'</div><div class="pinfo"><h2 style="margin:0">'+esc(nomeP(p))+'</h2>'+
+      [p.telefono,p.email,p.cf?"C.F. "+p.cf:"",addr,p.nascita?"Nato/a il "+dmy(p.nascita):"",ult?"Ultima visita: "+dmy(ult.inizio)+" · "+(ult.tipo||""):"",pros[0]?"Prossima: "+dmy(pros[0].inizio)+" alle "+hm(new Date(pros[0].inizio)):""].filter(Boolean).map(function(x){return '<small>'+esc(x)+'</small>'}).join("")+
+      (p.note?'<small>📝 '+esc(p.note)+'</small>':'')+'</div>'+
+      '<div class="pacts">'+(p.telefono?'<a class="icb" href="'+telHref(p.telefono)+'" title="Chiama">'+TEL+'</a><a class="icb" href="https://wa.me/'+waNum(p.telefono)+'" target="_blank" rel="noopener" title="WhatsApp">'+WA+'</a>':'')+'<button class="icb" data-pedit title="Modifica dati">✎</button></div></div>'+
+    '<div class="kpis"><div class="kpi glass red" style="cursor:default"><small>Peso attuale</small><b>'+(pw!=null?nf(pw)+" kg":"–")+'</b><span>'+(M.length?"al "+dmy(M[M.length-1].data):"")+'</span></div>'+
+      '<div class="kpi glass green" style="cursor:default"><small>Variazione peso</small><b>'+(dv!=null?(dv>0?"+":"")+nf(dv)+" kg":"–")+'</b><span>'+(M.length>1?"dal "+dmy(M[0].data):"")+'</span></div>'+
+      '<div class="kpi glass" style="cursor:default"><small>BMI</small><b>'+nf(b)+'</b><span>'+bmiTxt(b)+'</span></div>'+
+      '<div class="kpi glass orange" style="cursor:default"><small>Massa grassa</small><b>'+(g!=null?nf(g)+" %":"–")+'</b><span></span></div></div>'+
+    '<div class="card glass"><div class="chead"><h2>Andamento</h2><div class="seg" id="pMet">'+met.map(function(k){return '<button data-k="'+k[0]+'"'+(k[0]===PK?' class="on"':'')+'>'+k[1]+'</button>'}).join("")+'</div></div>'+
+      '<div id="pChart">'+(M.length?chartSvg(M,PK):'<div class="empty">Ancora nessuna misurazione: aggiungi la prima qui sotto e il grafico si disegna da solo.</div>')+'</div>'+
+      (M.length?'<div class="acts2"><button class="btn ghost small" data-mpdf>📄 Report PDF da mandare al paziente</button></div>':'')+'</div>'+
+    '<div class="card glass"><h2>Nuova misurazione</h2><div class="mform"><div><label>Data</label><input type="date" id="mData" value="'+ymd(new Date())+'"></div>'+
+      MK.map(function(k){var v=k[0]==="altezza"?last("altezza"):null;return '<div><label>'+k[1]+(k[2]?" ("+k[2]+")":"")+'</label><input id="m_'+k[0]+'" inputmode="decimal" autocomplete="off"'+(v!=null?' value="'+v+'"':'')+(k[0]==="bmi"?' placeholder="si calcola da solo"':'')+'></div>'}).join("")+
+      '</div><label>Note</label><input id="mNote" autocomplete="off"><button class="btn" id="mSave" style="margin-top:14px">Salva misurazione</button></div>'+
+    '<div class="card glass"><h2>Storico misurazioni</h2>'+(M.length?'<div class="scroll"><table class="mtab"><tr><th>Data</th>'+av.map(function(k){return '<th>'+k[1]+(k[2]?'<small>'+k[2]+'</small>':'')+'</th>'}).join("")+'<th>Note</th><th></th></tr>'+
+      M.slice().reverse().map(function(m){return '<tr><td>'+dmy(m.data)+'</td>'+av.map(function(k){return '<td>'+nf(m[k[0]])+'</td>'}).join("")+'<td class="mn">'+esc(m.note||"")+'</td><td><button class="x" data-mdel="'+m.id+'" title="Elimina">✕</button></td></tr>'}).join("")+'</table></div>':'<div class="empty">Nessuna misurazione registrata.</div>')+'</div>'+
+    '<div class="card glass"><div class="chead"><h2>Appuntamenti</h2><button class="btn small" data-pnew>+ Nuovo</button></div>'+(A.length?A.map(function(a){var s=new Date(a.inizio);return '<div class="app-row'+(a.stato==="annullato"?" ann":"")+(a.stato==="da_confermare"?" da":"")+'" style="--c:'+fam(a)+'" data-app="'+a.id+'"><div class="ora">'+pad(s.getDate())+'/'+pad(s.getMonth()+1)+'</div><div class="chi"><b>'+esc(a.tipo||"")+'</b><small>'+s.getFullYear()+' · '+hm(s)+' · '+esc(sedeNome(a.sede_id))+(a.stato==="annullato"?" · annullato":"")+(a.presenza?" · "+a.presenza:"")+'</small></div></div>'}).join(""):'<div class="empty">Nessun appuntamento.</div>')+'</div>'+
+    '<div class="card glass"><h2>Pagamenti</h2>'+(I.length?I.map(function(x){return '<div class="irow"><div class="chi"><b>'+dmy(x.data)+' · '+esc(x.descrizione||"")+'</b><small>'+esc(x.metodo)+(x.fattura_num?' · fattura '+esc(x.fattura_num):' · fattura da emettere')+'</small></div><div class="imp">'+eur(x.importo)+'</div></div>'}).join(""):'<div class="empty">Nessun pagamento registrato.</div>')+'</div>'+
+    '<div class="acts2"><button class="btn ghost small" data-pdel>Elimina paziente</button></div>';
+  function reload(){openPaz(p.id)}
+  $$("#pMet button",D).forEach(function(b){b.onclick=function(){PK=b.dataset.k;$$("#pMet button",D).forEach(function(x){x.classList.toggle("on",x===b)});$("pChart").innerHTML=chartSvg(M,PK)}});
+  D.querySelector("#mSave").onclick=function(){var o={studio_id:ST.id,paziente_id:p.id,data:$("mData").value,note:$("mNote").value.trim()||null},any=false;
+    MK.forEach(function(k){var v=num($("m_"+k[0]).value);o[k[0]]=v;if(v!=null&&k[0]!=="altezza")any=true});
     if(o.bmi==null&&o.peso&&o.altezza)o.bmi=Math.round(o.peso/Math.pow(o.altezza/100,2)*10)/10;if(o.metabolismo!=null)o.metabolismo=Math.round(o.metabolismo);
     if(!any)return toast("Inserisci almeno una misura.");if(!o.data)return toast("Scegli la data.");
-    sb.from("misurazioni").insert(o).then(function(r){if(r.error)return err(r.error);toast("Misurazione salvata.");q(sb.from("misurazioni").select("*").eq("paziente_id",p.id).order("data")).then(reload)})};
-  B.addEventListener("click",function(e){var x=e.target.closest("[data-mdel]");if(!x)return;ask("Eliminare la misurazione?","Non si può annullare.","Sì, elimina",function(){
-    sb.from("misurazioni").delete().eq("id",x.dataset.mdel).then(function(r){if(r.error)return err(r.error);q(sb.from("misurazioni").select("*").eq("paziente_id",p.id).order("data")).then(reload)})})});
-  var pdf=B.querySelector("#mPdf");if(pdf)pdf.onclick=function(){misReport(p,M)}}
-function chartSvg(M,k){var pts=M.filter(function(m){return m[k]!=null});if(pts.length<2)return '<div class="empty">Servono almeno due misurazioni con questo valore.</div>';
-  var W=560,H=180,P=32,vals=pts.map(function(m){return +m[k]}),mn=Math.min.apply(0,vals),mx=Math.max.apply(0,vals);if(mx===mn){mx+=1;mn-=1}
-  var x=function(i){return P+i*(W-2*P)/(pts.length-1)},y=function(v){return H-P-(v-mn)*(H-2*P)/(mx-mn)};
-  var d=pts.map(function(m,i){return(i?"L":"M")+x(i).toFixed(1)+" "+y(+m[k]).toFixed(1)}).join(" ");
-  return '<svg class="chart" viewBox="0 0 '+W+' '+H+'"><path d="'+d+'" fill="none" stroke="#B62432" stroke-width="2.5" stroke-linejoin="round"/>'+pts.map(function(m,i){return '<circle cx="'+x(i)+'" cy="'+y(+m[k])+'" r="4" fill="#B62432"/><text x="'+x(i)+'" y="'+(y(+m[k])-9)+'" text-anchor="middle">'+m[k]+'</text><text x="'+x(i)+'" y="'+(H-8)+'" text-anchor="middle">'+dmy(m.data).slice(0,5)+'</text>'}).join("")+'</svg>'}
+    sb.from("misurazioni").insert(o).then(function(r){if(r.error)return err(r.error);toast("Misurazione salvata.");reload()})};
+  D.onclick=function(e){var x=e.target.closest("[data-mdel]");if(x)ask("Eliminare questa misurazione?","Non si può annullare.","Sì, elimina",function(){sb.from("misurazioni").delete().eq("id",x.dataset.mdel).then(function(r){if(r.error)return err(r.error);reload()})});
+    if(e.target.closest("[data-mpdf]"))misReport(p,M);
+    if(e.target.closest("[data-pedit]"))pazForm(p,function(){reload();loadPaz()});
+    if(e.target.closest("[data-pback]")){PZ=null;document.querySelector('[data-view="paz"]').classList.remove("pdmode");$$("#lPaz .prow").forEach(function(r){r.classList.remove("on")});window.scrollTo(0,0)}
+    if(e.target.closest("[data-pnew]")){go("nuovo");choose(p)}
+    if(e.target.closest("[data-pdel]"))ask("Eliminare "+nomeP(p)+"?","Vengono cancellate anche le misurazioni. Gli appuntamenti e gli incassi restano. Non si può annullare.","Sì, elimina",function(){
+      sb.from("pazienti").delete().eq("id",p.id).then(function(r){if(r.error)return err(r.error);toast("Paziente eliminato.");PZ=null;D.innerHTML="";document.querySelector('[data-view="paz"]').classList.remove("pdmode");loadPaz()})})};
+  if(window.innerWidth<900)window.scrollTo(0,0)}
+function chartSvg(M,k){var u=(MK.filter(function(x){return x[0]===k})[0]||[])[2]||"",pts=M.filter(function(m){return m[k]!=null});
+  if(!pts.length)return '<div class="empty">Nessun valore per questa misura.</div>';
+  var W=640,H=230,L=44,R=18,T=24,Bm=34,vals=pts.map(function(m){return +m[k]}),mn=Math.min.apply(0,vals),mx=Math.max.apply(0,vals),pad2=(mx-mn)*.15||1;mn-=pad2;mx+=pad2;
+  var x=function(i){return pts.length===1?(L+W-R)/2:L+i*(W-L-R)/(pts.length-1)},y=function(v){return T+(mx-v)*(H-T-Bm)/(mx-mn)};
+  var grid="";for(var gI=0;gI<=3;gI++){var gv=mn+(mx-mn)*gI/3,gy=y(gv);grid+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+gy+'" y2="'+gy+'" stroke="rgba(120,120,128,.18)"/><text x="'+(L-6)+'" y="'+(gy+4)+'" text-anchor="end">'+nf(gv)+'</text>'}
+  var d=pts.map(function(m,i){return(i?"L":"M")+x(i).toFixed(1)+" "+y(+m[k]).toFixed(1)}).join(" "),area=pts.length>1?d+" L"+x(pts.length-1)+" "+(H-Bm)+" L"+x(0)+" "+(H-Bm)+" Z":"";
+  var step=Math.ceil(pts.length/8);
+  return '<svg class="chart" viewBox="0 0 '+W+' '+H+'"><defs><linearGradient id="cg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#B62432" stop-opacity=".22"/><stop offset="1" stop-color="#B62432" stop-opacity="0"/></linearGradient></defs>'+grid+
+    (area?'<path d="'+area+'" fill="url(#cg)"/>':'')+'<path d="'+d+'" fill="none" stroke="#B62432" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'+
+    pts.map(function(m,i){return '<circle cx="'+x(i)+'" cy="'+y(+m[k])+'" r="4.5" fill="#fff" stroke="#B62432" stroke-width="2.5"/><text x="'+x(i)+'" y="'+(y(+m[k])-10)+'" text-anchor="middle" style="font-weight:700;fill:#B62432">'+nf(m[k])+'</text>'+(i%step===0||i===pts.length-1?'<text x="'+x(i)+'" y="'+(H-12)+'" text-anchor="middle">'+dmy(m.data).slice(0,5)+'/'+String(m.data).slice(2,4)+'</text>':'')}).join("")+
+    (u?'<text x="'+L+'" y="12" text-anchor="start">'+u+'</text>':'')+'</svg>'}
 function misReport(p,M){var f=M[0],l=M[M.length-1];
   $("print").innerHTML='<div class="doc"><div class="hd"><div><h1>Le tue misurazioni</h1><div>'+esc(nomeP(p))+'</div></div><div style="text-align:right"><b>'+esc((ST.fiscale||{}).nome||ST.nome)+'</b><br>'+esc(ST.professione||"")+'<br><small>'+dmy(ymd(new Date()))+'</small></div></div>'+
     '<table><tr><th>Misura</th><th class="r">Prima ('+dmy(f.data)+')</th><th class="r">Ultima ('+dmy(l.data)+')</th><th class="r">Differenza</th></tr>'+MK.filter(function(k){return k[0]!=="altezza"&&(f[k[0]]!=null||l[k[0]]!=null)}).map(function(k){var a=f[k[0]],b=l[k[0]],dd=a!=null&&b!=null?Math.round((b-a)*10)/10:"";
