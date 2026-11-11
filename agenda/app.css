@@ -363,3 +363,7 @@ html.notte .kev.bl{background:repeating-linear-gradient(45deg,#2f2c2d 0 6px,#232
 .gmove small{display:block;color:var(--muted);font-size:.72rem}.gmove b{display:block;text-transform:capitalize}.gmove span{font-size:.85rem}
 @media(max-width:1100px){.kwrap{grid-template-columns:1fr}.kside{display:grid;grid-template-columns:1fr 1fr;gap:14px}.kside .card+.card{margin-top:0}.kwb{max-height:none;min-height:0}}
 @media(max-width:899px){.kwrap{display:flex;flex-direction:column;gap:14px}.kside{display:contents}.kmini{order:1}.kmain{order:2}.kside2{order:3}.kev b{font-size:.72rem}.kwt span{font-size:.62rem;right:4px}#kQ{order:9;flex-basis:100%;margin:0}}
+/* barra in alto: ricerca e pulsante allineati */
+.topr .search.gsearch{margin:0}
+.topr .gsearch input,.topr .tnew{height:44px;box-sizing:border-box}
+.topr .gsearch input{padding-top:0;padding-bottom:0}
