@@ -270,7 +270,7 @@ textarea{min-height:80px;resize:vertical}
 (function(){
 "use strict";
 var SB_URL="https://afdpxhzxhfeumtjtfvui.supabase.co",SB_KEY="sb_publishable_PlEfnhOIIYzjwciVxKUnSA_wSwMy-7o";
-var sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,detectSessionInUrl:true,flowType:"pkce"}});
+var sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,detectSessionInUrl:true,flowType:"implicit"}});
 var $=function(i){return document.getElementById(i)},$$=function(q,r){return Array.prototype.slice.call((r||document).querySelectorAll(q))};
 var ST=null,SEDI=[],PRES=[],ORARI=[],VIEW="home",WEEK=null,SELDAY=null,NP=null;
 var GG=["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"],GC=["dom","lun","mar","mer","gio","ven","sab"],MESI=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
