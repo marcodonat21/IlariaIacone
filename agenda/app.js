@@ -443,7 +443,7 @@ function renderPaz(p,A,M,I){var D=$("pDet");
   if(window.innerWidth<900)window.scrollTo(0,0)}
 function chartSvg(M,k){var u=(MK.filter(function(x){return x[0]===k})[0]||[])[2]||"",pts=M.filter(function(m){return m[k]!=null});
   if(!pts.length)return '<div class="empty">Nessun valore per questa misura.</div>';
-  var W=640,H=230,L=44,R=18,T=24,Bm=34,vals=pts.map(function(m){return +m[k]}),mn=Math.min.apply(0,vals),mx=Math.max.apply(0,vals),pad2=(mx-mn)*.15||1;mn-=pad2;mx+=pad2;
+  var W=640,H=230,L=44,R=30,T=24,Bm=34,vals=pts.map(function(m){return +m[k]}),mn=Math.min.apply(0,vals),mx=Math.max.apply(0,vals),pad2=(mx-mn)*.15||1;mn-=pad2;mx+=pad2;
   var x=function(i){return pts.length===1?(L+W-R)/2:L+i*(W-L-R)/(pts.length-1)},y=function(v){return T+(mx-v)*(H-T-Bm)/(mx-mn)};
   var grid="";for(var gI=0;gI<=3;gI++){var gv=mn+(mx-mn)*gI/3,gy=y(gv);grid+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+gy+'" y2="'+gy+'" stroke="rgba(120,120,128,.18)"/><text x="'+(L-6)+'" y="'+(gy+4)+'" text-anchor="end">'+nf(gv)+'</text>'}
   var d=pts.map(function(m,i){return(i?"L":"M")+x(i).toFixed(1)+" "+y(+m[k]).toFixed(1)}).join(" "),area=pts.length>1?d+" L"+x(pts.length-1)+" "+(H-Bm)+" L"+x(0)+" "+(H-Bm)+" Z":"";
