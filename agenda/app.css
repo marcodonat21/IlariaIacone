@@ -367,3 +367,8 @@ html.notte .kev.bl{background:repeating-linear-gradient(45deg,#2f2c2d 0 6px,#232
 .topr .search.gsearch{margin:0}
 .topr .gsearch input,.topr .tnew{height:44px;box-sizing:border-box}
 .topr .gsearch input{padding-top:0;padding-bottom:0}
+
+/* contenitore per creare il PDF da allegare (fuori schermo) */
+.pdfbox{position:fixed;left:-10000px;top:0;width:182mm;background:#fff;color:#111;font:11pt/1.45 -apple-system,Helvetica,Arial,sans-serif}
+.pdfbox .doc h3{margin:16px 0 4px;font-size:12pt}
+.pdfbox .chart text{font:11px -apple-system,Helvetica,Arial,sans-serif;fill:#555}

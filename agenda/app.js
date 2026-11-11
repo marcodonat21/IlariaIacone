@@ -416,7 +416,7 @@ function renderPaz(p,A,M,I){var D=$("pDet");
       '<div class="kpi glass orange" style="cursor:default"><small>Massa grassa</small><b>'+(g!=null?nf(g)+" %":"–")+'</b><span></span></div></div>'+
     '<div class="card glass"><div class="chead"><h2>Andamento</h2><div class="seg" id="pMet">'+met.map(function(k){return '<button data-k="'+k[0]+'"'+(k[0]===PK?' class="on"':'')+'>'+k[1]+'</button>'}).join("")+'</div></div>'+
       '<div id="pChart">'+(M.length?chartSvg(M,PK):'<div class="empty">Ancora nessuna misurazione: aggiungi la prima qui sotto e il grafico si disegna da solo.</div>')+'</div>'+
-      (M.length?'<div class="acts2"><button class="btn ghost small" data-mpdf>📄 Report PDF da mandare al paziente</button></div>':'')+'</div>'+
+      (M.length?'<div class="acts2"><button class="btn ghost small" data-mpdf>📄 Report PDF</button>'+(p.email?'<button class="btn ghost small" data-mmail>✉️ Manda il report per mail</button>':'')+'</div>':'')+'</div>'+
     '<div class="card glass"><h2>Nuova misurazione</h2><div class="mform"><div><label>Data</label><input type="date" id="mData" value="'+ymd(new Date())+'"></div>'+
       MK.map(function(k){var v=k[0]==="altezza"?last("altezza"):null;return '<div><label>'+k[1]+(k[2]?" ("+k[2]+")":"")+'</label><input id="m_'+k[0]+'" inputmode="decimal" autocomplete="off"'+(v!=null?' value="'+v+'"':'')+(k[0]==="bmi"?' placeholder="si calcola da solo"':'')+'></div>'}).join("")+
       '</div><label>Note</label><input id="mNote" autocomplete="off"><button class="btn" id="mSave" style="margin-top:14px">Salva misurazione</button></div>'+
@@ -434,6 +434,7 @@ function renderPaz(p,A,M,I){var D=$("pDet");
     sb.from("misurazioni").insert(o).then(function(r){if(r.error)return err(r.error);toast("Misurazione salvata.");reload()})};
   D.onclick=function(e){var x=e.target.closest("[data-mdel]");if(x)ask("Eliminare questa misurazione?","Non si può annullare.","Sì, elimina",function(){sb.from("misurazioni").delete().eq("id",x.dataset.mdel).then(function(r){if(r.error)return err(r.error);reload()})});
     if(e.target.closest("[data-mpdf]"))misReport(p,M);
+    if(e.target.closest("[data-mmail]"))mailDoc("misure",p.id,p.email,misHtml(p,M),"Misurazioni "+nomeP(p));
     if(e.target.closest("[data-pedit]"))pazForm(p,function(){reload();loadPaz()});
     if(e.target.closest("[data-pback]")){PZ=null;document.querySelector('[data-view="paz"]').classList.remove("pdmode");$$("#lPaz .prow").forEach(function(r){r.classList.remove("on")});window.scrollTo(0,0)}
     if(e.target.closest("[data-pnew]")){go("nuovo");choose(p)}
@@ -451,13 +452,13 @@ function chartSvg(M,k){var u=(MK.filter(function(x){return x[0]===k})[0]||[])[2]
     (area?'<path d="'+area+'" fill="url(#cg)"/>':'')+'<path d="'+d+'" fill="none" stroke="#B62432" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'+
     pts.map(function(m,i){return '<circle cx="'+x(i)+'" cy="'+y(+m[k])+'" r="4.5" fill="#fff" stroke="#B62432" stroke-width="2.5"/><text x="'+x(i)+'" y="'+(y(+m[k])-10)+'" text-anchor="middle" style="font-weight:700;fill:#B62432">'+nf(m[k])+'</text>'+(i%step===0||i===pts.length-1?'<text x="'+x(i)+'" y="'+(H-12)+'" text-anchor="middle">'+dmy(m.data).slice(0,5)+'/'+String(m.data).slice(2,4)+'</text>':'')}).join("")+
     (u?'<text x="'+L+'" y="12" text-anchor="start">'+u+'</text>':'')+'</svg>'}
-function misReport(p,M){var f=M[0],l=M[M.length-1];
-  $("print").innerHTML='<div class="doc"><div class="hd"><div><h1>Le tue misurazioni</h1><div>'+esc(nomeP(p))+'</div></div><div style="text-align:right"><b>'+esc((ST.fiscale||{}).nome||ST.nome)+'</b><br>'+esc(ST.professione||"")+'<br><small>'+dmy(ymd(new Date()))+'</small></div></div>'+
+function misReport(p,M){$("print").innerHTML=misHtml(p,M);window.print()}
+function misHtml(p,M){var f=M[0],l=M[M.length-1];
+  return '<div class="doc"><div class="hd"><div><h1>Le tue misurazioni</h1><div>'+esc(nomeP(p))+'</div></div><div style="text-align:right"><b>'+esc((ST.fiscale||{}).nome||ST.nome)+'</b><br>'+esc(ST.professione||"")+'<br><small>'+dmy(ymd(new Date()))+'</small></div></div>'+
     '<table><tr><th>Misura</th><th class="r">Prima ('+dmy(f.data)+')</th><th class="r">Ultima ('+dmy(l.data)+')</th><th class="r">Differenza</th></tr>'+MK.filter(function(k){return k[0]!=="altezza"&&(f[k[0]]!=null||l[k[0]]!=null)}).map(function(k){var a=f[k[0]],b=l[k[0]],dd=a!=null&&b!=null?Math.round((b-a)*10)/10:"";
       return '<tr><td>'+k[1]+(k[2]?" ("+k[2]+")":"")+'</td><td class="r">'+(a??"–")+'</td><td class="r">'+(b??"–")+'</td><td class="r">'+(dd===""?"":(dd>0?"+":"")+dd)+'</td></tr>'}).join("")+'</table>'+
     (M.length>1?'<h3>Peso</h3>'+chartSvg(M,"peso")+(M.some(function(m){return m.massa_grassa!=null})?'<h3>Massa grassa (%)</h3>'+chartSvg(M,"massa_grassa"):""):"")+
-    '<table><tr><th>Data</th><th class="r">Peso</th><th class="r">BMI</th><th class="r">Vita</th><th class="r">Fianchi</th><th class="r">Grasso %</th></tr>'+M.map(function(m){return '<tr><td>'+dmy(m.data)+'</td><td class="r">'+(m.peso??"")+'</td><td class="r">'+(m.bmi??"")+'</td><td class="r">'+(m.vita??"")+'</td><td class="r">'+(m.fianchi??"")+'</td><td class="r">'+(m.massa_grassa??"")+'</td></tr>'}).join("")+'</table></div>';
-  window.print()}
+    '<table><tr><th>Data</th><th class="r">Peso</th><th class="r">BMI</th><th class="r">Vita</th><th class="r">Fianchi</th><th class="r">Grasso %</th></tr>'+M.map(function(m){return '<tr><td>'+dmy(m.data)+'</td><td class="r">'+(m.peso??"")+'</td><td class="r">'+(m.bmi??"")+'</td><td class="r">'+(m.vita??"")+'</td><td class="r">'+(m.fianchi??"")+'</td><td class="r">'+(m.massa_grassa??"")+'</td></tr>'}).join("")+'</table></div>'}
 
 /* ---------------- lista d'attesa ---------------- */
 var LIBERI=[];
@@ -542,9 +543,10 @@ function loadFatt(){var B=$("fBox");B.innerHTML='<div class="card glass"><span c
     var anni={};anni[anno]=1;L.forEach(function(f){anni[f.anno]=1});var sel=+($("fAnno")&&$("fAnno").value)||anno,LL=L.filter(function(f){return f.anno===sel}),ult=LL[0];
     B.innerHTML='<div class="card glass"><div class="hrow"><h2>Fatture '+sel+'</h2><select id="fAnno" class="mpick">'+Object.keys(anni).sort().reverse().map(function(a){return '<option'+(+a===sel?" selected":"")+'>'+a+'</option>'}).join("")+'</select></div>'+
       (own()?'<button class="btn block" data-new style="margin-bottom:10px">+ Nuova fattura</button>':'')+
-      (LL.length?LL.map(function(f){return '<div class="irow"><div class="chi"><b>n. '+f.numero+'/'+f.anno+' · '+esc(f.nome)+'</b><small>'+dmy(f.data)+' · '+esc(f.metodo)+(f.bollo>0?" · bollo "+eur(f.bollo):"")+'</small></div><div class="imp">'+eur(+f.importo+ +f.bollo)+'</div><button class="btn ghost small" data-pdf="'+f.id+'">PDF</button>'+(own()&&ult&&ult.id===f.id?'<button class="x" data-fdel="'+f.id+'" aria-label="Elimina">✕</button>':'')+'</div>'}).join(""):'<div class="empty">Nessuna fattura in questo anno.</div>')+'</div>';
+      (LL.length?LL.map(function(f){return '<div class="irow"><div class="chi"><b>n. '+f.numero+'/'+f.anno+' · '+esc(f.nome)+'</b><small>'+dmy(f.data)+' · '+esc(f.metodo)+(f.bollo>0?" · bollo "+eur(f.bollo):"")+'</small></div><div class="imp">'+eur(+f.importo+ +f.bollo)+'</div><button class="btn ghost small" data-pdf="'+f.id+'">PDF</button>'+(f.email?'<button class="btn ghost small" data-fmail="'+f.id+'" title="'+esc(f.email)+'">'+(f.inviata?"✓ Inviata":"✉️ Invia")+'</button>':'')+(own()&&ult&&ult.id===f.id?'<button class="x" data-fdel="'+f.id+'" aria-label="Elimina">✕</button>':'')+'</div>'}).join(""):'<div class="empty">Nessuna fattura in questo anno.</div>')+'</div>';
     $("fAnno").onchange=loadFatt;
-    B.onclick=function(e){var p=e.target.closest("[data-pdf]");if(p)fattPdf(L.filter(function(f){return f.id===p.dataset.pdf})[0]);if(e.target.closest("[data-new]"))fattForm(null);
+    B.onclick=function(e){var p=e.target.closest("[data-pdf]");if(p)fattPdf(L.filter(function(f){return f.id===p.dataset.pdf})[0]);
+      var fm=e.target.closest("[data-fmail]");if(fm){var ff=L.filter(function(f){return f.id===fm.dataset.fmail})[0];mailDoc("fattura",ff.id,ff.email,fattHtml(ff),"Fattura "+ff.numero+"-"+ff.anno+" "+ff.nome)}if(e.target.closest("[data-new]"))fattForm(null);
       var d=e.target.closest("[data-fdel]");if(d)ask("Eliminare l'ultima fattura?","Si può eliminare solo l'ultima, per non lasciare buchi nella numerazione.","Sì, elimina",function(){var f=L.filter(function(x){return x.id===d.dataset.fdel})[0];
         sb.from("fatture").delete().eq("id",f.id).then(function(r){if(r.error)return err(r.error);if(f.incasso_id)sb.from("incassi").update({fattura_num:null}).eq("id",f.incasso_id).then(function(){});toast("Fattura eliminata.");loadFatt()})})}}).catch(err)}
   if(FM==="studio"){var s=fisc(),F=[["nome","Nome e titolo"],["qualifica","Qualifica"],["indirizzo","Indirizzo dello studio"],["citta","Città"],["cap","CAP"],["prov","Provincia"],["piva","Partita IVA"],["cf","Codice fiscale"],["albo","Iscrizione all'albo"],["tel","Telefono"],["email","Email"],["iban","IBAN"]];
@@ -576,12 +578,20 @@ function fattForm(x){if(!studioOk()){toast("Prima completa i dati dello studio (
             descrizione:v("#fDe")||"Prestazione professionale di consulenza nutrizionale",importo:imp,bollo:imp>(+ST.soglia_bollo||77.47)&&box.querySelector("#fB").checked?2:0,metodo:v("#fM"),opposizione_ts:box.querySelector("#fTs").checked};
           sb.from("fatture").insert(f).select().single().then(function(r){if(r.error){if(/duplicate|unique/i.test(r.error.message)){m.className="hint err";m.textContent="La fattura n. "+n+"/"+f.anno+" esiste già.";return}return err(r.error)}
             if(x.id)sb.from("incassi").update({fattura_num:n+"/"+f.anno}).eq("id",x.id).then(function(){});close();toast("Fattura n. "+n+"/"+f.anno+" creata.");fattPdf(r.data);loadFatt()})}})})}
-function fattPdf(f){var s=fisc(),tot=+f.importo+ +f.bollo;
-  $("print").innerHTML='<div class="doc"><div class="hd"><div><h1>'+esc(s.nome||ST.nome)+'</h1><div>'+esc(s.qualifica||"")+'</div><small>'+esc([s.indirizzo,[s.cap,s.citta,s.prov?"("+s.prov+")":""].filter(Boolean).join(" ")].filter(Boolean).join(", "))+'<br>P. IVA '+esc(s.piva||"")+(s.cf?' · C.F. '+esc(s.cf):'')+(s.albo?'<br>'+esc(s.albo):'')+'<br>'+esc([s.tel,s.email].filter(Boolean).join(" · "))+'</small></div>'+
+function fattPdf(f){$("print").innerHTML=fattHtml(f);window.print()}
+function fattHtml(f){var s=fisc(),tot=+f.importo+ +f.bollo;
+  return '<div class="doc"><div class="hd"><div><h1>'+esc(s.nome||ST.nome)+'</h1><div>'+esc(s.qualifica||"")+'</div><small>'+esc([s.indirizzo,[s.cap,s.citta,s.prov?"("+s.prov+")":""].filter(Boolean).join(" ")].filter(Boolean).join(", "))+'<br>P. IVA '+esc(s.piva||"")+(s.cf?' · C.F. '+esc(s.cf):'')+(s.albo?'<br>'+esc(s.albo):'')+'<br>'+esc([s.tel,s.email].filter(Boolean).join(" · "))+'</small></div>'+
     '<div style="text-align:right"><h1 style="font-size:16pt;color:#111">Fattura n. '+f.numero+'/'+f.anno+'</h1><div>del '+dmy(f.data)+'</div></div></div>'+
     '<div><small>Spett.le</small><br><b>'+esc(f.nome)+'</b><br>'+esc([f.indirizzo,[f.cap,f.citta,f.prov?"("+f.prov+")":""].filter(Boolean).join(" ")].filter(Boolean).join(", "))+(f.cf?'<br>C.F. '+esc(f.cf):'')+'</div>'+
     '<table><tr><th>Descrizione</th><th class="r">Importo</th></tr><tr><td>'+esc(f.descrizione)+'</td><td class="r">'+eur(f.importo)+'</td></tr>'+(f.bollo>0?'<tr><td>Imposta di bollo assolta sull’originale</td><td class="r">'+eur(f.bollo)+'</td></tr>':'')+'<tr class="tot"><td>Totale</td><td class="r">'+eur(tot)+'</td></tr></table>'+
     '<div>Pagamento: '+esc(f.metodo)+(f.metodo==="Bonifico"&&s.iban?" · IBAN "+esc(s.iban):"")+'</div>'+(f.opposizione_ts?'<div><small>Il paziente si è opposto alla trasmissione dei dati al Sistema Tessera Sanitaria.</small></div>':'')+
-    '<div class="note">'+esc(s.nota1||"")+'<br>'+esc(s.nota2||"")+'</div></div>';
-  window.print()}
+    '<div class="note">'+esc(s.nota1||"")+'<br>'+esc(s.nota2||"")+'</div></div>'}
+/* PDF vero (non la stampa) da allegare alla mail */
+var H2P=null;function h2p(){return H2P||(H2P=new Promise(function(ok,ko){var sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js";sc.onload=function(){ok(window.html2pdf)};sc.onerror=function(){H2P=null;ko(new Error("Non riesco a preparare il PDF: controlla la connessione."))};document.head.appendChild(sc)}))}
+function pdfB64(html){return h2p().then(function(h){var el=document.createElement("div");el.className="pdfbox";el.innerHTML=html;document.body.appendChild(el);
+  return h().set({margin:[14,14,14,14],image:{type:"jpeg",quality:.95},html2canvas:{scale:2,backgroundColor:"#ffffff"},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"],avoid:["tr","svg","h3"]}}).from(el.firstChild).outputPdf("datauristring")
+    .then(function(u){el.remove();return u.split(",")[1]},function(e){el.remove();throw e})})}
+function mailDoc(tipo,id,email,html,file){ask(tipo==="misure"?"Mandare il report per mail?":"Mandare la fattura per mail?","A "+email+", con il PDF allegato.","Sì, manda",function(){toast("Preparo il PDF…");
+  pdfB64(html).then(function(b64){return sb.functions.invoke("mail",{body:{tipo:tipo,id:id,pdf:b64,file:file}})}).then(function(r){
+    if(r.error||!r.data||!r.data.ok)return toast("Attenzione: la mail non è partita.");toast("Mail con il PDF inviata ✉️");if(tipo==="fattura"&&FM==="emesse")loadFatt()}).catch(function(e){toast(e&&e.message?e.message:"Attenzione: la mail non è partita.")})})}
 })();
