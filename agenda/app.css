@@ -374,7 +374,7 @@ html.notte .kev.bl{background:repeating-linear-gradient(45deg,#2f2c2d 0 6px,#232
 .pdfbox .chart text{font:11px -apple-system,Helvetica,Arial,sans-serif;fill:#555}
 
 /* ---------- report misurazioni (come il PDF dell'agenda Google) ---------- */
-.rep{--rr:#B62432;--rg:#6f8f73;--rp:#f9e9ea;color:#1c1c1e;font:10pt/1.4 Inter,-apple-system,Helvetica,Arial,sans-serif}
+.rep{--rr:#B62432;--rg:#6f8f73;--rp:#f9e9ea;color:#1c1c1e;text-align:left;font:10pt/1.4 Inter,-apple-system,Helvetica,Arial,sans-serif}
 .rep .rp{padding:0}
 .rep .rhd{display:flex;align-items:center;gap:14px;background:var(--rp);border-radius:14px;padding:10px 16px}
 .rep .rhd img{width:52px;height:52px;border-radius:50%;background:#fff;padding:5px;box-sizing:border-box}
