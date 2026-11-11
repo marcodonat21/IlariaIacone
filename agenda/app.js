@@ -486,7 +486,7 @@ function miniChart(M,k){var pts=M.filter(function(m){return m[k]!=null});if(!pts
     '<text x="'+(L-6)+'" y="'+(y(hi)+4)+'" text-anchor="end">'+fm(hi)+'</text><text x="'+(L-6)+'" y="'+(y(lo)+4)+'" text-anchor="end">'+fm(lo)+'</text>';
   var d=pts.map(function(m,i){return(i?"L":"M")+x(i).toFixed(1)+" "+y(+m[k]).toFixed(1)}).join(" ");
   var step=Math.ceil(pts.length/8);
-  return '<svg class="mch" viewBox="0 0 '+W+' '+H+'">'+g+'<path d="'+d+'" fill="none" stroke="#B62432" stroke-width="2.6" stroke-linejoin="round"/>'+
+  return '<svg class="mch" viewBox="0 0 '+W+' '+H+'" font-family="Inter,Helvetica,Arial,sans-serif" font-size="12" fill="#555">'+g+'<path d="'+d+'" fill="none" stroke="#B62432" stroke-width="2.6" stroke-linejoin="round"/>'+
     pts.map(function(m,i){var s=String(m.data);return '<circle cx="'+x(i)+'" cy="'+y(+m[k])+'" r="5.5" fill="#B62432"/>'+(i%step===0||i===pts.length-1?'<text x="'+x(i)+'" y="'+(H-B+17+(i%2?14:0))+'" text-anchor="middle">'+s.slice(8,10)+'/'+s.slice(5,7)+'</text>':'')}).join("")+'</svg>'}
 
 /* ---------------- lista d'attesa ---------------- */
@@ -617,9 +617,14 @@ function fattHtml(f){var s=fisc(),tot=+f.importo+ +f.bollo;
     '<div class="note">'+esc(s.nota1||"")+'<br>'+esc(s.nota2||"")+'</div></div>'}
 /* PDF vero (non la stampa) da allegare alla mail */
 var H2P=null;function h2p(){return H2P||(H2P=new Promise(function(ok,ko){var sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js";sc.onload=function(){ok(window.html2pdf)};sc.onerror=function(){H2P=null;ko(new Error("Non riesco a preparare il PDF: controlla la connessione."))};document.head.appendChild(sc)}))}
+function toPng(src,w,h){return new Promise(function(ok){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=Math.round(w*3);c.height=Math.round(h*3);var x=c.getContext("2d");x.scale(3,3);x.drawImage(im,0,0,w,h);try{ok(c.toDataURL("image/png"))}catch(e){ok(null)}};im.onerror=function(){ok(null)};im.src=src})}
+function rast(el){var J=[].map.call(el.querySelectorAll("svg"),function(sv){var r=sv.getBoundingClientRect(),c=sv.cloneNode(true);c.setAttribute("xmlns","http://www.w3.org/2000/svg");c.setAttribute("width",r.width);c.setAttribute("height",r.height);
+    return toPng("data:image/svg+xml;charset=utf-8,"+encodeURIComponent(new XMLSerializer().serializeToString(c)),r.width,r.height).then(function(u){if(!u)return;var im=document.createElement("img");im.src=u;im.style.cssText="display:block;width:"+r.width+"px;height:"+r.height+"px";sv.parentNode.replaceChild(im,sv)})})
+  .concat([].map.call(el.querySelectorAll('img[src$=".svg"]'),function(im){var r=im.getBoundingClientRect();return toPng(im.src,r.width,r.height).then(function(u){if(u)im.src=u})}));
+  return Promise.all(J).then(function(){return new Promise(function(ok){setTimeout(ok,60)})})}
 function pdfB64(html){return h2p().then(function(h){return (document.fonts&&document.fonts.ready||Promise.resolve()).then(function(){return h})}).then(function(h){var el=document.createElement("div");el.className="pdfbox";el.innerHTML=html;document.body.appendChild(el);
-  return h().set({margin:[12,12,12,12],image:{type:"jpeg",quality:.95},html2canvas:{scale:2,backgroundColor:"#ffffff"},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"],avoid:["tr",".rcard",".rtile",".rinfo","h3"]}}).from(el.firstChild).outputPdf("datauristring")
-    .then(function(u){el.remove();return u.split(",")[1]},function(e){el.remove();throw e})})}
+  return rast(el).then(function(){return h().set({margin:[12,12,12,12],image:{type:"jpeg",quality:.95},html2canvas:{scale:2,backgroundColor:"#ffffff"},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"],avoid:["tr",".rcard",".rtile",".rinfo","h3"]}}).from(el.firstChild).outputPdf("datauristring")
+    .then(function(u){el.remove();return u.split(",")[1]},function(e){el.remove();throw e})})})}
 function mailDoc(tipo,id,email,html,file){ask(tipo==="misure"?"Mandare il report per mail?":"Mandare la fattura per mail?","A "+email+", con il PDF allegato.","Sì, manda",function(){toast("Preparo il PDF…");
   pdfB64(html).then(function(b64){return sb.functions.invoke("mail",{body:{tipo:tipo,id:id,pdf:b64,file:file}})}).then(function(r){
     if(r.error||!r.data||!r.data.ok)return toast("Attenzione: la mail non è partita.");toast("Mail con il PDF inviata ✉️");if(tipo==="fattura"&&FM==="emesse")loadFatt()}).catch(function(e){toast(e&&e.message?e.message:"Attenzione: la mail non è partita.")})})}
