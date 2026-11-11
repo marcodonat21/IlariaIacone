@@ -99,8 +99,14 @@ function altro(){var n=$("sidenav").querySelector("[data-cnt]");var c=n&&!n.hidd
 function sheet(html,bind){var bg=document.createElement("div");bg.className="sheet-bg";bg.innerHTML='<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>'+html+'</div>';document.body.appendChild(bg);
   requestAnimationFrame(function(){bg.classList.add("on")});function close(){bg.classList.remove("on");setTimeout(function(){bg.remove()},220)}
   bg.addEventListener("click",function(e){if(e.target===bg)close()});bind&&bind(bg.firstChild,close);return close}
-function ask(t,sub,ok,fn){sheet('<h2>'+esc(t)+'</h2><div class="sub">'+esc(sub)+'</div><div class="acts2"><button class="btn block" data-y>'+esc(ok)+'</button><button class="btn ghost block" data-n>No</button></div>',function(box,close){
-  box.querySelector("[data-y]").onclick=function(){close();fn()};box.querySelector("[data-n]").onclick=close})}
+function ask(t,sub,ok,fn,ckMail){sheet('<h2>'+esc(t)+'</h2><div class="sub">'+esc(sub)+'</div>'+(ckMail?ckMail:'')+'<div class="acts2"><button class="btn block" data-y>'+esc(ok)+'</button><button class="btn ghost block" data-n>No</button></div>',function(box,close){
+  box.querySelector("[data-y]").onclick=function(){var c=box.querySelector("#ckMail");close();fn(!!(c&&c.checked))};box.querySelector("[data-n]").onclick=close})}
+/* mail ai pazienti (funzione "mail" su Supabase, con Resend) */
+function ckMail(email,testo){return email?'<label class="ck" style="margin-top:12px"><input type="checkbox" id="ckMail" checked> ✉️ '+esc(testo||"Avvisa il paziente per mail")+' <small style="color:var(--muted)">('+esc(email)+')</small></label>':''}
+function mail(tipo,id,prima){return sb.functions.invoke("mail",{body:{tipo:tipo,id:id,prima:prima||null}}).then(function(r){
+  if(r.error||!r.data||!r.data.ok)return toast("Attenzione: la mail al paziente non è partita.");
+  toast(r.data.inviate?"Mail inviata al paziente ✉️":"Nessuna mail inviata (manca l'indirizzo o è già stata mandata).")}).catch(function(){toast("Attenzione: la mail al paziente non è partita.")})}
+function quandoTxt(d){return dlab(d)+" alle "+hm(d)}
 
 /* ---------------- dati comuni ---------------- */
 var SELAPP="*,paziente:pazienti(id,nome,cognome,telefono,email,cf,indirizzo,cap,citta,prov)";
@@ -108,7 +114,7 @@ function apps(da,a,tutti){var r=sb.from("appuntamenti").select(SELAPP).eq("studi
 function blocchi(da,a){return q(sb.from("blocchi").select("*").eq("studio_id",ST.id).lt("inizio",a.toISOString()).gt("fine",da.toISOString()).order("inizio"))}
 function contaConf(){if(!own())return Promise.resolve(0);return sb.from("appuntamenti").select("id",{count:"exact",head:true}).eq("studio_id",ST.id).eq("stato","da_confermare").gte("inizio",new Date().toISOString())
   .then(function(r){var n=r.count||0;$$("[data-cnt]").forEach(function(c){c.hidden=!n;c.textContent=n});return n})}
-function setStato(id,stato,msg,then){sb.from("appuntamenti").update({stato:stato}).eq("id",id).then(function(r){if(r.error)return err(r.error);toast(msg);contaConf();then&&then()})}
+function setStato(id,stato,msg,then,avvisa){sb.from("appuntamenti").update({stato:stato}).eq("id",id).then(function(r){if(r.error)return err(r.error);toast(msg);contaConf();then&&then();if(avvisa)mail(stato,id)})}
 function refresh(){go(VIEW)}
 function schedaLink(a){return location.origin+"/agenda/scheda.html?t="+a.token}
 function waRem(a){var p=a.paziente||{},s=new Date(a.inizio),oggi=ymd(new Date()),g=ymd(s),qd=g===oggi?"oggi":g===ymd(addD(new Date(),1))?"domani":dlab(s),sd=sede(a.sede_id);
@@ -163,14 +169,15 @@ function loadConf(){$("lConf").innerHTML='<div class="card glass"><span class="s
     if(!L.length){$("lConf").innerHTML='<div class="card glass"><div class="empty">Nessuna richiesta da confermare. 🎉</div></div>';return}
     $("lConf").innerHTML='<div class="card glass" style="display:flex;gap:14px;align-items:center"><div class="kpi" style="padding:0;cursor:default"><b style="color:#c0731f">'+L.length+'</b></div><div><b>richiest'+(L.length===1?"a":"e")+' da confermare</b><div class="sub">Chiama il paziente, poi premi Conferma: in calendario diventa definitivo.</div></div></div>'+
       L.map(function(a){var s=new Date(a.inizio),p=a.paziente||{},tel=p.telefono;
-      return '<div class="card glass req" data-id="'+a.id+'"><div class="when">'+hm(s)+'<small>'+esc(sedeNome(a.sede_id))+'</small></div>'+
+      return '<div class="card glass req" data-id="'+a.id+'" data-email="'+esc(p.email||"")+'"><div class="when">'+hm(s)+'<small>'+esc(sedeNome(a.sede_id))+'</small></div>'+
         '<div><b>'+esc(nomeP(p))+'</b><div class="sub" style="text-transform:capitalize">'+dlab(s)+'</div><span class="pill">'+esc(a.tipo||"")+'</span>'+
         (tel?'<div class="sub">'+esc(tel)+(p.email?' · '+esc(p.email):'')+'</div>':'')+(a.note?'<div class="sub">Note: '+esc(a.note)+'</div>':'')+'<div class="sub">Richiesta il '+dmy(a.creato)+' '+hm(new Date(a.creato))+'</div></div>'+
         '<div class="acts">'+(tel?'<a class="btn ghost small" href="'+telHref(tel)+'">📞 Chiama</a><a class="btn ghost small" target="_blank" rel="noopener" href="https://wa.me/'+waNum(tel)+'">💬 WhatsApp</a>':'')+
         '<button class="btn green small" data-ok>✓ Conferma</button><button class="btn ghost small" data-no>✕ Annulla</button></div></div>'}).join("")}).catch(err)}
 $("lConf").addEventListener("click",function(e){var c=e.target.closest(".req");if(!c)return;var id=c.dataset.id;
-  if(e.target.closest("[data-ok]"))setStato(id,"confermato","Appuntamento confermato.",loadConf);
-  if(e.target.closest("[data-no]"))ask("Annullare la richiesta?","L'orario tornerà libero anche per le prenotazioni dal sito.","Sì, annulla",function(){setStato(id,"annullato","Richiesta annullata.",loadConf)})});
+  var em=c.dataset.email||"";
+  if(e.target.closest("[data-ok]"))ask("Confermare l'appuntamento?","",'Sì, conferma',function(m){setStato(id,"confermato","Appuntamento confermato.",loadConf,m)},ckMail(em,"Manda la mail di conferma"));
+  if(e.target.closest("[data-no]"))ask("Annullare la richiesta?","L'orario tornerà libero anche per le prenotazioni dal sito.","Sì, annulla",function(m){setStato(id,"annullato","Richiesta annullata.",loadConf,m)},ckMail(em))});
 
 /* ---------------- calendario (come l'agenda Google) ---------------- */
 var KH0=7,KH1=21,KPX=56;
@@ -254,11 +261,11 @@ function moveAsk(a,g,ora,confl){var s=new Date(a.inizio),dur=Math.round((new Dat
   sheet('<h2>Spostare l’appuntamento?</h2><div class="sub"><b>'+esc(nomeP(a.paziente))+'</b> · '+esc(a.tipo||"")+'</div>'+
     '<div class="gmove"><div><small>Prima</small><b>'+dlab(s)+'</b><span>ore '+hm(s)+'</span></div><i>→</i><div class="new"><small>Dopo</small><b>'+dlab(pd(g))+'</b><span>ore '+ora+' – '+kh(kmin(ora)+dur)+'</span></div></div>'+
     '<label>Sede</label><select id="mvS">'+SEDI.map(function(x){return '<option value="'+x.id+'"'+(x.id===sd?" selected":"")+'>'+esc(x.nome)+'</option>'}).join("")+'</select>'+
-    (confl?'<div class="hint err">In quell’orario c’è già: '+esc(confl)+'</div>':'')+
+    (confl?'<div class="hint err">In quell’orario c’è già: '+esc(confl)+'</div>':'')+(a.stato!=="annullato"?ckMail(a.paziente&&a.paziente.email):'')+
     '<div class="acts2"><button class="btn ghost" data-n>Annulla</button><button class="btn" data-y>'+(confl?"Sposta comunque":"Sposta")+'</button></div>',function(box,close){
       var done=false;box.querySelector("[data-n]").onclick=function(){close()};
       box.querySelector("[data-y]").onclick=function(){var ini=new Date(g+"T"+ora),fin=new Date(ini.getTime()+dur*60000);
-        var save=function(){done=true;sb.from("appuntamenti").update({inizio:ini.toISOString(),fine:fin.toISOString(),sede_id:box.querySelector("#mvS").value,promemoria_wa:null}).eq("id",a.id).then(function(r){if(r.error)return err(r.error);close();toast("Appuntamento spostato.");loadCal()})};
+        var save=function(){done=true;var ck=box.querySelector("#ckMail"),av=ck&&ck.checked;sb.from("appuntamenti").update({inizio:ini.toISOString(),fine:fin.toISOString(),sede_id:box.querySelector("#mvS").value,promemoria_wa:null}).eq("id",a.id).then(function(r){if(r.error)return err(r.error);close();toast("Appuntamento spostato.");loadCal();if(av)mail("spostato",a.id,quandoTxt(s))})};
         if(confl)return save();
         q(sb.from("appuntamenti").select("inizio,paziente:pazienti(nome,cognome)").eq("studio_id",ST.id).neq("stato","annullato").neq("id",a.id).lt("inizio",fin.toISOString()).gt("fine",ini.toISOString())).then(function(L){
           if(!L.length)return save();done=true;close();moveAsk(a,g,ora,L.map(function(x){return hm(new Date(x.inizio))+" "+nomeP(x.paziente)}).join(", "))})};
@@ -294,14 +301,17 @@ function openApp(id){q(sb.from("appuntamenti").select("*,paziente:pazienti(*)").
     (a.stato!=="annullato"?'<div class="seg" id="pres"><button data-p="">In attesa</button><button data-p="arrivato">✓ Arrivato</button><button data-p="assente">✕ Assente</button></div>':'')+
     '<div class="acts2">'+(p.telefono?'<a class="btn ghost small" data-rem="'+a.id+'" href="'+esc(waRem(Object.assign({},a,{paziente:p})))+'" target="_blank" rel="noopener">💬 Promemoria WhatsApp</a><a class="btn ghost small" href="'+telHref(p.telefono)+'">📞 Chiama</a>':'')+
     (manca&&p.telefono?'<a class="btn ghost small" target="_blank" rel="noopener" href="https://wa.me/'+waNum(p.telefono)+'?text='+encodeURIComponent("Ciao "+(p.nome||"")+", per la fattura mi servono codice fiscale e indirizzo di residenza: puoi inserirli qui, in modo sicuro? "+schedaLink(a)+" Grazie! 🌿")+'">🧾 Chiedi i dati per la fattura</a>':'')+
+    (p.email&&a.stato!=="annullato"&&s>new Date()?'<button class="btn ghost small" data-mail="promemoria">✉️ Promemoria mail</button>':'')+
+    (manca&&p.email&&a.stato!=="annullato"?'<button class="btn ghost small" data-mail="scheda">🧾 Chiedi i dati per mail</button>':'')+
     (a.stato==="da_confermare"?'<button class="btn green small" data-s="confermato">✓ Conferma</button>':'')+
     (a.stato!=="annullato"?'<button class="btn ghost small" data-edit>✎ Modifica o sposta</button><button class="btn ghost small" data-s="annullato">Annulla appuntamento</button>':'')+
     (p.id?'<button class="btn ghost small" data-pz="'+p.id+'">Scheda paziente</button>':'')+'</div>',function(box,close){
       $$("#pres button",box).forEach(function(b){b.classList.toggle("on",(a.presenza||"")===b.dataset.p);b.onclick=function(){var v=b.dataset.p||null;
         sb.from("appuntamenti").update({presenza:v}).eq("id",a.id).then(function(r){if(r.error)return err(r.error);$$("#pres button",box).forEach(function(x){x.classList.toggle("on",x===b)});toast(v?"Segnato: "+v+".":"Presenza tolta.");refresh()})}});
       box.addEventListener("click",function(e){var b=e.target.closest("[data-s]");if(b){var v=b.dataset.s;
-          if(v==="annullato")ask("Annullare l'appuntamento?","L'orario tornerà libero anche sul sito.","Sì, annulla",function(){close();setStato(a.id,v,"Appuntamento annullato.",refresh)});
-          else{close();setStato(a.id,v,"Appuntamento confermato.",refresh)}}
+          if(v==="annullato")ask("Annullare l'appuntamento?","L'orario tornerà libero anche sul sito.","Sì, annulla",function(m){close();setStato(a.id,v,"Appuntamento annullato.",refresh,m)},ckMail(p.email));
+          else ask("Confermare l'appuntamento?","","Sì, conferma",function(m){close();setStato(a.id,v,"Appuntamento confermato.",refresh,m)},ckMail(p.email,"Manda la mail di conferma"))}
+        if(e.target.closest("[data-mail]")){var t=e.target.closest("[data-mail]").dataset.mail;ask(t==="promemoria"?"Mandare il promemoria per mail?":"Chiedere i dati per la fattura per mail?","A "+p.email,"Sì, manda",function(){mail(t,a.id)})}
         if(e.target.closest("[data-edit]")){close();editApp(a)}
         if(e.target.closest("[data-pz]"))close()})})}).catch(err)}
 function editApp(a){var s=new Date(a.inizio),dur=Math.round((new Date(a.fine)-s)/60000);
@@ -309,12 +319,12 @@ function editApp(a){var s=new Date(a.inizio),dur=Math.round((new Date(a.fine)-s)
     '<label>Tipo di visita</label><select id="eTipo">'+PRES.map(function(p){return '<option value="'+p.id+'"'+(p.id===a.prestazione_id?" selected":"")+'>'+esc(p.nome)+'</option>'}).join("")+'</select>'+
     '<div class="row keep"><div><label>Giorno</label><input type="date" id="eData" value="'+ymd(s)+'"></div><div><label>Ora</label><input type="time" id="eOra" step="300" value="'+hm(s)+'"></div></div>'+
     '<div class="row keep"><div><label>Sede</label><select id="eSede">'+SEDI.map(function(x){return '<option value="'+x.id+'"'+(x.id===a.sede_id?" selected":"")+'>'+esc(x.nome)+'</option>'}).join("")+'</select></div><div><label>Durata</label><select id="eDur">'+durOpts(dur)+'</select></div></div>'+
-    '<label>Note</label><textarea id="eNote">'+esc(a.note||"")+'</textarea><div class="hint" id="eMsg"></div><button class="btn block" id="eOk" style="margin-top:14px">Salva</button>',function(box,close){
+    '<label>Note</label><textarea id="eNote">'+esc(a.note||"")+'</textarea>'+(a.stato!=="annullato"?ckMail(a.paziente&&a.paziente.email,"Se cambiano giorno o ora, avvisa il paziente per mail"):'')+'<div class="hint" id="eMsg"></div><button class="btn block" id="eOk" style="margin-top:14px">Salva</button>',function(box,close){
       box.querySelector("#eTipo").onchange=function(){var p=PRES.filter(function(x){return x.id===this.value},this)[0];if(p){var sel=box.querySelector("#eDur");if(!$$("option",sel).some(function(o){return +o.value===p.durata_min}))sel.add(new Option(durLab(p.durata_min),p.durata_min));sel.value=String(p.durata_min)}};
       var forza=false;box.querySelector("#eOk").onclick=function(){var ini=new Date(box.querySelector("#eData").value+"T"+box.querySelector("#eOra").value),fin=new Date(ini.getTime()+(+box.querySelector("#eDur").value)*60000),m=box.querySelector("#eMsg");
         if(isNaN(ini))return toast("Scegli giorno e ora.");var p=PRES.filter(function(x){return x.id===box.querySelector("#eTipo").value})[0];
         var save=function(){sb.from("appuntamenti").update({inizio:ini.toISOString(),fine:fin.toISOString(),sede_id:box.querySelector("#eSede").value,prestazione_id:p.id,tipo:p.nome,note:box.querySelector("#eNote").value.trim()||null,promemoria_wa:null}).eq("id",a.id)
-          .then(function(r){if(r.error)return err(r.error);close();toast("Appuntamento aggiornato.");if(VIEW==="cal"){CAL.d=sod(ini)}refresh()})};
+          .then(function(r){if(r.error)return err(r.error);var ck=box.querySelector("#ckMail");close();toast("Appuntamento aggiornato.");if(VIEW==="cal"){CAL.d=sod(ini)}refresh();if(ck&&ck.checked&&ini.getTime()!==s.getTime())mail("spostato",a.id,quandoTxt(s))})};
         if(forza)return save();
         q(sb.from("appuntamenti").select("inizio,paziente:pazienti(nome,cognome)").eq("studio_id",ST.id).neq("stato","annullato").neq("id",a.id).lt("inizio",fin.toISOString()).gt("fine",ini.toISOString())).then(function(L){
           if(!L.length)return save();forza=true;m.className="hint warn";m.textContent="In quell'orario c'è già "+L.map(function(x){return nomeP(x.paziente)+" alle "+hm(new Date(x.inizio))}).join(", ")+". Premi di nuovo per salvare lo stesso.";box.querySelector("#eOk").textContent="Salva lo stesso"})}})}
