@@ -369,6 +369,46 @@ html.notte .kev.bl{background:repeating-linear-gradient(45deg,#2f2c2d 0 6px,#232
 .topr .gsearch input{padding-top:0;padding-bottom:0}
 
 /* contenitore per creare il PDF da allegare (fuori schermo) */
-.pdfbox{position:fixed;left:-10000px;top:0;width:182mm;background:#fff;color:#111;font:11pt/1.45 -apple-system,Helvetica,Arial,sans-serif}
+.pdfbox{position:fixed;left:-10000px;top:0;width:186mm;background:#fff;color:#111;font:11pt/1.45 -apple-system,Helvetica,Arial,sans-serif}
 .pdfbox .doc h3{margin:16px 0 4px;font-size:12pt}
 .pdfbox .chart text{font:11px -apple-system,Helvetica,Arial,sans-serif;fill:#555}
+
+/* ---------- report misurazioni (come il PDF dell'agenda Google) ---------- */
+.rep{--rr:#B62432;--rg:#6f8f73;--rp:#f9e9ea;color:#1c1c1e;font:10pt/1.4 Inter,-apple-system,Helvetica,Arial,sans-serif}
+.rep .rp{padding:0}
+.rep .rhd{display:flex;align-items:center;gap:14px;background:var(--rp);border-radius:14px;padding:10px 16px}
+.rep .rhd img{width:52px;height:52px;border-radius:50%;background:#fff;padding:5px;box-sizing:border-box}
+.rep .rbr b{display:block;font:700 19pt/1.1 'Playfair Display',Georgia,serif;color:var(--rr)}
+.rep .rbr span{display:block;font-size:7.5pt;letter-spacing:.28em;text-transform:uppercase;color:var(--rg);margin-top:3px}
+.rep .rdx{margin-left:auto;font-size:9pt;color:#555}.rep .rdx b{color:#1c1c1e}
+.rep .rtag{display:inline-block;margin:12px 0 4px;background:#e8f0e9;color:#3d5a41;font:600 7.5pt Inter,sans-serif;letter-spacing:.18em;padding:4px 11px;border-radius:999px}
+.rep .rt{font:700 21pt/1.2 'Playfair Display',Georgia,serif;color:#1c1c1e;margin:2px 0 10px}
+.rep .rt em,.rep .rs em{color:var(--rr);font-style:italic}
+.rep .rinfo{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 18px;border:1px solid #f0d9db;border-left:3px solid var(--rp);padding:10px 14px;margin-bottom:12px}
+.rep .rinfo small{display:block;font-size:7pt;letter-spacing:.16em;text-transform:uppercase;color:var(--rg);font-weight:600}
+.rep .rinfo div div{font-size:9.5pt}
+.rep .rs{font:700 13pt 'Playfair Display',Georgia,serif;color:var(--rr);margin:12px 0 8px}
+.rep .rs em{color:var(--rg);font-size:10.5pt;font-weight:400}
+.rep .rtiles{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.rep .rtile{background:var(--rp);border-radius:9px;padding:7px 10px}
+.rep .rtile small{display:block;font-size:7.5pt;color:#444}
+.rep .rtile b{display:block;font:700 15pt/1.25 'Playfair Display',Georgia,serif;color:var(--rr)}
+.rep .rtile b i{font:400 7.5pt Inter,sans-serif;color:#444;font-style:normal;margin-left:2px}
+.rep .rtile span{display:block;font-size:6.8pt;color:#444}
+.rep .rcharts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.rep .rcard{border:1px solid #ececef;border-radius:9px;padding:6px 8px 2px}
+.rep .rcard>b{display:block;font-size:8pt;font-weight:700;padding-left:4px}
+.rep .mch{width:100%;height:auto;display:block}
+.rep .mch text{font:12px Inter,Helvetica,Arial,sans-serif;fill:#555}
+.rep .rtab{width:100%;border-collapse:collapse;margin:4px 0 0;font-size:8.5pt;table-layout:fixed}
+.rep .rtab th:first-child{width:19mm}.rep .rtab th:last-child{width:17mm}
+.rep .rtab th{background:var(--rr);color:#fff;font-weight:600;font-size:7pt;line-height:1.2;padding:8px 1px;text-align:center;vertical-align:middle;border:0}
+.rep .rtab th small{display:block;font-weight:400;font-size:6.5pt;opacity:.85;color:#fff}
+.rep .rtab td{text-align:center;padding:11px 2px;border-bottom:1px solid #f0dfe0;vertical-align:middle}
+.rep .rtab tr:nth-child(even) td{background:#fcf6f6}
+.rep .rtab td.d{font-weight:700;white-space:nowrap;font-size:8pt}
+.rep .rtab td.d small{display:block;font-size:6.5pt;letter-spacing:.14em;color:var(--rr)}
+.rep .rtab td.n{text-align:left;font-size:7pt;color:#555;overflow-wrap:anywhere;padding-left:5px}
+.rep .rtab tr.last td{background:var(--rp);color:var(--rr);font-weight:700}
+.rep .rft{border-top:1px solid #ddd;margin-top:10px;padding-top:6px;text-align:center;font-size:7.5pt;color:#555;letter-spacing:.02em;white-space:pre}
+@media print{.rep .html2pdf__page-break{break-after:page;page-break-after:always}.rep *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}

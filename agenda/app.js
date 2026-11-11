@@ -453,12 +453,41 @@ function chartSvg(M,k){var u=(MK.filter(function(x){return x[0]===k})[0]||[])[2]
     pts.map(function(m,i){return '<circle cx="'+x(i)+'" cy="'+y(+m[k])+'" r="4.5" fill="#fff" stroke="#B62432" stroke-width="2.5"/><text x="'+x(i)+'" y="'+(y(+m[k])-10)+'" text-anchor="middle" style="font-weight:700;fill:#B62432">'+nf(m[k])+'</text>'+(i%step===0||i===pts.length-1?'<text x="'+x(i)+'" y="'+(H-12)+'" text-anchor="middle">'+dmy(m.data).slice(0,5)+'/'+String(m.data).slice(2,4)+'</text>':'')}).join("")+
     (u?'<text x="'+L+'" y="12" text-anchor="start">'+u+'</text>':'')+'</svg>'}
 function misReport(p,M){$("print").innerHTML=misHtml(p,M);window.print()}
-function misHtml(p,M){var f=M[0],l=M[M.length-1];
-  return '<div class="doc"><div class="hd"><div><h1>Le tue misurazioni</h1><div>'+esc(nomeP(p))+'</div></div><div style="text-align:right"><b>'+esc((ST.fiscale||{}).nome||ST.nome)+'</b><br>'+esc(ST.professione||"")+'<br><small>'+dmy(ymd(new Date()))+'</small></div></div>'+
-    '<table><tr><th>Misura</th><th class="r">Prima ('+dmy(f.data)+')</th><th class="r">Ultima ('+dmy(l.data)+')</th><th class="r">Differenza</th></tr>'+MK.filter(function(k){return k[0]!=="altezza"&&(f[k[0]]!=null||l[k[0]]!=null)}).map(function(k){var a=f[k[0]],b=l[k[0]],dd=a!=null&&b!=null?Math.round((b-a)*10)/10:"";
-      return '<tr><td>'+k[1]+(k[2]?" ("+k[2]+")":"")+'</td><td class="r">'+(a??"–")+'</td><td class="r">'+(b??"–")+'</td><td class="r">'+(dd===""?"":(dd>0?"+":"")+dd)+'</td></tr>'}).join("")+'</table>'+
-    (M.length>1?'<h3>Peso</h3>'+chartSvg(M,"peso")+(M.some(function(m){return m.massa_grassa!=null})?'<h3>Massa grassa (%)</h3>'+chartSvg(M,"massa_grassa"):""):"")+
-    '<table><tr><th>Data</th><th class="r">Peso</th><th class="r">BMI</th><th class="r">Vita</th><th class="r">Fianchi</th><th class="r">Grasso %</th></tr>'+M.map(function(m){return '<tr><td>'+dmy(m.data)+'</td><td class="r">'+(m.peso??"")+'</td><td class="r">'+(m.bmi??"")+'</td><td class="r">'+(m.vita??"")+'</td><td class="r">'+(m.fianchi??"")+'</td><td class="r">'+(m.massa_grassa??"")+'</td></tr>'}).join("")+'</table></div>'}
+function misHtml(p,M){var f=M[0],l=M[M.length-1],X=ST.fiscale||{};
+  var LB={vita:"Circonferenza vita",fianchi:"Circonferenza fianchi"},lab=function(k){return LB[k[0]]||k[1]};
+  var ks=MK.filter(function(k){return k[0]!=="altezza"&&M.some(function(m){return m[k[0]]!=null})});
+  var lastV=function(k){for(var i=M.length-1;i>=0;i--)if(M[i][k]!=null)return M[i][k];return null},firstV=function(k){for(var i=0;i<M.length;i++)if(M[i][k]!=null)return M[i][k];return null};
+  var nm=function(v){return v==null?"–":(Math.round(v*10)/10).toLocaleString("it-IT",{maximumFractionDigits:1,useGrouping:Math.abs(v)>=10000})};
+  var addr=p.indirizzo?p.indirizzo+(p.citta?", "+(p.cap?p.cap+" ":"")+p.citta+(p.prov?" ("+p.prov+")":""):""):"";
+  var wa=ST.whatsapp||X.tel||"",sito=(ST.sito||"www.nutrizionistaiacone.it").replace(/^https?:\/\//,"").replace(/\/$/,"");
+  var head=function(dx){return '<div class="rhd"><img src="/img/logo-i.svg" alt=""><div class="rbr"><b>'+esc(ST.nome||"Ilaria Iacone")+'</b><span>'+esc(ST.professione||X.qualifica||"")+'</span></div><div class="rdx">'+dx+'</div></div>'};
+  var cell=function(t,v){return '<div><small>'+t+'</small><div>'+esc(v||"–")+'</div></div>'};
+  var tiles=ks.map(function(k){var a=firstV(k[0]),b=lastV(k[0]),d=a!=null&&b!=null&&M.length>1?Math.round((b-a)*10)/10:null;
+    return '<div class="rtile"><small>'+lab(k)+'</small><b>'+nm(b)+(k[2]?'<i>'+k[2]+'</i>':'')+'</b><span>'+(d==null?"&nbsp;":(d>0?"+":d<0?"-":"±")+nm(Math.abs(d))+(k[2]?" "+k[2]:"")+" dalla prima visita")+'</span></div>'}).join("");
+  var charts=M.length>1?ks.map(function(k){return '<div class="rcard"><b>'+lab(k)+(k[2]?" ("+k[2]+")":"")+'</b>'+miniChart(M,k[0])+'</div>'}).join(""):"";
+  var th=ks.map(function(k){return '<th>'+({vita:"Circ.<br>vita",fianchi:"Circ.<br>fianchi"}[k[0]]||lab(k).replace(/ /g,"<br>"))+(k[2]?'<small>'+k[2]+'</small>':'')+'</th>'}).join("");
+  var rows=M.slice().reverse().map(function(m,i){return '<tr'+(i===0?' class="last"':'')+'><td class="d">'+dmy(m.data)+(i===0?'<small>ULTIMA</small>':'')+'</td>'+ks.map(function(k){return '<td>'+(m[k[0]]==null?"":nm(m[k[0]]))+'</td>'}).join("")+'<td class="n">'+esc(m.note||"")+'</td></tr>'}).join("");
+  return '<div class="rep"><div class="rp">'+head('Riepilogo al <b>'+dmy(l.data)+'</b>')+
+    '<span class="rtag">I TUOI PROGRESSI</span><h1 class="rt">Le misurazioni di <em>'+esc(nomeP(p))+'</em></h1>'+
+    '<div class="rinfo">'+cell("Paziente",nomeP(p))+cell("Codice fiscale",p.cf)+cell("Telefono",p.telefono)+cell("Indirizzo",addr)+cell("Email",p.email)+cell("Visite",M.length+(M.length>1?" · dal "+dmy(f.data)+" al "+dmy(l.data):" · "+dmy(f.data)))+'</div>'+
+    '<h2 class="rs">Ultima misurazione <em>· '+dmy(l.data)+'</em></h2><div class="rtiles">'+tiles+'</div>'+
+    (charts?'<h2 class="rs">Il tuo andamento <em>· visita dopo visita</em></h2><div class="rcharts">'+charts+'</div>':'')+'</div>'+
+    '<div class="html2pdf__page-break"></div>'+
+    '<div class="rp">'+head('Pagina 2 · Storico completo')+'<span class="rtag">STORICO</span><h1 class="rt">Tutte le <em>misurazioni</em></h1>'+
+    '<table class="rtab"><thead><tr><th>Data</th>'+th+'<th>Note</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    '<div class="rft">'+esc([sito,wa?"WhatsApp "+wa:"","Documento riservato al paziente"].filter(Boolean).join("  ·  "))+'</div></div></div>'}
+function miniChart(M,k){var pts=M.filter(function(m){return m[k]!=null});if(!pts.length)return "";
+  var W=300,H=136,L=44,R=14,T=14,B=38,v=pts.map(function(m){return +m[k]}),mn=Math.min.apply(0,v),mx=Math.max.apply(0,v);
+  var span=(mx-mn)||Math.abs(mx)*.1||1,raw=span*1.2,mag=Math.pow(10,Math.floor(Math.log10(raw))),st=[1,2,2.5,5,10].map(function(s){return s*mag}).filter(function(s){return s>=raw/2})[0]||mag*10;
+  var lo=Math.floor((mn-span*.6)/st)*st,hi=Math.ceil((mx+span*.6)/st)*st;if(lo<0&&mn>=0)lo=0;if(hi===lo)hi=lo+st;
+  var x=function(i){return pts.length===1?(L+W-R)/2:L+8+i*(W-L-R-16)/(pts.length-1)},y=function(z){return T+(hi-z)*(H-T-B)/(hi-lo)};
+  var fm=function(z){return (Math.round(z*10)/10).toLocaleString("it-IT")};
+  var g='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(hi)+'" y2="'+y(hi)+'" stroke="#e3e3e6"/><line x1="'+L+'" x2="'+(W-R)+'" y1="'+y((hi+lo)/2)+'" y2="'+y((hi+lo)/2)+'" stroke="#efeff1"/><line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(lo)+'" y2="'+y(lo)+'" stroke="#bdbdc2"/>'+
+    '<text x="'+(L-6)+'" y="'+(y(hi)+4)+'" text-anchor="end">'+fm(hi)+'</text><text x="'+(L-6)+'" y="'+(y(lo)+4)+'" text-anchor="end">'+fm(lo)+'</text>';
+  var d=pts.map(function(m,i){return(i?"L":"M")+x(i).toFixed(1)+" "+y(+m[k]).toFixed(1)}).join(" ");
+  var step=Math.ceil(pts.length/8);
+  return '<svg class="mch" viewBox="0 0 '+W+' '+H+'">'+g+'<path d="'+d+'" fill="none" stroke="#B62432" stroke-width="2.6" stroke-linejoin="round"/>'+
+    pts.map(function(m,i){var s=String(m.data);return '<circle cx="'+x(i)+'" cy="'+y(+m[k])+'" r="5.5" fill="#B62432"/>'+(i%step===0||i===pts.length-1?'<text x="'+x(i)+'" y="'+(H-B+17+(i%2?14:0))+'" text-anchor="middle">'+s.slice(8,10)+'/'+s.slice(5,7)+'</text>':'')}).join("")+'</svg>'}
 
 /* ---------------- lista d'attesa ---------------- */
 var LIBERI=[];
@@ -588,8 +617,8 @@ function fattHtml(f){var s=fisc(),tot=+f.importo+ +f.bollo;
     '<div class="note">'+esc(s.nota1||"")+'<br>'+esc(s.nota2||"")+'</div></div>'}
 /* PDF vero (non la stampa) da allegare alla mail */
 var H2P=null;function h2p(){return H2P||(H2P=new Promise(function(ok,ko){var sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js";sc.onload=function(){ok(window.html2pdf)};sc.onerror=function(){H2P=null;ko(new Error("Non riesco a preparare il PDF: controlla la connessione."))};document.head.appendChild(sc)}))}
-function pdfB64(html){return h2p().then(function(h){var el=document.createElement("div");el.className="pdfbox";el.innerHTML=html;document.body.appendChild(el);
-  return h().set({margin:[14,14,14,14],image:{type:"jpeg",quality:.95},html2canvas:{scale:2,backgroundColor:"#ffffff"},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"],avoid:["tr","svg","h3"]}}).from(el.firstChild).outputPdf("datauristring")
+function pdfB64(html){return h2p().then(function(h){return (document.fonts&&document.fonts.ready||Promise.resolve()).then(function(){return h})}).then(function(h){var el=document.createElement("div");el.className="pdfbox";el.innerHTML=html;document.body.appendChild(el);
+  return h().set({margin:[12,12,12,12],image:{type:"jpeg",quality:.95},html2canvas:{scale:2,backgroundColor:"#ffffff"},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"],avoid:["tr",".rcard",".rtile",".rinfo","h3"]}}).from(el.firstChild).outputPdf("datauristring")
     .then(function(u){el.remove();return u.split(",")[1]},function(e){el.remove();throw e})})}
 function mailDoc(tipo,id,email,html,file){ask(tipo==="misure"?"Mandare il report per mail?":"Mandare la fattura per mail?","A "+email+", con il PDF allegato.","Sì, manda",function(){toast("Preparo il PDF…");
   pdfB64(html).then(function(b64){return sb.functions.invoke("mail",{body:{tipo:tipo,id:id,pdf:b64,file:file}})}).then(function(r){
