@@ -92,8 +92,19 @@ function go(v){if(v==="altro")return altro();if(allowed().indexOf(v)<0)v=allowed
 document.addEventListener("click",function(e){var b=e.target.closest("[data-v],[data-go]");if(!b||b.closest(".sheet"))return;e.preventDefault();go(b.dataset.v||b.dataset.go)});
 function altro(){var n=$("sidenav").querySelector("[data-cnt]");var c=n&&!n.hidden?n.textContent:"";
   sheet('<h2>Menu</h2>'+VIEWS.map(function(v){return '<button class="nav'+(VIEW===v[0]?" on":"")+'" data-m="'+v[0]+'">'+svg(v[0])+v[1]+(v[0]==="conf"&&c?'<span class="cnt">'+c+'</span>':'')+'</button>'}).join("")+
-    '<div style="border-top:1px solid var(--line);margin-top:10px;padding-top:10px;display:flex;flex-direction:column;gap:6px"><button class="nav notte-t">🌙 Modalità notte: '+(document.documentElement.classList.contains("notte")?"accesa":"spenta")+'</button><a class="nav" href="https://www.nutrizionistaiacone.it" target="_blank" rel="noopener">Sito web ↗</a><button class="nav" data-out>Esci</button></div>',
-    function(box,close){box.addEventListener("click",function(e){var b=e.target.closest("[data-m]");if(b){close();go(b.dataset.m)}if(e.target.closest("[data-out]"))$("logout").click()})})}
+    '<div style="border-top:1px solid var(--line);margin-top:10px;padding-top:10px;display:flex;flex-direction:column;gap:6px">'+(RUOLO==="titolare"?'<button class="nav" data-cal>📅 Calendario su iPhone</button>':'')+'<button class="nav notte-t">🌙 Modalità notte: '+(document.documentElement.classList.contains("notte")?"accesa":"spenta")+'</button><a class="nav" href="https://www.nutrizionistaiacone.it" target="_blank" rel="noopener">Sito web ↗</a><button class="nav" data-out>Esci</button></div>',
+    function(box,close){box.addEventListener("click",function(e){var b=e.target.closest("[data-m]");if(b){close();go(b.dataset.m)}if(e.target.closest("[data-out]"))$("logout").click();if(e.target.closest("[data-cal]")){close();calIphone()}})})}
+/* calendario in abbonamento: l'iPhone legge gli appuntamenti da un link privato (solo lettura) */
+function calIphone(nuovo){sb.rpc("calendario_link",{p_studio:ST.id,p_nuovo:!!nuovo}).then(function(r){if(r.error)return err(r.error);
+  var https=location.origin+"/cal/"+r.data+".ics",web=https.replace(/^https:/,"webcal:");
+  sheet('<h2>📅 Calendario su iPhone</h2><div class="sub">Gli appuntamenti dell’agenda compaiono nel Calendario dell’iPhone (e del Mac) e si aggiornano da soli, con qualche minuto di ritardo. Da lì si vedono soltanto: per spostare o confermare usa l’agenda.</div>'+
+    '<div class="acts2" style="margin-top:14px"><a class="btn" href="'+web+'">Aggiungi al Calendario</a><button class="btn ghost" data-cp>Copia il link</button></div>'+
+    '<p class="sub" style="font-size:.85rem;margin-top:12px">Sull’iPhone: apri questa pagina e tocca <b>Aggiungi al Calendario</b> → <b>Abbonati</b>. Oppure Impostazioni → Calendario → Account → Aggiungi account → Altro → <b>Aggiungi calendario in abbonamento</b> e incolla il link.</p>'+
+    '<input readonly value="'+esc(https)+'" style="font-size:.8rem;margin-top:6px" onclick="this.select()">'+
+    '<p class="sub" style="font-size:.8rem;margin-top:12px">Il link è personale: chi lo ha vede gli appuntamenti. Se lo hai condiviso per errore, cambialo: il vecchio smetterà di funzionare.</p>'+
+    '<div class="acts2"><button class="btn ghost small" data-new>Cambia link</button></div>',
+    function(box,close){box.querySelector("[data-cp]").onclick=function(){(navigator.clipboard?navigator.clipboard.writeText(https):Promise.reject()).then(function(){toast("Link copiato.")},function(){toast("Tieni premuto sul link qui sotto per copiarlo.")})};
+      box.querySelector("[data-new]").onclick=function(){ask("Cambiare il link del calendario?","Il link attuale smetterà di funzionare: andrà aggiunto di nuovo sui telefoni.","Sì, cambia",function(){close();calIphone(true)})}})})}
 
 /* ---------------- fogli e conferme ---------------- */
 function sheet(html,bind){var bg=document.createElement("div");bg.className="sheet-bg";bg.innerHTML='<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>'+html+'</div>';document.body.appendChild(bg);
