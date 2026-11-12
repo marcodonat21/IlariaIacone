@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#fdf6f6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Agenda">
+<link rel="icon" href="/img/logo-i.svg">
+<link rel="apple-touch-icon" href="/img/logo-i.svg">
+<title>Agenda di Ilaria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap">
+
+<link rel="stylesheet" href="app.css?v=12">
+</head>
+<body>
+<div class="test" id="testbar">Anteprima delle modifiche · l’agenda vera è su www.nutrizionistaiacone.it/agenda</div>
+<script>if(!/\.pages\.dev$/.test(location.hostname)){document.documentElement.classList.add("notest");document.getElementById("testbar").remove()}</script>
+
+<!-- ============ accesso ============ -->
+<section id="login" hidden>
+  <div class="card glass">
+    <img src="/img/logo-i.svg" alt="">
+    <h1>Agenda</h1>
+    <div class="sub">Accedi con la tua email: ti mando un link per entrare, senza password.</div>
+    <form id="lform">
+      <label for="lmail">Email</label>
+      <input id="lmail" type="email" autocomplete="email" required placeholder="nome@esempio.it">
+      <button class="btn block" id="lbtn">Mandami il link</button>
+      <div class="hint" id="lmsg"></div>
+    </form>
+  </div>
+</section>
+
+<!-- ============ app ============ -->
+<div class="app" id="app" hidden>
+  <aside class="side">
+    <div class="brand"><img src="/img/logo-i.svg" alt=""><div><b id="snome">Agenda</b><small id="sprof"></small></div></div>
+    <nav id="sidenav"></nav>
+    <div class="foot">
+      <button id="notte" class="notte-t">🌙 Modalità notte: spenta</button>
+      <a href="https://www.nutrizionistaiacone.it" target="_blank" rel="noopener">Sito web ↗</a>
+      <span id="umail"></span><button id="logout">Esci</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div><h1 id="title">Panoramica</h1><div class="sub" id="today"></div></div>
+      <div class="topr">
+        <div class="search gsearch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="gq" placeholder="Cerca paziente o appuntamento…" autocomplete="off"></div>
+        <button class="btn tnew" data-go="nuovo">+ Nuovo appuntamento</button>
+      </div>
+    </div>
+    <div class="glass card gres" id="gres" hidden></div>
+
+    <!-- panoramica -->
+    <section data-view="home">
+      <div class="kpis">
+        <div class="kpi glass red" data-go="cal"><small>Oggi</small><b id="kOggi">–</b><span>appuntamenti</span></div>
+        <div class="kpi glass orange" data-go="conf"><small>Da confermare</small><b id="kConf">–</b><span>richieste dal sito</span></div>
+        <div class="kpi glass" data-go="cal"><small>Prossimi 7 giorni</small><b id="kSett">–</b><span>appuntamenti</span></div>
+        <div class="kpi glass green" data-go="inc"><small>Incassi del mese</small><b id="kInc" class="blurred">–</b><span id="kIncN">&nbsp;</span><button class="eye" id="kEye" aria-label="Mostra o nascondi">👁</button></div>
+      </div>
+      <div class="card glass" id="remCard" hidden><h2>Promemoria per domani</h2><div class="sub" style="margin:-6px 0 8px">Tocca 💬 per mandare il promemoria su WhatsApp: chi l'ha già ricevuto viene segnato.</div><div id="lRem"></div></div>
+      <div class="card glass"><h2>Oggi</h2><div id="lOggi"><span class="spin"></span></div></div>
+      <div class="card glass"><h2>Prossimi giorni</h2><div id="lProssimi"><span class="spin"></span></div></div>
+    </section>
+
+    <!-- da confermare -->
+    <section data-view="conf" hidden><div id="lConf"></div></section>
+
+    <!-- promemoria -->
+    <section data-view="prom" hidden>
+      <div class="card glass"><div class="sub" style="margin:0 0 10px">Gli appuntamenti da domani in poi. Tocca <b>💬 WhatsApp</b>: si apre la chat con il messaggio già scritto (nome, giorno, ora e sede), devi solo premere invio. Chi l’ha già ricevuto viene segnato.</div>
+        <div class="tabs2" id="pmGiorni"><button data-g="1">Domani</button><button data-g="3">3 giorni</button><button data-g="7">7 giorni</button><button data-g="14">14 giorni</button></div>
+        <label class="ck"><input type="checkbox" id="pmSolo"> Mostra solo quelli ancora da avvisare</label>
+        <div class="sub" id="pmConta" style="margin-top:6px"></div></div>
+      <div id="pmBox"></div>
+    </section>
+
+    <!-- calendario -->
+    <section data-view="cal" hidden>
+      <div class="kwrap">
+        <aside class="kside">
+          <div class="card glass kmini">
+            <div class="mhead"><button class="mnav" id="kPrevM" aria-label="Mese precedente">‹</button><b id="kMese"></b><button class="mnav" id="kNextM" aria-label="Mese successivo">›</button></div>
+            <div class="kgrid kdow"><span>Lun</span><span>Mar</span><span>Mer</span><span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span></div>
+            <div class="kgrid" id="kGrid"></div>
+            <p class="knote"><span class="dot"></span>confermati &nbsp;<span class="dot da"></span>da confermare · tocca un giorno per vedere le prenotazioni</p>
+          </div>
+          <div class="card glass kside2">
+            <button class="klink" id="cBlock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18M9.5 14.5l5 5M14.5 14.5l-5 5"/></svg>Imposta blocchi e ferie</button>
+            <button class="klink" data-go="attesa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M7 2c0 5 5 6 5 10s-5 5-5 10M17 2c0 5-5 6-5 10s5 5 5 10"/></svg>Lista d’attesa <span class="cnt" id="kWcnt" hidden></span></button>
+            <div class="kst">Prestazioni</div>
+            <div class="kleg" id="kLeg">
+              <label><input type="checkbox" data-t="t1"><i class="t1"></i>Prime visite</label>
+              <label><input type="checkbox" data-t="t2"><i class="t2"></i>Visite di controllo</label>
+              <label><input type="checkbox" data-t="t3"><i class="t3"></i>Nutrizione sportiva</label>
+              <label><input type="checkbox" data-t="t4"><i class="t4"></i>Solo esame (adipometria, bioimpedenziometria)</label>
+            </div>
+            <div class="kleg2"><span><i class="bl"></i>Orari bloccati</span><span><i class="da"></i>Da confermare</span><span><i class="ho"></i>Orari di ricevimento</span></div>
+          </div>
+        </aside>
+        <div class="kmain">
+          <div class="kbar"><button class="kb" id="cToday">Oggi</button><button class="kb kn" id="cPrev" aria-label="Indietro">‹</button><button class="kb kn" id="cNext" aria-label="Avanti">›</button><b id="cLab"></b>
+            <input id="kQ" placeholder="Cerca il paziente…" autocomplete="off"><div class="kviews" id="cMode"><button data-m="giorno">Giorno</button><button data-m="sett">Settimana</button></div></div>
+          <div class="kwk glass" id="kWeek"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- nuovo appuntamento -->
+    <section data-view="nuovo" hidden>
+      <div class="card glass">
+        <h2><span class="num">1</span>Paziente</h2>
+        <div id="npChosen" hidden class="chosen"><div class="av" id="npAv"></div><b id="npNome"></b><button class="btn ghost small" id="npChange">Cambia</button></div>
+        <div id="npSearch">
+          <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="npQ" placeholder="Cerca per nome o telefono" autocomplete="off"></div>
+          <div class="list-pick" id="npList" hidden></div>
+          <button class="btn ghost small" id="npNew" style="margin-top:8px">+ Nuovo paziente</button>
+          <div id="npForm" hidden>
+            <div class="row"><div><label>Nome *</label><input id="npN"></div><div><label>Cognome</label><input id="npC"></div></div>
+            <div class="row"><div><label>Cellulare *</label><input id="npT" type="tel"></div><div><label>Email</label><input id="npE" type="email"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card glass">
+        <h2><span class="num">2</span>Appuntamento</h2>
+        <label>Tipo di visita</label><select id="naTipo"></select>
+        <div class="row"><div><label>Giorno</label><input id="naData" type="date"></div><div><label>Ora</label><input id="naOra" type="time" step="300"></div></div>
+        <div class="row"><div><label>Sede</label><select id="naSede"></select></div><div><label>Durata</label><select id="naDur"></select></div></div>
+        <label>Note</label><textarea id="naNote" placeholder="Facoltative"></textarea>
+        <div class="hint" id="naHint"></div>
+        <button class="btn block" id="naSave" style="margin-top:14px">Aggiungi in agenda</button>
+      </div>
+    </section>
+
+    <!-- pazienti -->
+    <section data-view="paz" hidden>
+      <div class="pbar"><div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="pQ" placeholder="Cerca paziente" autocomplete="off"></div>
+        <button class="btn small" id="pAdd">+ Paziente</button><button class="btn ghost small" id="pSel">Seleziona</button></div>
+      <div class="selbar glass" id="pSelBar" hidden><b id="pSelN">0 selezionati</b><button id="pSelAll">Tutti</button><button id="pSelDel" class="red">Elimina</button><button id="pSelEnd">Fine</button></div>
+      <div class="pgrid">
+        <div class="card glass plist"><div id="lPaz"><span class="spin"></span></div></div>
+        <div class="pdet" id="pDet"><div class="card glass pempty"><div class="av" style="width:56px;height:56px;margin:0 auto 10px">👤</div><b>Scegli un paziente</b><div class="sub">Qui vedi dati, misurazioni con i grafici, appuntamenti e pagamenti.</div></div></div>
+      </div>
+    </section>
+
+    <!-- lista d'attesa -->
+    <section data-view="attesa" hidden>
+      <div class="card glass"><h2>Primi posti liberi</h2><div class="sub" style="margin:-6px 0 10px">Quando si libera un posto, scrivi su WhatsApp a chi è in lista: il messaggio è già pronto.</div><div class="chips" id="wLiberi"><span class="spin"></span></div></div>
+      <div class="card glass"><div class="hrow"><h2>In lista d'attesa</h2><button class="btn small" id="wAdd">+ Aggiungi</button></div><div id="lAttesa"><span class="spin"></span></div></div>
+    </section>
+
+    <!-- incassi -->
+    <section data-view="inc" hidden>
+      <div class="card glass">
+        <div class="hrow"><h2>Incassi</h2><input type="month" id="iMese" class="mpick"></div>
+        <div class="kpis k3"><div class="kpi glass green"><small>Totale</small><b id="iTot">–</b></div><div class="kpi glass"><small>POS</small><b id="iPos">–</b></div><div class="kpi glass"><small>Contanti e altro</small><b id="iAltro">–</b></div></div>
+        <button class="btn block" id="iAdd">+ Registra un incasso</button>
+      </div>
+      <div class="card glass" id="iOggiCard" hidden><h2>Pazienti di oggi</h2><div class="chips" id="iOggi"></div></div>
+      <div class="card glass"><div id="lInc"><span class="spin"></span></div></div>
+    </section>
+
+    <!-- statistiche -->
+    <section data-view="stat" hidden><div id="stBox"><div class="card glass"><span class="spin"></span></div></div></section>
+
+    <!-- fatture -->
+    <section data-view="fatt" hidden>
+      <div class="seg" id="fMode"><button data-f="da" class="on">Da fatturare</button><button data-f="emesse">Fatture emesse</button><button data-f="studio" data-own>Dati studio</button></div>
+      <div id="fBox"><div class="card glass"><span class="spin"></span></div></div>
+    </section>
+  </main>
+
+  <nav class="bnav" aria-label="Navigazione">
+    <button data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</button>
+    <button data-v="cal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Calendario</button>
+    <button data-v="nuovo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Nuovo</button>
+    <button data-v="paz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>Pazienti</button>
+    <button data-v="altro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Altro<span class="cnt" data-cnt hidden></span></button>
+  </nav>
+</div>
+
+<div id="print"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script src="app.js?v=14"></script>
+</body>
+</html>

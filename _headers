@@ -2,3 +2,10 @@
   Cache-Control: no-cache, no-store, must-revalidate
 /fatture
   Cache-Control: no-cache, no-store, must-revalidate
+
+/agenda/*
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Robots-Tag: noindex, nofollow
+/agenda
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Robots-Tag: noindex, nofollow
