@@ -163,7 +163,11 @@ function cerca(s){s=s.replace(/[%,()*]/g," ").trim();var parts=s.split(/\s+/),f;
 
 /* ---------------- panoramica ---------------- */
 var EYE=false;try{EYE=localStorage.getItem("eye")==="1"}catch(e){}
-$("kEye").onclick=function(e){e.stopPropagation();EYE=!EYE;try{localStorage.setItem("eye",EYE?"1":"0")}catch(x){}$("kInc").classList.toggle("blurred",!EYE)};
+var EYE_ON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  EYE_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-2.3 3.2M6.6 6.6C3.9 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="M3 3l18 18"/></svg>';
+function eyeIcon(){var b=$("kEye");b.innerHTML=EYE?EYE_OFF:EYE_ON;b.setAttribute("aria-label",EYE?"Nascondi gli importi":"Mostra gli importi");b.title=b.getAttribute("aria-label")}
+eyeIcon();
+$("kEye").onclick=function(e){e.stopPropagation();EYE=!EYE;try{localStorage.setItem("eye",EYE?"1":"0")}catch(x){}$("kInc").classList.toggle("blurred",!EYE);eyeIcon()};
 function loadHome(){var oggi=sod(new Date()),dom=ymd(addD(oggi,1));$("kInc").classList.toggle("blurred",!EYE);
   apps(oggi,addD(oggi,8)).then(function(L){var t=ymd(oggi);
     var o=L.filter(function(a){return ymd(new Date(a.inizio))===t}),pr=L.filter(function(a){return ymd(new Date(a.inizio))!==t}),dm=L.filter(function(a){return ymd(new Date(a.inizio))===dom&&a.paziente&&a.paziente.telefono});
@@ -174,7 +178,7 @@ function loadHome(){var oggi=sod(new Date()),dom=ymd(addD(oggi,1));$("kInc").cla
     $("lRem").innerHTML=(dm.length?'<div class="sub" style="margin-bottom:6px">Inviati '+fatti+' su '+dm.length+'</div>':'')+dm.map(rowHtml).join("")}).catch(err);
   contaConf().then(function(n){$("kConf").textContent=n});
   var m0=new Date(oggi.getFullYear(),oggi.getMonth(),1);
-  q(sb.from("incassi").select("importo").eq("studio_id",ST.id).gte("data",ymd(m0))).then(function(L){var s=0;L.forEach(function(x){s+=+x.importo});$("kInc").textContent=eur(s);$("kIncN").textContent=L.length+" incassi registrati"})}
+  q(sb.from("incassi").select("importo").eq("studio_id",ST.id).gte("data",ymd(m0))).then(function(L){var s=0;L.forEach(function(x){s+=+x.importo});$("kInc").textContent=eur(s);$("kIncN").textContent=L.length+(L.length===1?" incasso registrato":" incassi registrati")})}
 
 /* ---------------- promemoria: appuntamenti da domani in poi, con WhatsApp e telefono ---------------- */
 var PROM={g:3,solo:false};

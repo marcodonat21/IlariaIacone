@@ -102,7 +102,9 @@ textarea{min-height:80px;resize:vertical}
 .kpi span{color:var(--muted);font-size:.8rem}
 .kpi.red b{color:var(--red)}.kpi.orange b{color:#c0731f}.kpi.green b{color:#4f7a56}
 html.notte .kpi.green b{color:#93b597}
-.kpi .eye{position:absolute;right:10px;top:10px;border:0;background:var(--fill);border-radius:50%;width:30px;height:30px;cursor:pointer}
+.kpi .eye{position:absolute;right:12px;top:12px;border:0;background:transparent;width:30px;height:30px;padding:5px;border-radius:50%;cursor:pointer;color:var(--muted);display:grid;place-items:center;transition:background .2s,color .2s}
+.kpi .eye:hover{background:var(--fill);color:var(--text)}
+.kpi .eye svg{width:19px;height:19px;display:block}
 .blurred{filter:blur(7px);user-select:none}
 
 /* ---------- liste appuntamenti ---------- */

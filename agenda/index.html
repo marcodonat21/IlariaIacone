@@ -12,7 +12,7 @@
 <title>Agenda di Ilaria</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap">
 
-<link rel="stylesheet" href="app.css?v=12">
+<link rel="stylesheet" href="app.css?v=13">
 </head>
 <body>
 <div class="test" id="testbar">Anteprima delle modifiche · l’agenda vera è su www.nutrizionistaiacone.it/agenda</div>
@@ -61,7 +61,7 @@
         <div class="kpi glass red" data-go="cal"><small>Oggi</small><b id="kOggi">–</b><span>appuntamenti</span></div>
         <div class="kpi glass orange" data-go="conf"><small>Da confermare</small><b id="kConf">–</b><span>richieste dal sito</span></div>
         <div class="kpi glass" data-go="cal"><small>Prossimi 7 giorni</small><b id="kSett">–</b><span>appuntamenti</span></div>
-        <div class="kpi glass green" data-go="inc"><small>Incassi del mese</small><b id="kInc" class="blurred">–</b><span id="kIncN">&nbsp;</span><button class="eye" id="kEye" aria-label="Mostra o nascondi">👁</button></div>
+        <div class="kpi glass green" data-go="inc"><small>Incassi del mese</small><b id="kInc" class="blurred">–</b><span id="kIncN">&nbsp;</span><button class="eye" id="kEye" aria-label="Mostra gli importi"></button></div>
       </div>
       <div class="card glass" id="remCard" hidden><h2>Promemoria per domani</h2><div class="sub" style="margin:-6px 0 8px">Tocca 💬 per mandare il promemoria su WhatsApp: chi l'ha già ricevuto viene segnato.</div><div id="lRem"></div></div>
       <div class="card glass"><h2>Oggi</h2><div id="lOggi"><span class="spin"></span></div></div>
@@ -186,6 +186,6 @@
 
 <div id="print"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
-<script src="app.js?v=14"></script>
+<script src="app.js?v=15"></script>
 </body>
 </html>
