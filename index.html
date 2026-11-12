@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ilaria Iacone | Biologa Nutrizionista a Napoli e Portici</title>
 <meta name="description" content="Ilaria Iacone, biologa nutrizionista a Portici, Volla e Napoli. Percorsi alimentari personalizzati: prenota online la tua visita.">
-<meta name="theme-color" content="#B62432"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#B62432" media="(max-width: 700px)"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="it_IT">
 <meta property="og:site_name" content="Ilaria Iacone · Biologa Nutrizionista">
@@ -320,9 +320,8 @@ body{min-height:100vh}
 /* iPhone (Safari 26 colora la zona dell'orario con la barra fissa in alto) */
 @media(max-width:700px){header{position:fixed!important;left:0;right:0;top:0!important}body{padding-top:calc(58px + env(safe-area-inset-top,0px))}}
 /* Safari 26: la zona dell'orario prende il colore della pagina dietro -> rosso; il fondo chiaro lo disegna lo sfondo fisso */
-html{background:#B62432!important}
-body{background:transparent!important}
-body:before{background-color:#fdf6f6!important}
+@media(max-width:700px){html{background:#B62432!important}body{background:transparent!important}body:before{background-color:#fdf6f6!important}}
+@media(min-width:701px){html{background:#fdf6f6}}
 @media(max-width:700px){section{padding:34px 0!important}.hero{padding:40px 0 36px!important}#contatti{padding:28px 0!important}}
 @media(max-width:700px){body:before{top:env(safe-area-inset-top,0px)!important}header{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 
