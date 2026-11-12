@@ -102,7 +102,7 @@ begin
       'dove', coalesce(nullif(concat_ws(', ', nullif(r.struttura,''), nullif(r.indirizzo,'')), ''), r.sede, ''),
       'prima', p_prima, 'studio', r.studio, 'reply_to', r.studio_email, 'whatsapp', r.whatsapp, 'sito', r.sito,
       'scheda', case when (p_tipo in ('confermato','scheda') and not r.dati_ok) or p_tipo = 'scheda'
-                     then 'https://agenda-supabase.ilariaiacone.pages.dev/agenda/scheda.html?t=' || r.token end);
+                     then 'https://www.nutrizionistaiacone.it/agenda/scheda.html?t=' || r.token end);
   end loop;
   return jsonb_build_object('ok', true, 'mail', out);
 end $$;

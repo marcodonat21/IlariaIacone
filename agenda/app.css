@@ -427,3 +427,6 @@ html.notte .kev.bl{background:repeating-linear-gradient(45deg,#2f2c2d 0 6px,#232
 .btn.wa.ghost{background:transparent;color:#1d9e4f;border:1px solid rgba(37,211,102,.5)}
 #pmGiorni button.on{background:var(--red);color:#fff}
 @media (max-width:640px){.prow2{flex-wrap:wrap}.prow2 .pbtn{width:100%;justify-content:stretch}.prow2 .pbtn .btn{flex:1;text-align:center}}
+
+/* sito vero: senza la striscia dell'anteprima */
+html.notest body{padding-top:0}html.notest #login{min-height:100vh}html.notest .app{min-height:100vh}html.notest .side{top:0;height:100vh}
