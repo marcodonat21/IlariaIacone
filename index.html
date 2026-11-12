@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+<meta name="robots" content="noindex,nofollow">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ilaria Iacone | Biologa Nutrizionista a Napoli e Portici</title>
@@ -446,6 +447,7 @@ body:before{background-color:#fdf6f6!important}
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Devo venire a digiuno?", "acceptedAnswer": {"@type": "Answer", "text": "È preferibile concludere il pasto almeno 2 ore prima della visita, oppure fare un pasto più leggero del solito."}}, {"@type": "Question", "name": "Posso venire se ho il ciclo mestruale?", "acceptedAnswer": {"@type": "Answer", "text": "Certo, ne terremo conto. Se ti rende più tranquilla, puoi spostare l'appuntamento entro le 24 ore precedenti alla visita."}}, {"@type": "Question", "name": "Posso bere prima della visita?", "acceptedAnswer": {"@type": "Answer", "text": "Assolutamente sì."}}, {"@type": "Question", "name": "Cosa devo portare?", "acceptedAnswer": {"@type": "Answer", "text": "Le analisi del sangue più recenti: sono attendibili fino a 6 mesi prima, altrimenti è meglio rifarle."}}, {"@type": "Question", "name": "Posso venire dopo l'allenamento?", "acceptedAnswer": {"@type": "Answer", "text": "Devono passare almeno 12 ore."}}, {"@type": "Question", "name": "Come si disdice o si sposta un appuntamento?", "acceptedAnswer": {"@type": "Answer", "text": "Si può prenotare e disdire fino a 24 ore prima della visita, scrivendomi su WhatsApp."}}]}</script>
 </head>
 <body>
+<div style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#e8913a;color:#fff;text-align:center;font:600 12px/1.2 -apple-system,Helvetica,Arial,sans-serif;padding:6px 10px">Copia di prova · le prenotazioni vanno nell’agenda nuova (Supabase), non in quella vera</div>
 <header><div class="wrap"><a class="brand" href="#top" aria-label="Ilaria Iacone, Biologa Nutrizionista"><img class="logo-light" src="img/logo.webp" alt="Ilaria Iacone · Biologa Nutrizionista" width="800" height="239"></a>
 <nav id="mainnav"><a href="#chi-sono">Chi sono</a><a href="#servizi">Servizi</a><a href="#sedi">Sedi</a><a href="#recensioni">Recensioni</a><a href="#faq">Domande</a><a href="#contatti">Contatti</a><a class="cta" href="#prenota">Prenota</a></nav><div class="hsoc"><a href="https://www.instagram.com/nutrizionistaiacone/" aria-label="Instagram" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1" fill="currentColor" stroke="none"/></svg></a><a href="https://www.tiktok.com/@nutrizionistaiacone?_r=1&amp;_t=ZN-9AFVOFIqnLS" aria-label="TikTok" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.6 6.8a4.6 4.6 0 0 1-3.5-4.1h-3.3v13.1a2.7 2.7 0 1 1-2.7-2.7c.3 0 .6 0 .8.1V9.8a6 6 0 1 0 5.2 5.9V9.4a7.8 7.8 0 0 0 4.5 1.4V7.5a4.6 4.6 0 0 1-1-.7z"/></svg></a></div><button class="burger" type="button" aria-label="Apri il menu" aria-expanded="false" aria-controls="mainnav"><span></span></button></div></header>
 
@@ -672,8 +674,10 @@ det.forEach(function(d){d.addEventListener("toggle",function(){if(d.open)det.for
 })();
 </script>
 
-<script>(function(){var h=document.querySelector("header");function f(){h.classList.toggle("hsm",window.scrollY>30)}window.addEventListener("scroll",f,{passive:true});f()})();</script><script>(function(){
-var URL="https://script.google.com/macros/s/AKfycbw7WKsvPiN0_uy5awoiwJ2OD_GnftdAC7VvNghuCbbwYwIgeumOpLIsodJmaPiY3K_0aA/exec",WA="393517855930";
+<script>(function(){var h=document.querySelector("header");function f(){h.classList.toggle("hsm",window.scrollY>30)}window.addEventListener("scroll",f,{passive:true});f()})();</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script>(function(){
+/* COPIA DI PROVA: prenota sull'agenda nuova (Supabase). Il sito vero usa ancora l'agenda Google. */
+var SB=supabase.createClient("https://afdpxhzxhfeumtjtfvui.supabase.co","sb_publishable_PlEfnhOIIYzjwciVxKUnSA_wSwMy-7o",{auth:{persistSession:false,autoRefreshToken:false}}),SLUG="ilaria-iacone",WA="393517855930";
 var SEDI=[{s:"Portici",n:"Studio Medico Secondulfo",g:[2,5],d:"martedì · venerdì"},{s:"Volla",n:"Movement & Performance",g:[1,3,6],d:"lunedì · mercoledì · sabato"},{s:"Napoli",n:"Full Face Academy",g:[4],d:"giovedì"}];
 var TIPI=[
  {g:"Prima visita",t:"Prima visita nutrizionale",d:60,p:85,x:"Anamnesi, misure, bioimpedenziometria e piano alimentare"},
@@ -715,9 +719,8 @@ $("bktipi").onclick=function(e){var b=e.target.closest(".bkopt");if(!b)return;S.
  S.day=null;S.ora=null;setTimeout(function(){days();go(2)},180)};
 // slot dal server (per durata); se il server non conosce la durata, li ricavo dagli orari a ore
 function slots(dur){if(cache[dur])return Promise.resolve(cache[dur]);
- return fetch(URL+"?action=slots&dur="+dur).then(function(r){return r.json()}).then(function(j){var sl=j.slots||{};
-  if(!j.dur&&dur>60){var o={};Object.keys(sl).forEach(function(k){o[k]=sl[k].filter(function(h){var n=(+h.slice(0,2)+1);return sl[k].indexOf((n<10?"0":"")+n+":"+h.slice(3))>=0})});sl=o}
-  return cache[dur]=sl})}
+ return SB.rpc("slot_liberi",{p_slug:SLUG,p_durata:dur}).then(function(r){if(r.error||!r.data||!r.data.ok)throw new Error("slots");
+  var g=r.data.giorni||{},o={};Object.keys(g).forEach(function(k){o[k]=g[k].map(function(x){return String(x.ora).slice(0,5)})});return cache[dur]=o})}
 function sedeOf(k){var g=dt(k).getDay();for(var i=0;i<SEDI.length;i++)if(SEDI[i].g.indexOf(g)>=0)return SEDI[i].s}
 // 3 giorni
 function days(){var box=$("bkdays");box.innerHTML='<p class="bkload">Cerco i giorni liberi…</p>';
@@ -753,11 +756,15 @@ send.onclick=function(){var v=function(i){return $(i).value.trim()};
  send.disabled=true;send.textContent="Invio in corso…";show("");
  function fin(){send.disabled=false;send.textContent="Richiedi appuntamento"}
  function taken(){fin();cache={};show("Questo orario è stato appena preso da qualcun altro: scegline un altro.","err");slots(S.tipo.d).then(function(){S.ora=null;times();go(3,true)})}
- fetch(URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(req)}).then(function(r){return r.json()}).then(function(j){
-  if(j.ok){fin();return done(req,j.mailed)}if(j.error==="cf_invalid"){fin();return show("Il codice fiscale non sembra corretto: controllalo e riprova.","err")}if(j.error==="slot_taken")return taken();
-  fin();show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})
- .catch(function(){show("Sto verificando la prenotazione…","ok");return new Promise(function(r){setTimeout(r,1500)}).then(function(){return fetch(URL+"?action=slots&dur="+S.tipo.d+"&_="+Date.now())}).then(function(r){return r.json()}).then(function(j){fin();
-  if(((j.slots||{})[S.day]||[]).indexOf(S.ora)<0)return done(req,!!req.email);show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")}).catch(function(){fin();show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})})};
+ var p={nome:v("nome"),cognome:v("cognome"),telefono:req.telefono,email:req.email,tipo:req.tipo,sede:req.sede,note:req.note,cf:cf,indirizzo:req.indirizzo,cap:req.cap,citta:req.citta,prov:prov,data:req.data,ora:req.ora,privacy:true};
+ SB.rpc("prenota",{p_slug:SLUG,p:p}).then(function(r){if(r.error)throw r.error;var j=r.data||{};
+  if(j.ok){var m=req.email?SB.functions.invoke("mail",{body:{tipo:"ricevuta",id:j.id}}).then(function(x){return !!(x.data&&x.data.inviate)},function(){return false}):Promise.resolve(false);
+   return m.then(function(ok){fin();done(req,ok)})}
+  if(j.error==="slot_taken")return taken();
+  fin();if(j.error==="bad_phone")return show("Il numero di telefono sembra incompleto: controllalo e riprova.","err");
+  if(j.error==="too_many")return show("Hai già alcune richieste in attesa di conferma: ti ricontatto io a breve, oppure scrivimi su WhatsApp.","err");
+  show("Non è stato possibile inviare la richiesta. Riprova tra poco.","err")})
+ .catch(function(){fin();show("Non è stato possibile inviare la richiesta. Riprova tra poco o scrivimi su WhatsApp.","err")})};
 // dai "primi posti liberi" in alto: sede, giorno e ora già scelti, resta il tipo di visita
 window.bookPick=function(k,h){S.sede=sedeOf(k);S.want={sede:S.sede,k:k,h:h};mark($("bksedi"),$("bksedi").querySelector('[data-s="'+S.sede+'"]'));go(1);setTimeout(function(){show("Hai scelto "+lab(k)+" alle "+h+" a "+S.sede+": ora dimmi che visita ti serve.","ok")},50)};
 window.bookSlots=slots;
