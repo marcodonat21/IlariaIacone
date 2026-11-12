@@ -130,7 +130,8 @@ function setStato(id,stato,msg,then,avvisa){sb.from("appuntamenti").update({stat
 function refresh(){go(VIEW)}
 function schedaLink(a){return location.origin+"/agenda/scheda.html?t="+a.token}
 function waRem(a){var p=a.paziente||{},s=new Date(a.inizio),oggi=ymd(new Date()),g=ymd(s),qd=g===oggi?"oggi":g===ymd(addD(new Date(),1))?"domani":dlab(s),sd=sede(a.sede_id);
-  var t="Ciao "+(p.nome||"")+", ti ricordo l’appuntamento"+(a.tipo?" ("+a.tipo+")":"")+" con la dott.ssa "+ST.nome+" "+qd+" alle "+hm(s)+(sd?" a "+sd.nome+" ("+[sd.struttura,sd.indirizzo].filter(Boolean).join(", ")+")":"")+". Se hai bisogno di spostarlo scrivimi pure qui. A presto! 🌿";
+  var q1=qd.charAt(0).toUpperCase()+qd.slice(1);
+  var t="Ciao "+(p.nome||"")+", ti ricordo l’appuntamento con la dott.ssa "+ST.nome+".\n"+q1+" alle "+hm(s)+(sd?" a "+sd.nome+([sd.struttura,sd.indirizzo].filter(Boolean).length?" ("+[sd.struttura,sd.indirizzo].filter(Boolean).join(", ")+")":""):"")+".\nA presto!";
   return "https://wa.me/"+waNum(p.telefono)+"?text="+encodeURIComponent(t)}
 function rowHtml(a){var s=new Date(a.inizio),p=a.paziente,tel=p&&p.telefono,pr=a.presenza?'<span class="pres '+a.presenza+'">'+(a.presenza==="arrivato"?"arrivato":"assente")+'</span>':'';
   return '<div class="app-row'+(a.stato==="da_confermare"?" da":"")+(a.stato==="annullato"?" ann":"")+'" style="--c:'+fam(a)+'" data-app="'+a.id+'">'+
