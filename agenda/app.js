@@ -372,7 +372,9 @@ function durOpts(sel){var d=[20,30,40,45,60,90,100,120];if(d.indexOf(sel)<0)d.pu
 /* ---------------- nuovo appuntamento ---------------- */
 function fillForm(){$("naTipo").innerHTML=PRES.filter(function(p){return p.attiva}).map(function(p){return '<option value="'+p.id+'">'+esc(p.nome)+' · '+p.durata_min+' min</option>'}).join("");
   $("naSede").innerHTML=SEDI.map(function(s){return '<option value="'+s.id+'">'+esc(s.nome)+'</option>'}).join("");$("naDur").innerHTML=durOpts(60)}
-function resetNew(){NP=null;$("npChosen").hidden=true;$("npSearch").hidden=false;$("npForm").hidden=true;$("npQ").value="";$("npList").hidden=true;["npN","npC","npT","npE"].forEach(function(i){$(i).value=""});
+function mailTo(){var e=NP?NP.email:($("npForm").hidden?"":$("npE").value.trim());$("naMailTo").textContent=NP||e?(e?"("+e+")":"(questo paziente non ha la mail)"):""}
+$("npE").addEventListener("input",mailTo);
+function resetNew(){$("naMail").checked=true;NP=null;setTimeout(mailTo);$("npChosen").hidden=true;$("npSearch").hidden=false;$("npForm").hidden=true;$("npQ").value="";$("npList").hidden=true;["npN","npC","npT","npE"].forEach(function(i){$(i).value=""});
   $("naData").value=ymd(addD(new Date(),1));$("naOra").value="09:00";$("naNote").value="";$("naHint").textContent="";tipoDur();sedeDay()}
 function tipoDur(){var p=PRES.filter(function(x){return x.id===$("naTipo").value})[0];if(!p)return;$("naDur").innerHTML=durOpts(p.durata_min);check()}
 function sedeDay(){var v=$("naData").value;if(!v)return;var o=ORARI.filter(function(x){return x.giorno===pd(v).getDay()})[0];if(o)$("naSede").value=o.sede_id;check()}
@@ -388,15 +390,15 @@ function rangeNew(){var d=$("naData").value,t=$("naOra").value;if(!d||!t)return 
 var npT=null;$("npQ").oninput=function(){clearTimeout(npT);var s=this.value.trim();if(s.length<2){$("npList").hidden=true;return}npT=setTimeout(function(){cerca(s).then(function(L){
   $("npList").hidden=false;$("npList").innerHTML=L.length?L.map(function(p){return '<button data-p="'+p.id+'"><b>'+esc(nomeP(p))+'</b> <span class="muted">'+esc(p.telefono||"")+'</span></button>'}).join(""):'<div class="empty" style="padding:10px 12px">Nessun paziente trovato.</div>';
   $("npList").onclick=function(e){var b=e.target.closest("[data-p]");if(!b)return;choose(L.filter(function(p){return p.id===b.dataset.p})[0])}})},200)};
-function choose(p){NP=p;$("npSearch").hidden=true;$("npChosen").hidden=false;$("npNome").textContent=nomeP(p);$("npAv").textContent=ini(p)}
-$("npChange").onclick=function(){NP=null;$("npChosen").hidden=true;$("npSearch").hidden=false};
-$("npNew").onclick=function(){$("npForm").hidden=!$("npForm").hidden;if(!$("npForm").hidden)$("npN").focus()};
+function choose(p){NP=p;mailTo();$("npSearch").hidden=true;$("npChosen").hidden=false;$("npNome").textContent=nomeP(p);$("npAv").textContent=ini(p)}
+$("npChange").onclick=function(){NP=null;mailTo();$("npChosen").hidden=true;$("npSearch").hidden=false};
+$("npNew").onclick=function(){$("npForm").hidden=!$("npForm").hidden;mailTo();if(!$("npForm").hidden)$("npN").focus()};
 $("naSave").onclick=function(){var r=rangeNew();if(!r)return toast("Scegli giorno e ora.");var b=this;
   var pr=NP?Promise.resolve(NP):(function(){var n=$("npN").value.trim(),t=$("npT").value.trim();if(!n||!t){toast("Scegli un paziente o inserisci nome e cellulare.");return Promise.reject()}
     return q(sb.from("pazienti").insert({studio_id:ST.id,nome:n,cognome:$("npC").value.trim()||null,telefono:t.replace(/[^\d+]/g,""),email:$("npE").value.trim().toLowerCase()||null}).select().single())})();
   b.disabled=true;pr.then(function(p){var pres=PRES.filter(function(x){return x.id===$("naTipo").value})[0];
-    return q(sb.from("appuntamenti").insert({studio_id:ST.id,paziente_id:p.id,sede_id:$("naSede").value,prestazione_id:pres.id,tipo:pres.nome,inizio:r[0].toISOString(),fine:r[1].toISOString(),stato:"confermato",origine:"agenda",note:$("naNote").value.trim()||null}))})
-  .then(function(){b.disabled=false;toast("Appuntamento aggiunto.");CAL.d=sod(r[0]);go("cal")},function(e){b.disabled=false;if(e)err(e)})};
+    return q(sb.from("appuntamenti").insert({studio_id:ST.id,paziente_id:p.id,sede_id:$("naSede").value,prestazione_id:pres.id,tipo:pres.nome,inizio:r[0].toISOString(),fine:r[1].toISOString(),stato:"confermato",origine:"agenda",note:$("naNote").value.trim()||null}).select("id").single()).then(function(a){return {a:a,p:p}})})
+  .then(function(x){b.disabled=false;toast("Appuntamento aggiunto.");if($("naMail").checked&&x.p.email)mail("confermato",x.a.id);CAL.d=sod(r[0]);go("cal")},function(e){b.disabled=false;if(e)err(e)})};
 
 /* ---------------- pazienti ---------------- */
 var pT=null,SEL={};$("pQ").oninput=function(){clearTimeout(pT);pT=setTimeout(loadPaz,200)};
