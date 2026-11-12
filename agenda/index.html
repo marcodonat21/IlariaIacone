@@ -132,6 +132,7 @@
         <div class="row"><div><label>Giorno</label><input id="naData" type="date"></div><div><label>Ora</label><input id="naOra" type="time" step="300"></div></div>
         <div class="row"><div><label>Sede</label><select id="naSede"></select></div><div><label>Durata</label><select id="naDur"></select></div></div>
         <label>Note</label><textarea id="naNote" placeholder="Facoltative"></textarea>
+        <label class="ck" style="margin-top:12px"><input type="checkbox" id="naMail" checked> ✉️ Manda la mail di conferma al paziente <small style="color:var(--muted)" id="naMailTo"></small></label>
         <div class="hint" id="naHint"></div>
         <button class="btn block" id="naSave" style="margin-top:14px">Aggiungi in agenda</button>
       </div>
@@ -186,6 +187,6 @@
 
 <div id="print"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
-<script src="app.js?v=15"></script>
+<script src="app.js?v=16"></script>
 </body>
 </html>
