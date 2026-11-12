@@ -12,7 +12,7 @@
 <title>Agenda di Ilaria</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap">
 
-<link rel="stylesheet" href="app.css?v=10">
+<link rel="stylesheet" href="app.css?v=11">
 </head>
 <body>
 <div class="test" id="testbar">Versione di prova (Supabase) · l'agenda in uso resta quella di Google</div>
@@ -69,6 +69,15 @@
 
     <!-- da confermare -->
     <section data-view="conf" hidden><div id="lConf"></div></section>
+
+    <!-- promemoria -->
+    <section data-view="prom" hidden>
+      <div class="card glass"><div class="sub" style="margin:0 0 10px">Gli appuntamenti da domani in poi. Tocca <b>💬 WhatsApp</b>: si apre la chat con il messaggio già scritto (nome, giorno, ora e sede), devi solo premere invio. Chi l’ha già ricevuto viene segnato.</div>
+        <div class="tabs2" id="pmGiorni"><button data-g="1">Domani</button><button data-g="3">3 giorni</button><button data-g="7">7 giorni</button><button data-g="14">14 giorni</button></div>
+        <label class="ck"><input type="checkbox" id="pmSolo"> Mostra solo quelli ancora da avvisare</label>
+        <div class="sub" id="pmConta" style="margin-top:6px"></div></div>
+      <div id="pmBox"></div>
+    </section>
 
     <!-- calendario -->
     <section data-view="cal" hidden>
@@ -176,6 +185,6 @@
 
 <div id="print"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
-<script src="app.js?v=11"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>

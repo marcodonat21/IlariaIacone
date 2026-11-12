@@ -8,6 +8,7 @@ var ST=null,RUOLO="titolare",SEDI=[],PRES=[],ORARI=[],VIEW="home",CAL={},NP=null
 var GG=["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"],GC=["dom","lun","mar","mer","gio","ven","sab"],MESI=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
 var METODI=["POS","Contanti","Bonifico","Satispay","Altro"];
 var IC={
+prom:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
   home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
   nuovo:'<path d="M12 5v14M5 12h14"/>',
   paz:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/>',
@@ -20,7 +21,7 @@ var IC={
 };
 var TEL='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"/></svg>';
 var WA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.5A8.5 8.5 0 1 1 21 11.5z"/></svg>';
-var VIEWS=[["home","Panoramica"],["nuovo","Nuovo appuntamento"],["paz","Pazienti"],["conf","Da confermare"],["cal","Calendario"],["attesa","Lista d’attesa"],["inc","Incassi"],["stat","Statistiche"],["fatt","Fatture"]];
+var VIEWS=[["home","Panoramica"],["nuovo","Nuovo appuntamento"],["paz","Pazienti"],["conf","Da confermare"],["prom","Promemoria"],["cal","Calendario"],["attesa","Lista d’attesa"],["inc","Incassi"],["stat","Statistiche"],["fatt","Fatture"]];
 
 /* ---------------- utilità ---------------- */
 function esc(t){return String(t==null?"":t).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
@@ -88,7 +89,7 @@ function go(v){if(v==="altro")return altro();if(allowed().indexOf(v)<0)v=allowed
   var main=["home","cal","nuovo","paz"];$$(".nav,.bnav button").forEach(function(b){b.classList.toggle("on",b.dataset.v===v||(b.dataset.v==="altro"&&main.indexOf(v)<0))});
   $("title").textContent=(VIEWS.filter(function(x){return x[0]===v})[0]||[])[1]||"";$("gres").hidden=true;
   try{history.replaceState(null,"","#"+v)}catch(e){}window.scrollTo(0,0);
-  ({home:loadHome,conf:loadConf,cal:loadCal,paz:loadPaz,nuovo:resetNew,attesa:loadAttesa,inc:loadInc,stat:loadStat,fatt:loadFatt})[v]()}
+  ({home:loadHome,conf:loadConf,prom:loadProm,cal:loadCal,paz:loadPaz,nuovo:resetNew,attesa:loadAttesa,inc:loadInc,stat:loadStat,fatt:loadFatt})[v]()}
 document.addEventListener("click",function(e){var b=e.target.closest("[data-v],[data-go]");if(!b||b.closest(".sheet"))return;e.preventDefault();go(b.dataset.v||b.dataset.go)});
 function altro(){var n=$("sidenav").querySelector("[data-cnt]");var c=n&&!n.hidden?n.textContent:"";
   sheet('<h2>Menu</h2>'+VIEWS.map(function(v){return '<button class="nav'+(VIEW===v[0]?" on":"")+'" data-m="'+v[0]+'">'+svg(v[0])+v[1]+(v[0]==="conf"&&c?'<span class="cnt">'+c+'</span>':'')+'</button>'}).join("")+
@@ -129,7 +130,7 @@ function setStato(id,stato,msg,then,avvisa){sb.from("appuntamenti").update({stat
 function refresh(){go(VIEW)}
 function schedaLink(a){return location.origin+"/agenda/scheda.html?t="+a.token}
 function waRem(a){var p=a.paziente||{},s=new Date(a.inizio),oggi=ymd(new Date()),g=ymd(s),qd=g===oggi?"oggi":g===ymd(addD(new Date(),1))?"domani":dlab(s),sd=sede(a.sede_id);
-  var t="Ciao "+(p.nome||"")+", ti ricordo l’appuntamento con la dott.ssa "+ST.nome+" "+qd+" alle "+hm(s)+(sd?" a "+sd.nome+" ("+[sd.struttura,sd.indirizzo].filter(Boolean).join(", ")+")":"")+". Se hai bisogno di spostarlo scrivimi pure qui. A presto! 🌿";
+  var t="Ciao "+(p.nome||"")+", ti ricordo l’appuntamento"+(a.tipo?" ("+a.tipo+")":"")+" con la dott.ssa "+ST.nome+" "+qd+" alle "+hm(s)+(sd?" a "+sd.nome+" ("+[sd.struttura,sd.indirizzo].filter(Boolean).join(", ")+")":"")+". Se hai bisogno di spostarlo scrivimi pure qui. A presto! 🌿";
   return "https://wa.me/"+waNum(p.telefono)+"?text="+encodeURIComponent(t)}
 function rowHtml(a){var s=new Date(a.inizio),p=a.paziente,tel=p&&p.telefono,pr=a.presenza?'<span class="pres '+a.presenza+'">'+(a.presenza==="arrivato"?"arrivato":"assente")+'</span>':'';
   return '<div class="app-row'+(a.stato==="da_confermare"?" da":"")+(a.stato==="annullato"?" ann":"")+'" style="--c:'+fam(a)+'" data-app="'+a.id+'">'+
@@ -139,7 +140,7 @@ function blkHtml(b){var s=new Date(b.inizio),f=new Date(b.fine),tutto=hm(s)==="0
   return '<div class="app-row blk" data-blk="'+b.id+'"><div class="ora">'+(tutto?"🚫":hm(s))+'</div><div class="chi"><b>'+esc(b.motivo||"Non disponibile")+'</b><small>'+(tutto?"tutto il giorno":hm(s)+"–"+hm(f))+'</small></div><button class="icb" data-delblk="'+b.id+'" aria-label="Togli il blocco">✕</button></div>'}
 function groupHtml(list,emptyMsg,noHead){if(!list.length)return '<div class="empty">'+emptyMsg+'</div>';var h="",last="";
   list.forEach(function(a){var d=ymd(new Date(a.inizio));if(d!==last&&!noHead){h+='<div class="day">'+dlab(new Date(a.inizio))+'</div>'}last=d;h+=rowHtml(a)});return h}
-document.addEventListener("click",function(e){var r=e.target.closest("[data-rem]");if(!r)return;sb.from("appuntamenti").update({promemoria_wa:new Date().toISOString()}).eq("id",r.dataset.rem).then(function(){r.classList.add("done")})});
+document.addEventListener("click",function(e){var r=e.target.closest("[data-rem]");if(!r)return;sb.from("appuntamenti").update({promemoria_wa:new Date().toISOString()}).eq("id",r.dataset.rem).then(function(){r.classList.add("done");if(VIEW==="prom")setTimeout(loadProm,1500)})});
 document.addEventListener("click",function(e){var r=e.target.closest("[data-app]");if(!r||e.target.closest("a,button"))return;openApp(r.dataset.app)});
 document.addEventListener("click",function(e){var b=e.target.closest("[data-delblk]");if(!b)return;ask("Togliere il blocco?","Quegli orari torneranno prenotabili anche dal sito.","Sì, togli",function(){
   sb.from("blocchi").delete().eq("id",b.dataset.delblk).then(function(r){if(r.error)return err(r.error);toast("Blocco tolto.");refresh()})})});
@@ -173,6 +174,28 @@ function loadHome(){var oggi=sod(new Date()),dom=ymd(addD(oggi,1));$("kInc").cla
   contaConf().then(function(n){$("kConf").textContent=n});
   var m0=new Date(oggi.getFullYear(),oggi.getMonth(),1);
   q(sb.from("incassi").select("importo").eq("studio_id",ST.id).gte("data",ymd(m0))).then(function(L){var s=0;L.forEach(function(x){s+=+x.importo});$("kInc").textContent=eur(s);$("kIncN").textContent=L.length+" incassi registrati"})}
+
+/* ---------------- promemoria: appuntamenti da domani in poi, con WhatsApp e telefono ---------------- */
+var PROM={g:3,solo:false};
+function loadProm(){var B=$("pmBox"),d0=addD(sod(new Date()),1);B.innerHTML='<div class="card glass"><span class="spin"></span></div>';
+  $$("#pmGiorni button").forEach(function(b){b.classList.toggle("on",+b.dataset.g===PROM.g)});$("pmSolo").checked=PROM.solo;
+  apps(d0,addD(d0,PROM.g)).then(function(L){
+    var tot=L.length,fatti=L.filter(function(a){return a.promemoria_wa}).length;
+    $("pmConta").textContent=tot?("Promemoria inviati: "+fatti+" su "+tot):"";
+    if(PROM.solo)L=L.filter(function(a){return !a.promemoria_wa});
+    if(!L.length){B.innerHTML='<div class="card glass"><div class="empty">'+(tot?"Hai mandato tutti i promemoria. 🎉":"Nessun appuntamento in questi giorni.")+'</div></div>';return}
+    var G={},ord=[];L.forEach(function(a){var k=ymd(new Date(a.inizio));if(!G[k]){G[k]=[];ord.push(k)}G[k].push(a)});
+    B.innerHTML=ord.map(function(k){var d=new Date(G[k][0].inizio),dom=k===ymd(d0);
+      return '<div class="card glass"><h2>'+(dom?"Domani · ":"")+dlab(d)+'</h2>'+G[k].map(promRow).join("")+'</div>'}).join("")}).catch(err)}
+function promRow(a){var s=new Date(a.inizio),p=a.paziente||{},tel=p.telefono,sd=sede(a.sede_id),inv=a.promemoria_wa?new Date(a.promemoria_wa):null;
+  return '<div class="prow2'+(a.stato==="da_confermare"?" da":"")+'" data-app="'+a.id+'" style="--c:'+fam(a)+'">'+
+    '<div class="ora">'+hm(s)+'</div>'+
+    '<div class="chi"><b>'+esc(nomeP(p))+'</b><small>'+esc(a.tipo||"")+(sd?' · '+esc(sd.nome):'')+(a.stato==="da_confermare"?' · <span style="color:#c06a00">da confermare</span>':'')+'</small>'+
+      (tel?'<a class="ptel" href="'+telHref(tel)+'">📞 '+esc(tel)+'</a>':'<small style="color:var(--red)">Manca il telefono</small>')+
+      (inv?'<small class="pinv">✓ Promemoria inviato il '+dmy(ymd(inv))+' alle '+hm(inv)+'</small>':'')+'</div>'+
+    (tel?'<div class="pbtn"><a class="btn small wa'+(inv?" ghost":"")+'" href="'+esc(waRem(a))+'" target="_blank" rel="noopener" data-rem="'+a.id+'">💬 '+(inv?"Rimanda":"WhatsApp")+'</a><a class="btn ghost small" href="'+telHref(tel)+'">Chiama</a></div>':'')+'</div>'}
+$("pmGiorni").addEventListener("click",function(e){var b=e.target.closest("[data-g]");if(!b)return;PROM.g=+b.dataset.g;loadProm()});
+$("pmSolo").addEventListener("change",function(){PROM.solo=this.checked;loadProm()});
 
 /* ---------------- da confermare ---------------- */
 function loadConf(){$("lConf").innerHTML='<div class="card glass"><span class="spin"></span></div>';
