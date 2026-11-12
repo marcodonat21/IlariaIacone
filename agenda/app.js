@@ -252,13 +252,15 @@ function kwrender(){var ds=CAL.days||kdays(),oggi=ymd(new Date()),H=(KH1-KH0)*KP
   var h='<div class="kwh" style="'+gc+'"><span></span>'+ds.map(function(d){var g=ymd(d);return '<button class="kwd'+(g===oggi?" today":"")+'" data-day="'+g+'"><small>'+GC[d.getDay()]+'</small><b>'+d.getDate()+'</b></button>'}).join("")+'</div>';
   var tutto=function(b,d){var s=new Date(b.inizio),f=new Date(b.fine);return s<=sod(d)&&f>=addD(sod(d),1)};
   var ad=ds.map(function(d){return CAL.bl.filter(function(b){return tutto(b,d)})});
-  if(ad.some(function(l){return l.length}))h+='<div class="kwa" style="'+gc+'"><span>tutto il giorno</span>'+ad.map(function(l){return '<div>'+l.map(function(b){return '<button class="kev blk bl" data-blk="'+b.id+'">🚫 '+esc(b.motivo||"Non disponibile")+'</button>'}).join("")+'</div>'}).join("")+'</div>';
+  var aa=ds.map(function(d){var g=ymd(d);return CAL.ev.filter(function(a){return ymd(new Date(a.inizio))===g&&tuttoApp(a)})});
+  if(ad.some(function(l){return l.length})||aa.some(function(l){return l.length}))h+='<div class="kwa" style="'+gc+'"><span>tutto il giorno</span>'+ad.map(function(l,i){return '<div>'+l.map(function(b){return '<button class="kev blk bl" data-blk="'+b.id+'">🚫 '+esc(b.motivo||"Non disponibile")+'</button>'}).join("")+
+    aa[i].map(function(a){return '<button class="kev blk gio'+(a.stato==="da_confermare"?" da":"")+'" data-kev="'+a.id+'" data-g="'+ymd(ds[i])+'" title="'+esc(nomeP(a.paziente)+" · "+(a.tipo||"")+" · tutto il giorno")+'">'+esc(nomeP(a.paziente))+'</button>'}).join("")+'</div>'}).join("")+'</div>';
   h+='<div class="kwb"><div class="kwg" style="'+gc+';height:'+H+'px"><div class="kwt">';
   for(var x=KH0;x<KH1;x++)h+='<span style="top:'+((x-KH0)*KPX)+'px">'+pad(x)+':00</span>';
   h+='</div>';
   ds.forEach(function(d){var g=ymd(d),col='<div class="kwc'+(g===oggi?" today":"")+'" data-day="'+g+'">';
     ORARI.filter(function(o){return o.giorno===d.getDay()}).forEach(function(o){var a=kmin(o.inizio)-KH0*60,b=kmin(o.fine)-KH0*60;col+='<i class="kwo" style="top:'+(a*KPX/60)+'px;height:'+((b-a)*KPX/60)+'px"></i>'});
-    var l=CAL.ev.filter(function(a){return ymd(new Date(a.inizio))===g}).map(function(a){var s=new Date(a.inizio),f=new Date(a.fine);return{a:a,s:s.getHours()*60+s.getMinutes(),f:(ymd(f)===g?f.getHours()*60+f.getMinutes():24*60)}})
+    var l=CAL.ev.filter(function(a){return ymd(new Date(a.inizio))===g&&!tuttoApp(a)}).map(function(a){var s=new Date(a.inizio),f=new Date(a.fine);return{a:a,s:s.getHours()*60+s.getMinutes(),f:(ymd(f)===g?f.getHours()*60+f.getMinutes():24*60)}})
       .concat(CAL.bl.filter(function(b){return !tutto(b,d)&&new Date(b.inizio)<addD(d,1)&&new Date(b.fine)>d}).map(function(b){var s=new Date(b.inizio),f=new Date(b.fine);return{b:b,s:ymd(s)===g?s.getHours()*60+s.getMinutes():0,f:ymd(f)===g?f.getHours()*60+f.getMinutes():24*60}}))
       .sort(function(x,y){return x.s-y.s||y.f-x.f});
     var cols=[];l.forEach(function(o){if(o.f<=o.s)o.f=o.s+30;var c=0;while(cols[c]&&cols[c]>o.s)c++;cols[c]=o.f;o.c=c});
@@ -271,7 +273,7 @@ function kwrender(){var ds=CAL.days||kdays(),oggi=ymd(new Date()),H=(KH1-KH0)*KP
     if(g===oggi){var nw=new Date(),m=nw.getHours()*60+nw.getMinutes()-KH0*60;if(m>0&&m<(KH1-KH0)*60)col+='<em class="kwn" style="top:'+(m*KPX/60)+'px"></em>'}
     h+=col+'</div>'});
   h+='</div></div>';$("kWeek").innerHTML=h;
-  var bx=$("kWeek").querySelector(".kwb");if(bx&&!CAL.scrolled){bx.scrollTop=(8.5-KH0)*KPX;CAL.scrolled=1}}
+  var bx=$("kWeek").querySelector(".kwb");if(bx){var sb=bx.offsetWidth-bx.clientWidth;$$(".kwh,.kwa",$("kWeek")).forEach(function(e){e.style.paddingRight=sb+"px"})}if(bx&&!CAL.scrolled){bx.scrollTop=(8.5-KH0)*KPX;CAL.scrolled=1}}
 /* clic: appuntamento -> scheda; giorno -> vista giorno; spazio vuoto -> nuovo appuntamento */
 var DRAG=null;
 $("kWeek").addEventListener("click",function(e){if(DRAG&&DRAG.moved)return;
@@ -284,7 +286,7 @@ $("kWeek").addEventListener("click",function(e){if(DRAG&&DRAG.moved)return;
   c.insertAdjacentHTML("beforeend",'<button class="kslot" data-g="'+c.dataset.day+'" data-h="'+kh(mm)+'" style="top:'+((mm-KH0*60)*KPX/60)+'px;height:'+(KPX/2-2)+'px">+ '+kh(mm)+' · nuovo appuntamento</button>')});
 function knew(g,hh){go("nuovo");$("naData").value=g;$("naOra").value=hh;sedeDay();setTimeout(function(){$("npQ").focus()},150);toast("Giorno e ora inseriti: ora scegli il paziente.")}
 /* trascina un appuntamento per spostarlo */
-$("kWeek").addEventListener("pointerdown",function(e){var el=e.target.closest("[data-kev]");if(!el||e.button>0)return;var a=CAL.ev.filter(function(x){return x.id===el.dataset.kev})[0];if(!a)return;
+$("kWeek").addEventListener("pointerdown",function(e){var el=e.target.closest("[data-kev]");if(!el||e.button>0||el.classList.contains("gio"))return;var a=CAL.ev.filter(function(x){return x.id===el.dataset.kev})[0];if(!a)return;
   DRAG={el:el,a:a,y0:e.clientY,x0:e.clientX,top0:parseFloat(el.style.top),moved:false,col:el.parentNode,timer:null,ok:e.pointerType==="mouse"};
   if(!DRAG.ok)DRAG.timer=setTimeout(function(){if(DRAG){DRAG.ok=true;el.classList.add("drag");if(navigator.vibrate)navigator.vibrate(10)}},350)});
 window.addEventListener("pointermove",function(e){if(!DRAG)return;var dy=e.clientY-DRAG.y0,dx=e.clientX-DRAG.x0;
@@ -360,14 +362,19 @@ function editApp(a){var s=new Date(a.inizio),dur=Math.round((new Date(a.fine)-s)
     '<div class="row keep"><div><label>Sede</label><select id="eSede">'+SEDI.map(function(x){return '<option value="'+x.id+'"'+(x.id===a.sede_id?" selected":"")+'>'+esc(x.nome)+'</option>'}).join("")+'</select></div><div><label>Durata</label><select id="eDur">'+durOpts(dur)+'</select></div></div>'+
     '<label>Note</label><textarea id="eNote">'+esc(a.note||"")+'</textarea>'+(a.stato!=="annullato"?ckMail(a.paziente&&a.paziente.email,"Se cambiano giorno o ora, avvisa il paziente per mail"):'')+'<div class="hint" id="eMsg"></div><button class="btn block" id="eOk" style="margin-top:14px">Salva</button>',function(box,close){
       box.querySelector("#eTipo").onchange=function(){var p=PRES.filter(function(x){return x.id===this.value},this)[0];if(p){var sel=box.querySelector("#eDur");if(!$$("option",sel).some(function(o){return +o.value===p.durata_min}))sel.add(new Option(durLab(p.durata_min),p.durata_min));sel.value=String(p.durata_min)}};
-      var forza=false;box.querySelector("#eOk").onclick=function(){var ini=new Date(box.querySelector("#eData").value+"T"+box.querySelector("#eOra").value),fin=new Date(ini.getTime()+(+box.querySelector("#eDur").value)*60000),m=box.querySelector("#eMsg");
+      var forza=false,eD=box.querySelector("#eDur"),eO=box.querySelector("#eOra");oraOff(eD,eO);eD.addEventListener("change",function(){oraOff(eD,eO)});box.querySelector("#eOk").onclick=function(){var rr=rangeDur(box.querySelector("#eData").value,eO.value,eD.value),ini=rr?rr[0]:new Date(NaN),fin=rr&&rr[1],m=box.querySelector("#eMsg");
         if(isNaN(ini))return toast("Scegli giorno e ora.");var p=PRES.filter(function(x){return x.id===box.querySelector("#eTipo").value})[0];
         var save=function(){sb.from("appuntamenti").update({inizio:ini.toISOString(),fine:fin.toISOString(),sede_id:box.querySelector("#eSede").value,prestazione_id:p.id,tipo:p.nome,note:box.querySelector("#eNote").value.trim()||null,promemoria_wa:null}).eq("id",a.id)
           .then(function(r){if(r.error)return err(r.error);var ck=box.querySelector("#ckMail");close();toast("Appuntamento aggiornato.");if(VIEW==="cal"){CAL.d=sod(ini)}refresh();if(ck&&ck.checked&&ini.getTime()!==s.getTime())mail("spostato",a.id,quandoTxt(s))})};
         if(forza)return save();
         q(sb.from("appuntamenti").select("inizio,paziente:pazienti(nome,cognome)").eq("studio_id",ST.id).neq("stato","annullato").neq("id",a.id).lt("inizio",fin.toISOString()).gt("fine",ini.toISOString())).then(function(L){
           if(!L.length)return save();forza=true;m.className="hint warn";m.textContent="In quell'orario c'è già "+L.map(function(x){return nomeP(x.paziente)+" alle "+hm(new Date(x.inizio))}).join(", ")+". Premi di nuovo per salvare lo stesso.";box.querySelector("#eOk").textContent="Salva lo stesso"})}})}
-function durOpts(sel){var d=[20,30,40,45,60,90,100,120];if(d.indexOf(sel)<0)d.push(sel);d.sort(function(x,y){return x-y});return d.map(function(m){return '<option value="'+m+'"'+(m===sel?" selected":"")+'>'+durLab(m)+'</option>'}).join("")}
+function durOpts(sel){var d=[15,20,30,40,45,60,75,90,100,120,150,180,210,240,300,360,420,480,540,600];if(sel>=GIORNO[2]-GIORNO[1])sel=0;else if(d.indexOf(sel)<0)d.push(sel);d.sort(function(x,y){return x-y});return d.map(function(m){return '<option value="'+m+'"'+(m===sel?" selected":"")+'>'+durLab(m)+'</option>'}).join("")+'<option value="0"'+(sel===0?" selected":"")+'>Tutto il giorno</option>'}
+/* "tutto il giorno" = dalle 7 alle 21 (tutta la giornata del calendario) */
+var GIORNO=[0,7*60,21*60];
+function tuttoApp(a){return (new Date(a.fine)-new Date(a.inizio))/60000>=GIORNO[2]-GIORNO[1]}
+function rangeDur(d,t,dur){if(!d)return null;dur=+dur;if(dur===0){var g=new Date(d+"T00:00");return[new Date(g.getTime()+GIORNO[1]*60000),new Date(g.getTime()+GIORNO[2]*60000)]}if(!t)return null;var s=new Date(d+"T"+t);return[s,new Date(s.getTime()+dur*60000)]}
+function oraOff(dur,ora){ora.disabled=+dur.value===0;ora.style.opacity=ora.disabled?.4:1}
 
 /* ---------------- nuovo appuntamento ---------------- */
 function fillForm(){$("naTipo").innerHTML=PRES.filter(function(p){return p.attiva}).map(function(p){return '<option value="'+p.id+'">'+esc(p.nome)+' · '+p.durata_min+' min</option>'}).join("");
@@ -378,7 +385,7 @@ function resetNew(){$("naMail").checked=true;NP=null;setTimeout(mailTo);$("npCho
   $("naData").value=ymd(addD(new Date(),1));$("naOra").value="09:00";$("naNote").value="";$("naHint").textContent="";tipoDur();sedeDay()}
 function tipoDur(){var p=PRES.filter(function(x){return x.id===$("naTipo").value})[0];if(!p)return;$("naDur").innerHTML=durOpts(p.durata_min);check()}
 function sedeDay(){var v=$("naData").value;if(!v)return;var o=ORARI.filter(function(x){return x.giorno===pd(v).getDay()})[0];if(o)$("naSede").value=o.sede_id;check()}
-$("naTipo").onchange=tipoDur;$("naData").onchange=sedeDay;$("naOra").onchange=check;$("naDur").onchange=check;
+$("naTipo").onchange=tipoDur;$("naData").onchange=sedeDay;$("naOra").onchange=check;$("naDur").onchange=function(){oraOff($("naDur"),$("naOra"));check()};
 var chkT=null;function check(){clearTimeout(chkT);chkT=setTimeout(function(){var r=rangeNew();if(!r)return;
   Promise.all([q(sb.from("appuntamenti").select("inizio,paziente:pazienti(nome,cognome)").eq("studio_id",ST.id).neq("stato","annullato").lt("inizio",r[1].toISOString()).gt("fine",r[0].toISOString())),blocchi(r[0],r[1])]).then(function(x){
     var L=x[0],B=x[1],dentro=ORARI.some(function(o){return o.giorno===r[0].getDay()&&hm(r[0])>=o.inizio.slice(0,5)&&hm(r[1])<=o.fine.slice(0,5)});
@@ -386,7 +393,7 @@ var chkT=null;function check(){clearTimeout(chkT);chkT=setTimeout(function(){var
     else if(B.length){$("naHint").className="hint warn";$("naHint").textContent="Attenzione: quell'orario è bloccato ("+(B[0].motivo||"non disponibile")+")."}
     else if(!dentro){$("naHint").className="hint warn";$("naHint").textContent="Orario libero, ma fuori dagli orari di ricevimento."}
     else{$("naHint").className="hint ok";$("naHint").textContent="Orario libero."}})},250)}
-function rangeNew(){var d=$("naData").value,t=$("naOra").value;if(!d||!t)return null;var s=new Date(d+"T"+t);return[s,new Date(s.getTime()+(+$("naDur").value)*60000)]}
+function rangeNew(){return rangeDur($("naData").value,$("naOra").value,$("naDur").value)}
 var npT=null;$("npQ").oninput=function(){clearTimeout(npT);var s=this.value.trim();if(s.length<2){$("npList").hidden=true;return}npT=setTimeout(function(){cerca(s).then(function(L){
   $("npList").hidden=false;$("npList").innerHTML=L.length?L.map(function(p){return '<button data-p="'+p.id+'"><b>'+esc(nomeP(p))+'</b> <span class="muted">'+esc(p.telefono||"")+'</span></button>'}).join(""):'<div class="empty" style="padding:10px 12px">Nessun paziente trovato.</div>';
   $("npList").onclick=function(e){var b=e.target.closest("[data-p]");if(!b)return;choose(L.filter(function(p){return p.id===b.dataset.p})[0])}})},200)};
