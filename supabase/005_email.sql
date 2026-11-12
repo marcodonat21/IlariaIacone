@@ -66,10 +66,11 @@ begin
     join public.studi s on s.id = a.studio_id
     left join public.sedi x on x.id = a.sede_id
     where (p_id is not null and a.id = p_id)
-       or (p_id is null and p_tipo = 'promemoria'
-           and a.stato = 'confermato'
-           and (a.inizio at time zone s.fuso)::date = ((now() at time zone s.fuso)::date + 1)
-           and extract(hour from now() at time zone s.fuso) >= 18)   -- parte dalle 18 del giorno prima
+       or (p_id is null and p_tipo = 'promemoria'               -- come l'agenda Google:
+           and a.stato in ('confermato','da_confermare')         -- circa 24 ore prima della visita,
+           and a.inizio between now() + interval '2 hours' and now() + interval '24 hours 30 minutes'
+           and extract(hour from now() at time zone s.fuso) between 8 and 20   -- mai di notte (8-21)
+           and a.creato < now() - interval '2 hours')            -- appena prenotato ha già la ricevuta
   loop
     -- chi può chiederla
     if v_srv then
@@ -118,7 +119,7 @@ $$;
 revoke all on function public.mail_esito(uuid, text, boolean, text, text) from public;
 grant execute on function public.mail_esito(uuid, text, boolean, text, text) to anon, authenticated;
 
--- promemoria automatico: ogni ora chiama la funzione "mail" (dalle 18 manda quelli di domani)
+-- promemoria automatico: ogni ora chiama la funzione "mail" (manda quelli delle prossime 24 ore, dalle 8 alle 21)
 create extension if not exists pg_net;
 create extension if not exists pg_cron;
 select cron.unschedule('mail-promemoria') where exists (select 1 from cron.job where jobname = 'mail-promemoria');
