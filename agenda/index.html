@@ -23,12 +23,18 @@
   <div class="card glass">
     <img src="/img/logo-i.svg" alt="">
     <h1>Agenda</h1>
-    <div class="sub">Accedi con la tua email: ti mando un link per entrare, senza password.</div>
+    <div class="sub">Accedi con la tua email: ti mando un link (e un codice) per entrare, senza password.</div>
     <form id="lform">
       <label for="lmail">Email</label>
       <input id="lmail" type="email" autocomplete="email" required placeholder="nome@esempio.it">
       <button class="btn block" id="lbtn">Mandami il link</button>
       <div class="hint" id="lmsg"></div>
+    </form>
+    <form id="lcform" hidden>
+      <label for="lcode">Codice ricevuto per mail</label>
+      <input id="lcode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456" style="letter-spacing:.3em;font-size:1.3rem;text-align:center">
+      <button class="btn block" id="lcbtn">Entra con il codice</button>
+      <div class="hint" id="lcmsg">Hai salvato l'agenda sulla schermata Home? Non toccare il link: copia qui il codice che trovi nella mail.</div>
     </form>
   </div>
 </section>
@@ -187,6 +193,6 @@
 
 <div id="print"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
-<script src="app.js?v=16"></script>
+<script src="app.js?v=18"></script>
 </body>
 </html>

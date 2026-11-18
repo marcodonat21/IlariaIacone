@@ -57,11 +57,16 @@ try{notte(localStorage.getItem("notte")==="1")}catch(e){}
 document.addEventListener("click",function(e){if(e.target.closest(".notte-t"))notte(!document.documentElement.classList.contains("notte"))});
 
 /* ---------------- accesso ---------------- */
-$("lform").onsubmit=function(e){e.preventDefault();var m=$("lmail").value.trim();if(!m)return;$("lbtn").disabled=true;$("lmsg").className="hint";$("lmsg").textContent="Invio in corso…";
+$("lform").onsubmit=function(e){e.preventDefault();var m=$("lmail").value.trim().toLowerCase();if(!m)return;$("lbtn").disabled=true;$("lmsg").className="hint";$("lmsg").textContent="Invio in corso…";
   sb.auth.signInWithOtp({email:m,options:{shouldCreateUser:false,emailRedirectTo:location.origin+location.pathname}}).then(function(r){
     $("lbtn").disabled=false;
     if(r.error){$("lmsg").className="hint err";$("lmsg").textContent=/not allowed|not found|Signups/i.test(r.error.message)?"Questa email non è abilitata all'agenda.":/rate|seconds/i.test(r.error.message)?"Hai già chiesto un link da poco: aspetta un minuto e riprova.":"Non sono riuscito a mandare il link: riprova tra poco.";return}
-    $("lmsg").className="hint ok";$("lmsg").textContent="Fatto! Apri la mail che ti ho mandato e tocca il link per entrare."})};
+    $("lmsg").className="hint ok";$("lmsg").textContent="Fatto! Apri la mail: tocca il link, oppure scrivi qui sotto il codice.";$("lcform").hidden=false;$("lcode").focus()})};
+$("lcform").onsubmit=function(e){e.preventDefault();var m=$("lmail").value.trim().toLowerCase(),c=$("lcode").value.replace(/\D/g,"");if(c.length<6){$("lcmsg").className="hint err";$("lcmsg").textContent="Il codice ha almeno 6 cifre.";return}
+  $("lcbtn").disabled=true;$("lcmsg").className="hint";$("lcmsg").textContent="Controllo il codice…";
+  sb.auth.verifyOtp({email:m,token:c,type:"email"}).then(function(r){$("lcbtn").disabled=false;
+    if(r.error){$("lcmsg").className="hint err";$("lcmsg").textContent=/expired|invalid/i.test(r.error.message)?"Codice sbagliato o scaduto: chiedine uno nuovo.":"Non sono riuscito a entrare: riprova.";return}
+    if(r.data&&r.data.session&&!ST)start(r.data.session)})};
 $("logout").onclick=function(){sb.auth.signOut().then(function(){location.reload()})};
 sb.auth.onAuthStateChange(function(ev,session){if(ev==="SIGNED_IN"&&session&&!ST)start(session)});
 sb.auth.getSession().then(function(r){if(r.data.session)start(r.data.session);else $("login").hidden=false});
