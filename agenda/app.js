@@ -611,7 +611,7 @@ function loadFatt(){var B=$("fBox");B.innerHTML='<div class="card glass"><span c
       L.forEach(function(x){var p=x.paziente||{};["cf","indirizzo","cap","citta","prov","email","telefono"].forEach(function(k){if(!x[k]&&p[k])x[k]=p[k]})});
       var da=L.filter(function(x){return !x.fattura_num}),fatte=L.filter(function(x){return x.fattura_num}).slice(0,15);
       B.innerHTML='<div class="kpis k3"><div class="kpi glass orange"><small>Da emettere</small><b>'+da.length+'</b><span>'+eur(da.reduce(function(s,x){return s+ +x.importo},0))+'</span></div><div class="kpi glass green"><small>Emesse</small><b>'+L.filter(function(x){return x.fattura_num}).length+'</b><span>ultimi 4 mesi</span></div><div class="kpi glass"><small>Di cui POS</small><b>'+da.filter(function(x){return x.metodo==="POS"}).length+'</b><span>da emettere</span></div></div>'+
-        '<div class="card glass"><div class="hrow"><h2>Da emettere</h2>'+(da.length?'<button class="btn ghost small" data-xall>📋 Copia tutte per Excel</button>':'')+'</div>'+(da.length?da.map(fRow).join(""):'<div class="empty">Nessuna fattura da emettere. 🎉</div>')+'</div>'+
+        '<div class="card glass"><div class="hrow"><h2>Da emettere</h2>'+(da.length?'<button class="fbtn" data-xall>📋 Copia tutte per Excel</button>':'')+'</div>'+(da.length?da.map(fRow).join(""):'<div class="empty">Nessuna fattura da emettere. 🎉</div>')+'</div>'+
         (fatte.length?'<div class="card glass"><h2>Emesse di recente</h2>'+fatte.map(fRow).join("")+'</div>':'');
       B.onclick=function(e){if(e.target.closest("[data-xall]")){var ns=da.filter(function(x){return !studioDi(x)}).length;return copia(da.slice().reverse().map(xlsRiga).join("\n"),da.length+" righe copiate"+(ns?" ("+ns+" senza studio: tocca «riga Excel» su quelle per sceglierlo)":": incollale nel file Excel (colonna A)."))}
         var b=e.target.closest("[data-fi]");if(!b)return;if(b.dataset.act==="xls"){var xx=L.filter(function(i){return i.id===b.dataset.fi})[0];if(studioDi(xx))return copia(xlsRiga(xx),"Riga copiata: incollala nel file Excel (colonna A).");
@@ -623,11 +623,16 @@ function loadFatt(){var B=$("fBox");B.innerHTML='<div class="card glass"><span c
   if(FM==="emesse"){var anno=new Date().getFullYear();q(sb.from("fatture").select("*").eq("studio_id",ST.id).order("anno",{ascending:false}).order("numero",{ascending:false})).then(function(L){
     var anni={};anni[anno]=1;L.forEach(function(f){anni[f.anno]=1});var sel=+($("fAnno")&&$("fAnno").value)||anno,LL=L.filter(function(f){return f.anno===sel}),ult=LL[0];
     B.innerHTML='<div class="card glass"><div class="hrow"><h2>Fatture '+sel+'</h2><select id="fAnno" class="mpick">'+Object.keys(anni).sort().reverse().map(function(a){return '<option'+(+a===sel?" selected":"")+'>'+a+'</option>'}).join("")+'</select></div>'+
-      (own()?'<button class="btn block" data-new style="margin-bottom:10px">+ Nuova fattura</button>':'')+
-      (LL.length?LL.map(function(f){return '<div class="irow"><div class="chi"><b>n. '+f.numero+'/'+f.anno+' · '+esc(f.nome)+'</b><small>'+dmy(f.data)+' · '+esc(f.metodo)+(f.bollo>0?" · bollo "+eur(f.bollo):"")+'</small></div><div class="imp">'+eur(+f.importo+ +f.bollo)+'</div><button class="btn ghost small" data-pdf="'+f.id+'">PDF</button>'+(f.email?'<button class="btn ghost small" data-fmail="'+f.id+'" title="'+esc(f.email)+'">'+(f.inviata?"✓ Inviata":"✉️ Invia")+'</button>':'')+(own()&&ult&&ult.id===f.id?'<button class="x" data-fdel="'+f.id+'" aria-label="Elimina">✕</button>':'')+'</div>'}).join(""):'<div class="empty">Nessuna fattura in questo anno.</div>')+'</div>';
+      (own()?'<button class="fbtn p wide" data-new>+ Nuova fattura</button>':'')+
+      (LL.length?LL.map(function(f){var pr=f.bollo>0;return '<div class="frow"><div class="ftop"><div class="chi"><b>FT '+f.numero+' · '+esc(f.nome)+'</b><small>'+dmy(f.data)+' · '+esc(f.metodo)+(pr?" · con marca da bollo":"")+'</small>'+
+        '<div>'+(f.protocollo_ts?'<span class="pill g">Prot. TS '+esc(f.protocollo_ts)+'</span>':'<span class="pill o">protocollo TS da inserire</span>')+(f.inviata?'<span class="pill g">✓ inviata</span>':'')+(!f.email?'<span class="pill o">manca email</span>':'')+'</div></div><div class="imp">'+eur(+f.importo+ +f.bollo)+'</div></div>'+
+        '<div class="facts">'+(pr?'<button class="fbtn" data-pdf="'+f.id+'">🖨️ PDF da stampare</button>'+(f.email?'<button class="fbtn p" data-scan="'+f.id+'">⬆️ Carica scansione e invia</button>':''):
+          '<button class="fbtn" data-pdf="'+f.id+'">📄 PDF</button>'+(f.email?'<button class="fbtn p" data-fmail="'+f.id+'">✉️ '+(f.inviata?"Invia di nuovo":"Invia al paziente")+'</button>':''))+
+        '<button class="fbtn" data-fts="'+f.id+'">✏️ N. e protocollo</button>'+(own()&&ult&&ult.id===f.id?'<button class="fbtn del" data-fdel="'+f.id+'">Elimina</button>':'')+'</div></div>'}).join(""):'<div class="empty">questo anno.</div>')+'</div>';
     $("fAnno").onchange=loadFatt;
     B.onclick=function(e){var p=e.target.closest("[data-pdf]");if(p)fattPdf(L.filter(function(f){return f.id===p.dataset.pdf})[0]);
-      var fm=e.target.closest("[data-fmail]");if(fm){var ff=L.filter(function(f){return f.id===fm.dataset.fmail})[0];mailDoc("fattura",ff.id,ff.email,fattHtml(ff),"Fattura "+ff.numero+"-"+ff.anno+" "+ff.nome)}if(e.target.closest("[data-new]"))fattForm(null);
+      var fm=e.target.closest("[data-fmail]");if(fm){var ff=L.filter(function(f){return f.id===fm.dataset.fmail})[0];conProt(ff,function(){mailDoc("fattura",ff.id,ff.email,fattHtml(ff),fattNome(ff))})}var sc=e.target.closest("[data-scan]");if(sc){var fs=L.filter(function(f){return f.id===sc.dataset.scan})[0];conProt(fs,function(){scanForm(fs)})}
+      var ft=e.target.closest("[data-fts]");if(ft)protForm(L.filter(function(f){return f.id===ft.dataset.fts})[0],null);if(e.target.closest("[data-new]"))fattForm(null);
       var d=e.target.closest("[data-fdel]");if(d)ask("Eliminare l'ultima fattura?","Si può eliminare solo l'ultima, per non lasciare buchi nella numerazione.","Sì, elimina",function(){var f=L.filter(function(x){return x.id===d.dataset.fdel})[0];
         sb.from("fatture").delete().eq("id",f.id).then(function(r){if(r.error)return err(r.error);if(f.incasso_id)sb.from("incassi").update({fattura_num:null}).eq("id",f.incasso_id).then(function(){});toast("Fattura eliminata.");loadFatt()})})}}).catch(err)}
   if(FM==="studio"){var s=fisc(),F=[["nome","Nome e titolo"],["qualifica","Qualifica"],["indirizzo","Indirizzo dello studio"],["citta","Città"],["cap","CAP"],["prov","Provincia"],["piva","Partita IVA"],["cf","Codice fiscale"],["albo","Iscrizione all'albo"],["tel","Telefono"],["email","Email"],["iban","IBAN"]];
@@ -645,21 +650,38 @@ function xlsRiga(x){var a=x.app||{},t=(x.descrizione||a.tipo||"")+"",on=/on.?lin
     tipo=/prima|1°/i.test(t)?"1°VISITA":/controllo/i.test(t)?"CONTROLLO":t.toUpperCase(),
     sd=studioDi(x),studio=(on||/^online$/i.test(sd))?"ON-LINE":sd.toUpperCase(),d=(x.data||"").split("-"),
     pag={POS:"SUMUP",Contanti:"CONTANTI",Bonifico:"BONIFICO",Satispay:"SATISPAY"}[x.metodo]||(x.metodo||"").toUpperCase();
-  return [d[2]+"/"+d[1]+"/"+d[0],((x.nome||"")+" "+tipo+(on&&!/ON-LINE/.test(tipo)?" ON-LINE":"")).toUpperCase().replace(/\s+/g," ").trim(),xlsEur(+x.importo),"",studio,"","",(x.cf||"").toUpperCase(),xlsEur(+x.importo/1.04),pag,""].join("\t")}
+  return [d[2]+"/"+d[1]+"/"+d[0],((x.nome||"")+" "+tipo+(on&&!/ON-LINE/.test(tipo)?" ON-LINE":"")).toUpperCase().replace(/\s+/g," ").trim(),xlsEur(+x.importo),"",studio,x.fattura_num&&x.fattura_num!=="Emessa"?"FT "+String(x.fattura_num).split("/")[0]:"",x.protocollo_ts||"",(x.cf||"").toUpperCase(),xlsEur(+x.importo/1.04),pag,""].join("\t")}
 function copia(t,msg){var ok=function(){toast(msg||"Copiato.")};
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,function(){copia2(t)&&ok()});else if(copia2(t))ok()}
 function copia2(t){var a=document.createElement("textarea");a.value=t;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();var r=false;try{r=document.execCommand("copy")}catch(e){}a.remove();if(!r)toast("Non riesco a copiare: tieni premuto sul testo.");return r}
 function fRow(x){var dati=[x.nome,x.cf,[x.indirizzo,[x.cap,x.citta,x.prov?"("+x.prov+")":""].filter(Boolean).join(" ")].filter(Boolean).join(", ")].filter(Boolean).join(" · ");
-  var manca=!(x.cf&&x.indirizzo&&x.citta);
-  return '<div class="irow" style="align-items:flex-start"><div class="chi"><b>'+esc(x.nome||"—")+'</b><small>'+dmy(x.data)+(studioDi(x)?' · '+esc(studioDi(x)):'')+' · '+esc(x.descrizione||"")+' · '+esc(x.metodo)+(x.bollo?" · marca da bollo 2 €":"")+(x.opposizione_ts?" · opposizione TS":"")+'</small>'+
-    '<div class="sub" style="font-size:.82rem">'+esc(x.cf||"CF mancante")+' · '+esc(x.indirizzo?[x.indirizzo,x.cap,x.citta,x.prov].filter(Boolean).join(" "):"residenza mancante")+(x.email?" · "+esc(x.email):"")+'<button class="copy" data-fi="'+x.id+'" data-act="copia" data-txt="'+esc(dati)+'">copia dati</button><button class="copy" data-fi="'+x.id+'" data-act="xls">📋 riga Excel</button></div>'+
-    (x.fattura_num?'<span class="pill g">fattura '+esc(x.fattura_num)+'</span>':(manca?'<span class="pill o">mancano dati</span> ':'')+(studioDi(x)?'':'<span class="pill o">studio da scegliere</span>'))+'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div class="imp">'+eur(x.importo)+'</div>'+
-    (x.fattura_num?'<button class="btn ghost small" data-fi="'+x.id+'" data-act="togli">Annulla segno</button>':(own()?'<button class="btn small" data-fi="'+x.id+'" data-act="crea">Crea fattura</button>':'')+'<button class="btn ghost small" data-fi="'+x.id+'" data-act="segna">Segna emessa</button>')+'</div></div>'}
-function segnaForm(x){sheet('<h2>Segna la fattura come emessa</h2><div class="sub">'+esc(x.nome)+' · '+eur(x.importo)+' · '+dmy(x.data)+'</div><label>Numero della fattura (facoltativo)</label><input id="sgN" placeholder="Es. 12/2026"><button class="btn block" id="sgOk" style="margin-top:14px">Segna emessa</button>',function(box,close){
-  box.querySelector("#sgOk").onclick=function(){sb.from("incassi").update({fattura_num:box.querySelector("#sgN").value.trim()||"Emessa"}).eq("id",x.id).then(function(r){if(r.error)return err(r.error);close();toast("Segnata come emessa.");loadFatt()})}})}
+  var manca=!(x.cf&&x.indirizzo&&x.citta),sd=studioDi(x);
+  return '<div class="frow"><div class="ftop"><div class="chi"><b>'+esc(x.nome||"—")+'</b><small>'+dmy(x.data)+(sd?' · '+esc(sd):'')+' · '+esc(x.descrizione||"")+' · '+esc(x.metodo)+(x.bollo?" · marca da bollo":"")+(x.opposizione_ts?" · opposizione TS":"")+'</small>'+
+    '<small class="fdati">'+esc(x.cf||"CF mancante")+' · '+esc(x.indirizzo?[x.indirizzo,x.cap,x.citta,x.prov].filter(Boolean).join(" "):"residenza mancante")+(x.email?" · "+esc(x.email):"")+'</small>'+
+    '<div>'+(x.fattura_num?'<span class="pill g">FT '+esc(String(x.fattura_num).split("/")[0])+'</span>'+(x.protocollo_ts?'<span class="pill g">Prot. TS '+esc(x.protocollo_ts)+'</span>':'<span class="pill o">protocollo TS da inserire</span>'):(manca?'<span class="pill o">mancano dati</span>':''))+(sd?'':'<span class="pill o">studio da scegliere</span>')+'</div></div><div class="imp">'+eur(x.importo)+'</div></div>'+
+    '<div class="facts">'+(x.fattura_num?'<button class="fbtn" data-fi="'+x.id+'" data-act="segna">✏️ N. e protocollo</button>':(own()?'<button class="fbtn p" data-fi="'+x.id+'" data-act="crea">Crea fattura</button>':'')+'<button class="fbtn" data-fi="'+x.id+'" data-act="segna">Già emessa</button>')+
+    '<button class="fbtn" data-fi="'+x.id+'" data-act="xls">📋 Riga Excel</button><button class="fbtn" data-fi="'+x.id+'" data-act="copia" data-txt="'+esc(dati)+'">Copia dati</button>'+
+    (x.fattura_num?'<button class="fbtn del" data-fi="'+x.id+'" data-act="togli">Annulla</button>':'')+'</div></div>'}
+function segnaForm(x){var n=x.fattura_num?String(x.fattura_num).split("/")[0]:"";
+  sheet('<h2>'+(x.fattura_num?"Numero e protocollo":"Fattura già emessa")+'</h2><div class="sub">'+esc(x.nome)+' · '+eur(x.importo)+' · '+dmy(x.data)+'</div>'+
+    '<div class="row keep"><div><label>Numero fattura (FT)</label><input id="sgN" inputmode="numeric" value="'+esc(n==="Emessa"?"":n)+'" placeholder="Es. 738"></div><div><label>Protocollo Sistema TS</label><input id="sgP" inputmode="numeric" value="'+esc(x.protocollo_ts||"")+'" placeholder="17 cifre"></div></div>'+
+    '<button class="btn block" id="sgOk" style="margin-top:14px">Salva</button>',function(box,close){
+  box.querySelector("#sgOk").onclick=function(){var nn=box.querySelector("#sgN").value.trim().replace(/^FT\s*/i,""),pp=box.querySelector("#sgP").value.replace(/\s/g,"");
+    sb.from("incassi").update({fattura_num:nn||"Emessa",protocollo_ts:pp||null}).eq("id",x.id).then(function(r){if(r.error)return err(r.error);
+      if(pp)sb.from("fatture").update({protocollo_ts:pp}).eq("incasso_id",x.id).then(function(){});close();toast("Salvato.");loadFatt()})}})}
+/* numero FT e protocollo TS di una fattura emessa (il protocollo serve prima dell'invio) */
+function protForm(f,dopo){sheet('<h2>Numero e protocollo</h2><div class="sub">'+esc(f.nome)+' · '+dmy(f.data)+(dopo?'<br>Prima di mandarla inserisci il protocollo del Sistema Tessera Sanitaria.':'')+'</div>'+
+    '<div class="row keep"><div><label>Numero fattura (FT)</label><input id="pfN" inputmode="numeric" value="'+f.numero+'"></div><div><label>Protocollo Sistema TS</label><input id="pfP" inputmode="numeric" value="'+esc(f.protocollo_ts||"")+'" placeholder="17 cifre"></div></div>'+
+    '<div class="hint" id="pfM"></div><button class="btn block" id="pfOk" style="margin-top:14px">'+(dopo?"Salva e continua":"Salva")+'</button>',function(box,close){
+  box.querySelector("#pfOk").onclick=function(){var n=parseInt(box.querySelector("#pfN").value.replace(/\D/g,""),10),pp=box.querySelector("#pfP").value.replace(/\s/g,""),m=box.querySelector("#pfM");
+    if(!(n>0)){m.className="hint err";m.textContent="Controlla il numero.";return}if(dopo&&!pp){m.className="hint err";m.textContent="Inserisci il protocollo TS.";return}
+    sb.from("fatture").update({numero:n,protocollo_ts:pp||null}).eq("id",f.id).then(function(r){if(r.error){m.className="hint err";m.textContent=/duplicate|unique/i.test(r.error.message)?"La fattura n. "+n+"/"+f.anno+" esiste già.":r.error.message;return}
+      f.numero=n;f.protocollo_ts=pp||null;if(f.incasso_id)sb.from("incassi").update({fattura_num:n+"/"+f.anno,protocollo_ts:pp||null}).eq("id",f.incasso_id).then(function(){});
+      close();if(dopo)dopo();else{toast("Salvato.");loadFatt()}})}})}
+function conProt(f,fn){if(f.protocollo_ts)fn();else protForm(f,fn)}
 function fattForm(x){if(!studioOk()){toast("Prima completa i dati dello studio (partita IVA, indirizzo e città).");FM="studio";$$("#fMode button").forEach(function(b){b.classList.toggle("on",b.dataset.f==="studio")});return loadFatt()}
   var anno=new Date().getFullYear();q(sb.from("fatture").select("numero").eq("studio_id",ST.id).eq("anno",anno).order("numero",{ascending:false}).limit(1)).then(function(L){var next=(L[0]?L[0].numero:0)+1;x=x||{};
-    sheet('<h2>Nuova fattura</h2><div class="row keep"><div><label>Numero</label><input id="fN" inputmode="numeric" value="'+next+'"></div><div><label>Data</label><input type="date" id="fD" value="'+ymd(new Date())+'"></div></div>'+
+    sheet('<h2>Nuova fattura</h2><div class="row3"><div><label>Numero (FT)</label><input id="fN" inputmode="numeric" value="'+next+'"></div><div><label>Data</label><input type="date" id="fD" value="'+ymd(new Date())+'"></div><div><label>Protocollo TS</label><input id="fPt" inputmode="numeric" value="'+esc(x&&x.protocollo_ts||"")+'" placeholder="si può aggiungere dopo"></div></div>'+
       '<label>Nome e cognome *</label><input id="fNo" value="'+esc(x.nome||"")+'"><div class="row"><div><label>Codice fiscale</label><input id="fCf" value="'+esc(x.cf||"")+'" style="text-transform:uppercase"></div><div><label>Email</label><input id="fE" value="'+esc(x.email||"")+'"></div></div>'+
       '<label>Indirizzo</label><input id="fI" value="'+esc(x.indirizzo||"")+'"><div class="row3"><div><label>Città</label><input id="fC" value="'+esc(x.citta||"")+'"></div><div><label>CAP</label><input id="fCap" value="'+esc(x.cap||"")+'"></div><div><label>Prov.</label><input id="fP" maxlength="2" value="'+esc(x.prov||"")+'"></div></div>'+
       '<label>Descrizione</label><input id="fDe" value="'+esc(x.descrizione?"Prestazione professionale: "+x.descrizione:"Prestazione professionale di consulenza nutrizionale")+'">'+
@@ -670,17 +692,54 @@ function fattForm(x){if(!studioOk()){toast("Prima completa i dati dello studio (
           if(!v("#fNo")){m.className="hint err";m.textContent="Scrivi il nome del paziente.";return}if(!(imp>0)){m.className="hint err";m.textContent="Inserisci l'importo.";return}
           if(cf&&!cfOk(cf)){m.className="hint err";m.textContent="Il codice fiscale non sembra corretto.";return}if(!(n>0)||!d){m.className="hint err";m.textContent="Controlla numero e data.";return}
           var f={studio_id:ST.id,numero:n,anno:+d.slice(0,4),data:d,paziente_id:x.paziente_id||null,incasso_id:x.id||null,nome:v("#fNo"),cf:cf||null,indirizzo:v("#fI")||null,cap:v("#fCap")||null,citta:v("#fC")||null,prov:v("#fP").toUpperCase()||null,email:v("#fE")||null,
-            descrizione:v("#fDe")||"Prestazione professionale di consulenza nutrizionale",importo:imp,bollo:imp>(+ST.soglia_bollo||77.47)&&box.querySelector("#fB").checked?2:0,metodo:v("#fM"),opposizione_ts:box.querySelector("#fTs").checked};
+            descrizione:v("#fDe")||"Prestazione professionale di consulenza nutrizionale",importo:imp,bollo:imp>(+ST.soglia_bollo||77.47)&&box.querySelector("#fB").checked?2:0,metodo:v("#fM"),opposizione_ts:box.querySelector("#fTs").checked,protocollo_ts:v("#fPt").replace(/\s/g,"")||null};
           sb.from("fatture").insert(f).select().single().then(function(r){if(r.error){if(/duplicate|unique/i.test(r.error.message)){m.className="hint err";m.textContent="La fattura n. "+n+"/"+f.anno+" esiste già.";return}return err(r.error)}
-            if(x.id)sb.from("incassi").update({fattura_num:n+"/"+f.anno}).eq("id",x.id).then(function(){});close();toast("Fattura n. "+n+"/"+f.anno+" creata.");fattPdf(r.data);loadFatt()})}})})}
-function fattPdf(f){$("print").innerHTML=fattHtml(f);window.print()}
-function fattHtml(f){var s=fisc(),tot=+f.importo+ +f.bollo;
-  return '<div class="doc"><div class="hd"><div><h1>'+esc(s.nome||ST.nome)+'</h1><div>'+esc(s.qualifica||"")+'</div><small>'+esc([s.indirizzo,[s.cap,s.citta,s.prov?"("+s.prov+")":""].filter(Boolean).join(" ")].filter(Boolean).join(", "))+'<br>P. IVA '+esc(s.piva||"")+(s.cf?' · C.F. '+esc(s.cf):'')+(s.albo?'<br>'+esc(s.albo):'')+'<br>'+esc([s.tel,s.email].filter(Boolean).join(" · "))+'</small></div>'+
-    '<div style="text-align:right"><h1 style="font-size:16pt;color:#111">Fattura n. '+f.numero+'/'+f.anno+'</h1><div>del '+dmy(f.data)+'</div></div></div>'+
-    '<div><small>Spett.le</small><br><b>'+esc(f.nome)+'</b><br>'+esc([f.indirizzo,[f.cap,f.citta,f.prov?"("+f.prov+")":""].filter(Boolean).join(" ")].filter(Boolean).join(", "))+(f.cf?'<br>C.F. '+esc(f.cf):'')+'</div>'+
-    '<table><tr><th>Descrizione</th><th class="r">Importo</th></tr><tr><td>'+esc(f.descrizione)+'</td><td class="r">'+eur(f.importo)+'</td></tr>'+(f.bollo>0?'<tr><td>Imposta di bollo assolta sull’originale</td><td class="r">'+eur(f.bollo)+'</td></tr>':'')+'<tr class="tot"><td>Totale</td><td class="r">'+eur(tot)+'</td></tr></table>'+
-    '<div>Pagamento: '+esc(f.metodo)+(f.metodo==="Bonifico"&&s.iban?" · IBAN "+esc(s.iban):"")+'</div>'+(f.opposizione_ts?'<div><small>Il paziente si è opposto alla trasmissione dei dati al Sistema Tessera Sanitaria.</small></div>':'')+
-    '<div class="note">'+esc(s.nota1||"")+'<br>'+esc(s.nota2||"")+'</div></div>'}
+            if(x.id)sb.from("incassi").update({fattura_num:n+"/"+f.anno,protocollo_ts:f.protocollo_ts}).eq("id",x.id).then(function(){});close();var nf=r.data;toast("Fattura FT "+n+" creata.");loadFatt();
+            if(nf.bollo>0){fattPdf(nf);setTimeout(function(){toast("Ha la marca da bollo: stampala, poi in «Fatture emesse» carica la scansione per mandarla.")},2600)}
+            else if(nf.email)conProt(nf,function(){mailDoc("fattura",nf.id,nf.email,fattHtml(nf),fattNome(nf))});else fattPdf(nf)})}})})}
+function fattHtml(f){var s=fisc(),imp=+f.importo,bol=+f.bollo||0,base=Math.round(imp/1.04*100)/100,enp=Math.round((imp-base)*100)/100,tot=imp+bol;
+  var e2=function(n){return n.toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €"},
+      mesi=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"],dd=(f.data||"").split("-"),quando=(+dd[2])+" "+mesi[+dd[1]-1]+" "+dd[0],
+      sito=(ST.sito||"www.nutrizionistaiacone.it").replace(/^https?:\/\//,"").replace(/\/$/,""),wa=ST.whatsapp||s.tel||"",
+      addrS=[s.indirizzo,[s.cap,s.citta,s.prov?"("+s.prov+")":""].filter(Boolean).join(" ")].filter(Boolean).join(" · "),
+      addrP=[f.indirizzo,[f.cap,f.citta,f.prov?"("+f.prov+")":""].filter(Boolean).join(" ")].filter(Boolean).join(" · ");
+  return '<div class="rep fat"><div class="rp">'+
+    '<div class="rhd"><img src="/img/logo-i.svg" alt=""><div class="rbr"><b>'+esc(s.nome||ST.nome||"Ilaria Iacone")+'</b><span>'+esc(s.qualifica||ST.professione||"")+'</span></div><div class="rdx">'+esc(sito)+'</div></div>'+
+    '<span class="rtag">FATTURA</span><h1 class="rt">Fattura n. '+f.numero+' <em>del '+quando+'</em></h1>'+
+    '<div class="fparti"><div><small>Emessa da</small><b>'+esc(s.nome||ST.nome||"")+'</b>'+(s.albo?'<div>'+esc(s.albo)+'</div>':'')+(addrS?'<div>'+esc(addrS)+'</div>':'')+(s.piva?'<div>P. IVA '+esc(s.piva)+'</div>':'')+(s.cf?'<div>C.F. '+esc(s.cf)+'</div>':'')+'</div>'+
+    '<div><small>Intestata a</small><b>'+esc(f.nome)+'</b>'+(addrP?'<div>'+esc(addrP)+'</div>':'')+(f.cf?'<div>C.F. '+esc(f.cf)+'</div>':'')+(f.email?'<div>'+esc(f.email)+'</div>':'')+'</div></div>'+
+    '<table class="ftab"><thead><tr><th>Descrizione</th><th class="r">Importo</th></tr></thead><tbody>'+
+      '<tr><td>'+esc(f.descrizione||"Visita nutrizionale")+'</td><td class="r">'+e2(base)+'</td></tr>'+
+      '<tr><td>Contributo integrativo ENPAB 4% <small>(art. 8, comma 3, D.Lgs. 103/96)</small></td><td class="r">'+e2(enp)+'</td></tr></tbody></table>'+
+    '<div class="ftot"><div><span>Imponibile</span><b>'+e2(imp)+'</b></div>'+(bol?'<div><span>Imposta di bollo sull’originale</span><b>'+e2(bol)+'</b></div>':'')+'<div class="g"><span>Totale fattura</span><b>'+e2(tot)+'</b></div></div>'+
+    '<div class="fpag"><div><small>Pagamento</small>'+esc(f.metodo||"")+(f.metodo==="Bonifico"&&s.iban?" · IBAN "+esc(s.iban):"")+'</div><div><small>Termini di pagamento</small>Data fattura</div></div>'+
+    '<div class="fnote">'+[s.nota1,s.nota2].filter(Boolean).map(esc).join("<br>")+(f.opposizione_ts?'<br>Il paziente si è opposto alla trasmissione dei dati al Sistema Tessera Sanitaria.':'')+'</div>'+
+    (bol?'<div class="fbollo"><div><span>Spazio per la<br><b>marca da bollo</b><br>da 2,00 €</span></div><div><span>Timbro e firma</span></div></div>':'')+
+    '<div class="rft">'+esc([sito,wa?"WhatsApp "+wa:"",s.email||""].filter(Boolean).join("  ·  "))+'</div></div></div>'}
+function fattNome(f){return "Fattura "+f.numero+"-"+f.anno+" "+f.nome}
+/* scarica il PDF della fattura (da stampare se ha la marca da bollo) */
+function fattPdf(f){toast("Preparo il PDF…");pdfB64(fattHtml(f)).then(function(b){scarica(b,fattNome(f)+".pdf")}).catch(function(e){toast(e&&e.message?e.message:"Non sono riuscito a preparare il PDF.")})}
+function scarica(b64,nome){var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+  var url=URL.createObjectURL(new Blob([u],{type:"application/pdf"})),a=document.createElement("a");a.href=url;a.download=nome;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},60000)}
+/* scansione della fattura con la marca da bollo: PDF o foto → PDF → mail al paziente */
+function scanForm(f){
+  sheet('<h2>Invia la fattura con la marca da bollo</h2><div class="sub">FT '+f.numero+' · '+esc(f.nome)+' · '+esc(f.email)+'</div>'+
+    '<label>Scansione o foto della fattura (PDF, JPG o PNG; puoi scegliere più foto)</label><input type="file" id="scF" accept="application/pdf,image/*" multiple>'+
+    '<div class="hint" id="scMsg">Stampa il PDF, applica la marca da bollo, timbra e firma: poi carica qui la scansione e la mando al paziente.</div><button class="btn block" id="scOk" style="margin-top:14px" disabled>✉️ Manda al paziente</button>',function(box,close){
+    var inp=box.querySelector("#scF"),ok=box.querySelector("#scOk"),m=box.querySelector("#scMsg");
+    inp.onchange=function(){ok.disabled=!inp.files.length};
+    ok.onclick=function(){ok.disabled=true;m.className="hint";m.textContent="Preparo il file…";
+      scanPdf([].slice.call(inp.files)).then(function(b64){if(b64.length>7800000)throw new Error("Il file è troppo grande (max circa 5 MB): scansiona a risoluzione più bassa.");m.textContent="Invio in corso…";
+        return sb.functions.invoke("mail",{body:{tipo:"fattura",id:f.id,pdf:b64,file:fattNome(f)}})}).then(function(r){
+        if(r.error||!r.data||!r.data.ok)throw new Error("La mail non è partita: riprova.");close();toast("Fattura inviata a "+f.email+" ✉️");loadFatt()}).catch(function(e){ok.disabled=false;m.className="hint err";m.textContent=e&&e.message?e.message:"La mail non è partita."})}})}
+function leggi(file,come){return new Promise(function(ok,ko){var r=new FileReader();r.onload=function(){ok(r.result)};r.onerror=function(){ko(new Error("Non riesco a leggere il file."))};r[come](file)})}
+function scanPdf(files){var pdf=files.filter(function(x){return /pdf$/i.test(x.type)||/\.pdf$/i.test(x.name)})[0];
+  if(pdf)return leggi(pdf,"readAsDataURL").then(function(u){var b=u.split(",")[1];if(!/^JVBER/.test(b))throw new Error("Il file non sembra un PDF.");return b});
+  return pdfLibs().then(function(){var doc=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),i=0;
+    return files.reduce(function(pr,fl){return pr.then(function(){return leggi(fl,"readAsDataURL")}).then(function(u){return new Promise(function(ok,ko){var im=new Image();im.onload=function(){
+      var k=Math.min(1,1700/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+      var w=190,h=c.height*w/c.width;if(h>277){h=277;w=c.width*h/c.height}if(i++)doc.addPage();doc.addImage(c.toDataURL("image/jpeg",.82),"JPEG",(210-w)/2,10,w,h);ok()};im.onerror=function(){ko(new Error("Non riesco ad aprire la foto "+fl.name+"."))};im.src=u})})},Promise.resolve())
+      .then(function(){return doc.output("datauristring").split(",")[1]})})}
 /* PDF vero (non la stampa) da allegare alla mail */
 function toPng(src,w,h){return new Promise(function(ok){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=Math.round(w*3);c.height=Math.round(h*3);var x=c.getContext("2d");x.scale(3,3);x.drawImage(im,0,0,w,h);try{ok(c.toDataURL("image/png"))}catch(e){ok(null)}};im.onerror=function(){ok(null)};im.src=src})}
 function rast(el){var J=[].map.call(el.querySelectorAll("svg"),function(sv){var r=sv.getBoundingClientRect(),c=sv.cloneNode(true);c.setAttribute("xmlns","http://www.w3.org/2000/svg");c.setAttribute("width",r.width);c.setAttribute("height",r.height);
@@ -693,7 +752,7 @@ var LIBS=null;function pdfLibs(){return LIBS||(LIBS=Promise.all(["https://cdnjs.
 function pdfB64(html){var fr;return pdfLibs().then(function(){return new Promise(function(ok){
     fr=document.createElement("iframe");fr.setAttribute("aria-hidden","true");fr.style.cssText="position:fixed;left:-10000px;top:0;width:820px;height:1200px;border:0";document.body.appendChild(fr);
     var d=fr.contentDocument;fr.onload=function(){ok(d)};
-    d.open();d.write('<!doctype html><html><head><meta charset="utf-8"><base href="'+location.href+'"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap"><link rel="stylesheet" href="app.css?v=10"><style>html,body{margin:0;padding:0;background:#fff;min-height:0}body:before{display:none}.pdfbox{position:static;left:0;padding:0}</style></head><body><div class="pdfbox">'+html+'</div></body></html>');d.close()})})
+    d.open();d.write('<!doctype html><html><head><meta charset="utf-8"><base href="'+location.href+'"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap"><link rel="stylesheet" href="app.css?v=15"><style>html,body{margin:0;padding:0;background:#fff;min-height:0}body:before{display:none}.pdfbox{position:static;left:0;padding:0}</style></head><body><div class="pdfbox">'+html+'</div></body></html>');d.close()})})
   .then(function(d){var F=d.fonts;return (F?Promise.all(["700 20px 'Playfair Display'","italic 700 20px 'Playfair Display'","italic 400 14px 'Playfair Display'","400 12px Inter","500 12px Inter","600 12px Inter","700 12px Inter"].map(function(f){return F.load(f).catch(function(){})})).then(function(){return F.ready}):Promise.resolve()).then(function(){d.body.offsetHeight;return new Promise(function(ok){setTimeout(ok,300)})}).then(function(){return rast(d.querySelector(".pdfbox"))}).then(function(){
     var P=[].slice.call(d.querySelectorAll(".rp"));if(!P.length)P=[d.querySelector(".pdfbox").firstElementChild];
     var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",orientation:"portrait"}),i=0;
