@@ -471,3 +471,5 @@ html.notte .fbtn{background:rgba(255,255,255,.08);color:#f2f2f7;border-color:rgb
 .rep .fbollo div{width:46mm;height:34mm;border:1.5px dashed #d9a9ae;border-radius:10px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:8pt;color:#a07a7e;line-height:1.4}
 .rep .fbollo b{color:var(--rr)}
 .rep.fat .rft{margin-top:22px}
+.fstep{margin-top:14px;background:var(--fill);border-radius:14px;padding:12px 14px;font-size:.86rem;line-height:1.45;color:var(--text)}
+.fstep b{display:block;color:var(--red);margin-bottom:3px}
