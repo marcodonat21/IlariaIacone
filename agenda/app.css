@@ -476,14 +476,15 @@ html.notte .fbtn{background:rgba(255,255,255,.08);color:#f2f2f7;border-color:rgb
 .fstep{margin-top:14px;background:var(--fill);border-radius:14px;padding:12px 14px;font-size:.86rem;line-height:1.45;color:var(--text)}
 .fstep b{display:block;color:var(--red);margin-bottom:3px}
 /* guida e avanzamento fatture */
-.fguida{padding:0!important;overflow:hidden}
-.fguida summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:700;color:var(--red)}
+.fguida{padding:0!important;overflow:hidden;margin-bottom:14px}
+.fguida summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:700;color:var(--red);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fgx{font-size:.8rem;font-weight:600;color:var(--muted);white-space:nowrap}.fgx:after{content:'Mostra ›'}.fguida[open] .fgx:after{content:'Chiudi ✕'}
 .fguida summary::-webkit-details-marker{display:none}
 .fguida[open] summary{border-bottom:1px solid var(--line)}
 .fgcols{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 18px 4px}
 .fgcols>div{background:var(--fill);border-radius:14px;padding:12px 14px;font-size:.86rem;line-height:1.45}
 .fgcols ol{margin:6px 0 0;padding-left:18px}.fgcols li{margin:3px 0}
-.fgnote{padding:8px 18px 14px;font-size:.82rem;color:var(--muted)}
+.fgnote{padding:8px 18px 14px;font-size:.82rem;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 @media(max-width:700px){.fgcols{grid-template-columns:1fr}}
 .ftrack{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:.74rem;color:var(--muted);flex-wrap:wrap}
 .ftrack span{display:flex;align-items:center;gap:5px;white-space:nowrap}
