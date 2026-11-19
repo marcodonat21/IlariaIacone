@@ -612,13 +612,14 @@ function fisc(){return ST.fiscale||{}}
 function studioOk(){var s=fisc();return !!(s.piva&&s.indirizzo&&s.citta)}
 function loadFatt(){var B=$("fBox");B.innerHTML='<div class="card glass"><span class="spin"></span></div>';
   if(FM==="da"){var lim=ymd(addD(new Date(),-120));
-    q(sb.from("incassi").select("*,paziente:pazienti(cf,indirizzo,cap,citta,prov,email,telefono)").eq("studio_id",ST.id).gte("data",lim).order("data",{ascending:false})).then(function(L){
+    q(sb.from("incassi").select("*,paziente:pazienti(cf,indirizzo,cap,citta,prov,email,telefono),app:appuntamenti(tipo,note,sede:sedi(nome))").eq("studio_id",ST.id).gte("data",lim).order("data",{ascending:false})).then(function(L){
       L.forEach(function(x){var p=x.paziente||{};["cf","indirizzo","cap","citta","prov","email","telefono"].forEach(function(k){if(!x[k]&&p[k])x[k]=p[k]})});
       var da=L.filter(function(x){return !x.fattura_num}),fatte=L.filter(function(x){return x.fattura_num}).slice(0,15);
       B.innerHTML='<div class="kpis k3"><div class="kpi glass orange"><small>Da emettere</small><b>'+da.length+'</b><span>'+eur(da.reduce(function(s,x){return s+ +x.importo},0))+'</span></div><div class="kpi glass green"><small>Emesse</small><b>'+L.filter(function(x){return x.fattura_num}).length+'</b><span>ultimi 4 mesi</span></div><div class="kpi glass"><small>Di cui POS</small><b>'+da.filter(function(x){return x.metodo==="POS"}).length+'</b><span>da emettere</span></div></div>'+
-        '<div class="card glass"><h2>Da emettere</h2>'+(da.length?da.map(fRow).join(""):'<div class="empty">Nessuna fattura da emettere. 🎉</div>')+'</div>'+
+        '<div class="card glass"><div class="hrow"><h2>Da emettere</h2>'+(da.length?'<button class="btn ghost small" data-xall>📋 Copia tutte per Excel</button>':'')+'</div>'+(da.length?da.map(fRow).join(""):'<div class="empty">Nessuna fattura da emettere. 🎉</div>')+'</div>'+
         (fatte.length?'<div class="card glass"><h2>Emesse di recente</h2>'+fatte.map(fRow).join("")+'</div>':'');
-      B.onclick=function(e){var b=e.target.closest("[data-fi]");if(!b)return;var x=L.filter(function(i){return i.id===b.dataset.fi})[0];
+      B.onclick=function(e){if(e.target.closest("[data-xall]"))return copia(da.slice().reverse().map(xlsRiga).join("\n"),da.length+" righe copiate: incollale nel file Excel (colonna A).");
+        var b=e.target.closest("[data-fi]");if(!b)return;if(b.dataset.act==="xls"){var xx=L.filter(function(i){return i.id===b.dataset.fi})[0];return copia(xlsRiga(xx),"Riga copiata: incollala nel file Excel (colonna A).")}var x=L.filter(function(i){return i.id===b.dataset.fi})[0];
         if(b.dataset.act==="crea")fattForm(x);if(b.dataset.act==="segna")segnaForm(x);if(b.dataset.act==="togli")ask("Segnare come non ancora emessa?","","Sì",function(){sb.from("incassi").update({fattura_num:null}).eq("id",x.id).then(function(r){if(r.error)return err(r.error);loadFatt()})});
         if(b.dataset.act==="copia"){navigator.clipboard&&navigator.clipboard.writeText(b.dataset.txt).then(function(){toast("Copiato.")})}}}).catch(err)}
   if(FM==="emesse"){var anno=new Date().getFullYear();q(sb.from("fatture").select("*").eq("studio_id",ST.id).order("anno",{ascending:false}).order("numero",{ascending:false})).then(function(L){
@@ -636,10 +637,21 @@ function loadFatt(){var B=$("fBox");B.innerHTML='<div class="card glass"><span c
       '<label>Nota fiscale 1</label><textarea data-s="nota1">'+esc(s.nota1||"")+'</textarea><label>Nota fiscale 2</label><textarea data-s="nota2">'+esc(s.nota2||"")+'</textarea><button class="btn block" id="sSave" style="margin-top:14px">Salva</button></div>';
     $("sSave").onclick=function(){var o={};$$("[data-s]",B).forEach(function(i){o[i.dataset.s]=i.value.trim()});o.piva=o.piva.replace(/\s/g,"");o.cf=o.cf.toUpperCase().replace(/\s/g,"");o.iban=o.iban.toUpperCase().replace(/\s/g,"");o.prov=o.prov.toUpperCase();
       sb.from("studi").update({fiscale:o}).eq("id",ST.id).then(function(r){if(r.error)return err(r.error);ST.fiscale=o;toast("Dati dello studio salvati.");loadFatt()})}}}
+/* riga per il file Excel delle fatture: DATA, DESCRIZIONE, INCASSATO, PAGATO, STUDIO, NR. FAT., PROTOCOLLO T.S., COD FISC, IMPONIBILE, PAG, INTESTATARIO
+   (numero fattura e protocollo T.S. restano vuoti: li scrive Ilaria) */
+function xlsEur(n){return (Math.round(n*100)/100).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €"}
+function xlsRiga(x){var a=x.app||{},t=(x.descrizione||a.tipo||"")+"",on=/on.?line/i.test((a.note||"")+" "+(x.note||"")+" "+t),
+    tipo=/prima|1°/i.test(t)?"1°VISITA":/controllo/i.test(t)?"CONTROLLO":t.toUpperCase(),
+    studio=on?"ON-LINE":((a.sede&&a.sede.nome)||"").toUpperCase(),d=(x.data||"").split("-"),
+    pag={POS:"SUMUP",Contanti:"CONTANTI",Bonifico:"BONIFICO",Satispay:"SATISPAY"}[x.metodo]||(x.metodo||"").toUpperCase();
+  return [d[2]+"/"+d[1]+"/"+d[0],((x.nome||"")+" "+tipo+(on&&!/ON-LINE/.test(tipo)?" ON-LINE":"")).toUpperCase().replace(/\s+/g," ").trim(),xlsEur(+x.importo),"",studio,"","",(x.cf||"").toUpperCase(),xlsEur(+x.importo/1.04),pag,""].join("\t")}
+function copia(t,msg){var ok=function(){toast(msg||"Copiato.")};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(ok,function(){copia2(t)&&ok()});else if(copia2(t))ok()}
+function copia2(t){var a=document.createElement("textarea");a.value=t;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();var r=false;try{r=document.execCommand("copy")}catch(e){}a.remove();if(!r)toast("Non riesco a copiare: tieni premuto sul testo.");return r}
 function fRow(x){var dati=[x.nome,x.cf,[x.indirizzo,[x.cap,x.citta,x.prov?"("+x.prov+")":""].filter(Boolean).join(" ")].filter(Boolean).join(", ")].filter(Boolean).join(" · ");
   var manca=!(x.cf&&x.indirizzo&&x.citta);
   return '<div class="irow" style="align-items:flex-start"><div class="chi"><b>'+esc(x.nome||"—")+'</b><small>'+dmy(x.data)+' · '+esc(x.descrizione||"")+' · '+esc(x.metodo)+(x.bollo?" · marca da bollo 2 €":"")+(x.opposizione_ts?" · opposizione TS":"")+'</small>'+
-    '<div class="sub" style="font-size:.82rem">'+esc(x.cf||"CF mancante")+' · '+esc(x.indirizzo?[x.indirizzo,x.cap,x.citta,x.prov].filter(Boolean).join(" "):"residenza mancante")+(x.email?" · "+esc(x.email):"")+'<button class="copy" data-fi="'+x.id+'" data-act="copia" data-txt="'+esc(dati)+'">copia dati</button></div>'+
+    '<div class="sub" style="font-size:.82rem">'+esc(x.cf||"CF mancante")+' · '+esc(x.indirizzo?[x.indirizzo,x.cap,x.citta,x.prov].filter(Boolean).join(" "):"residenza mancante")+(x.email?" · "+esc(x.email):"")+'<button class="copy" data-fi="'+x.id+'" data-act="copia" data-txt="'+esc(dati)+'">copia dati</button><button class="copy" data-fi="'+x.id+'" data-act="xls">📋 riga Excel</button></div>'+
     (x.fattura_num?'<span class="pill g">fattura '+esc(x.fattura_num)+'</span>':manca?'<span class="pill o">mancano dati</span>':'')+'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div class="imp">'+eur(x.importo)+'</div>'+
     (x.fattura_num?'<button class="btn ghost small" data-fi="'+x.id+'" data-act="togli">Annulla segno</button>':(own()?'<button class="btn small" data-fi="'+x.id+'" data-act="crea">Crea fattura</button>':'')+'<button class="btn ghost small" data-fi="'+x.id+'" data-act="segna">Segna emessa</button>')+'</div></div>'}
 function segnaForm(x){sheet('<h2>Segna la fattura come emessa</h2><div class="sub">'+esc(x.nome)+' · '+eur(x.importo)+' · '+dmy(x.data)+'</div><label>Numero della fattura (facoltativo)</label><input id="sgN" placeholder="Es. 12/2026"><button class="btn block" id="sgOk" style="margin-top:14px">Segna emessa</button>',function(box,close){
