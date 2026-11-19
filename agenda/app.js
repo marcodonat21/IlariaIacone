@@ -661,13 +661,14 @@ function copia2(t){var a=document.createElement("textarea");a.value=t;a.style.po
 /* guida e avanzamento delle fatture */
 function conBolloI(x){return +x.importo>(+ST.soglia_bollo||77.47)}
 function fTrack(b,fase){var L=b?["Fattura creata","Stampa, bollo e firma","Scansione inviata"]:["Fattura creata","Protocollo TS","Mail al paziente"];
-  return '<div class="ftrack">'+L.map(function(t,i){return '<span class="'+(i<fase?"ok":i===fase?"now":"")+'"><em>'+(i<fase?"✓":i+1)+'</em>'+t+'</span>'}).join('<i></i>')+'</div>'}
+  if(fase===0)L[0]="Crea la fattura";return '<div class="ftrack">'+L.map(function(t,i){return '<span class="'+(i<fase?"ok":i===fase?"now":"")+'"><em>'+(i<fase?"✓":i+1)+'</em>'+t+'</span>'}).join('<i></i>')+'</div>'}
+document.addEventListener("click",function(e){var c=e.target.closest("[data-fgclose]");if(c){var d=c.closest("details");if(d)d.open=false}});
 document.addEventListener("toggle",function(e){if(e.target.classList&&e.target.classList.contains("fguida"))try{localStorage.setItem("fGuida",e.target.open?"1":"0")}catch(x){}},true);
 function fGuida(){var chiusa=false;try{chiusa=localStorage.getItem("fGuida")==="0"}catch(e){}
-  return '<details class="card glass fguida"'+(chiusa?"":" open")+'><summary>❓ Come funzionano le fatture</summary><div class="fgcols">'+
+  return '<details class="card glass fguida"'+(chiusa?"":" open")+'><summary><span>❓ Come funzionano le fatture</span><span class="fgx"></span></summary><div class="fgcols">'+
     '<div><b>✉️ Fino a '+eur(ST.soglia_bollo||77.47)+' · senza bollo</b><ol><li>In <b>① Da fatturare</b> tocca <b>Crea fattura</b>.</li><li>Trasmetti la spesa sul sito del <b>Sistema Tessera Sanitaria</b> e scrivi il <b>protocollo</b> nel modulo.</li><li>La fattura parte <b>da sola per mail</b> al paziente.</li></ol></div>'+
     '<div><b>🖨️ Sopra '+eur(ST.soglia_bollo||77.47)+' · con marca da bollo</b><ol><li>Tocca <b>Crea fattura da stampare</b>: si scarica il PDF.</li><li><b>Stampalo</b>, metti la marca da bollo da 2 € e <b>firma</b>.</li><li>In <b>② Da inviare</b> tocca <b>Carica la scansione firmata</b>: la mando io al paziente.</li></ol></div></div>'+
-    '<div class="fgnote">Il pulsante rosso su ogni fattura è sempre il <b>prossimo passo</b> da fare.</div></details>'}
+    '<div class="fgnote"><span>Il pulsante rosso su ogni fattura è sempre il <b>prossimo passo</b> da fare.</span><button class="fbtn" data-fgclose>Ho capito, chiudi</button></div></details>'}
 function fRow(x){var dati=[x.nome,x.cf,[x.indirizzo,[x.cap,x.citta,x.prov?"("+x.prov+")":""].filter(Boolean).join(" ")].filter(Boolean).join(", ")].filter(Boolean).join(" · ");
   var manca=!(x.cf&&x.indirizzo&&x.citta),sd=studioDi(x);
   return '<div class="frow"><div class="ftop"><div class="chi"><b>'+esc(x.nome||"—")+'</b><small>'+dmy(x.data)+(sd?' · '+esc(sd):'')+' · '+esc(x.descrizione||"")+' · '+esc(x.metodo)+(x.bollo?" · marca da bollo":"")+(x.opposizione_ts?" · opposizione TS":"")+'</small>'+
@@ -778,7 +779,7 @@ var LIBS=null;function pdfLibs(){return LIBS||(LIBS=Promise.all(["https://cdnjs.
 function pdfB64(html){var fr;return pdfLibs().then(function(){return new Promise(function(ok){
     fr=document.createElement("iframe");fr.setAttribute("aria-hidden","true");fr.style.cssText="position:fixed;left:-10000px;top:0;width:820px;height:1200px;border:0";document.body.appendChild(fr);
     var d=fr.contentDocument;fr.onload=function(){ok(d)};
-    d.open();d.write('<!doctype html><html><head><meta charset="utf-8"><base href="'+location.href+'"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap"><link rel="stylesheet" href="app.css?v=17"><style>html,body{margin:0;padding:0;background:#fff;min-height:0}body:before{display:none}.pdfbox{position:static;left:0;padding:0}</style></head><body><div class="pdfbox">'+html+'</div></body></html>');d.close()})})
+    d.open();d.write('<!doctype html><html><head><meta charset="utf-8"><base href="'+location.href+'"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap"><link rel="stylesheet" href="app.css?v=18"><style>html,body{margin:0;padding:0;background:#fff;min-height:0}body:before{display:none}.pdfbox{position:static;left:0;padding:0}</style></head><body><div class="pdfbox">'+html+'</div></body></html>');d.close()})})
   .then(function(d){var F=d.fonts;return (F?Promise.all(["700 20px 'Playfair Display'","italic 700 20px 'Playfair Display'","italic 400 14px 'Playfair Display'","400 12px Inter","500 12px Inter","600 12px Inter","700 12px Inter"].map(function(f){return F.load(f).catch(function(){})})).then(function(){return F.ready}):Promise.resolve()).then(function(){d.body.offsetHeight;return new Promise(function(ok){setTimeout(ok,300)})}).then(function(){return rast(d.querySelector(".pdfbox"))}).then(function(){
     var P=[].slice.call(d.querySelectorAll(".rp"));if(!P.length)P=[d.querySelector(".pdfbox").firstElementChild];
     var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",orientation:"portrait"}),i=0;
