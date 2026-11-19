@@ -579,10 +579,12 @@ function incForm(app){var P=app&&app.paziente?app.paziente:null,pres=app?presOf(
   sheet('<h2>Registra un incasso</h2>'+(P?'<div class="chosen"><div class="av">'+esc(ini(P))+'</div><b>'+esc(nomeP(P))+'</b></div>':'<div class="search"><input id="iQ" placeholder="Cerca paziente in rubrica"></div><div class="list-pick" id="iL" hidden></div><label>Nome e cognome *</label><input id="iN">')+
     '<div class="row keep"><div><label>Data</label><input type="date" id="iD" value="'+ymd(new Date())+'"></div><div><label>Importo (€) *</label><input id="iI" inputmode="decimal" value="'+(pres&&pres.prezzo?pres.prezzo:"")+'"></div></div>'+
     '<label>Prestazione</label><select id="iV"><option value="">—</option>'+PRES.map(function(p){return '<option value="'+esc(p.nome)+'" data-pr="'+(p.prezzo||"")+'"'+(pres&&pres.id===p.id?" selected":"")+'>'+esc(p.nome)+(p.prezzo?" · "+eur(p.prezzo):"")+'</option>'}).join("")+'</select>'+
+    '<label>Studio</label><div class="chips" id="iS">'+studiOpz().map(function(n){return '<button class="chip'+(n===studioApp(app)?" on":"")+'" data-s="'+esc(n)+'">'+esc(n)+'</button>'}).join("")+'</div>'+
     '<label>Metodo di pagamento</label><div class="chips" id="iM">'+METODI.map(function(m,i){return '<button class="chip'+(i?"":" on")+'" data-m="'+m+'">'+m+'</button>'}).join("")+'</div>'+
     '<label class="ck" style="margin-top:14px"><input type="checkbox" id="iTS"> Il paziente si oppone all’invio dei dati al Sistema Tessera Sanitaria</label>'+
     '<label>Note</label><input id="iNo"><div class="hint" id="iMsg"></div><button class="btn block" id="iOk" style="margin-top:14px">Salva incasso</button>',function(box,close){
-      var met="POS",paz=P,t=null;
+      var met="POS",paz=P,t=null,sedeI=studioApp(app)||"";
+      $$("#iS .chip",box).forEach(function(b){b.onclick=function(){sedeI=b.dataset.s;$$("#iS .chip",box).forEach(function(x){x.classList.toggle("on",x===b)})}});
       $$("#iM .chip",box).forEach(function(b){b.onclick=function(){met=b.dataset.m;$$("#iM .chip",box).forEach(function(x){x.classList.toggle("on",x===b)})}});
       box.querySelector("#iV").onchange=function(){var o=this.selectedOptions[0];if(o&&o.dataset.pr)box.querySelector("#iI").value=o.dataset.pr};
       var iq=box.querySelector("#iQ");if(iq)iq.oninput=function(){clearTimeout(t);var s=this.value.trim(),L=box.querySelector("#iL");if(s.length<2){L.hidden=true;return}t=setTimeout(function(){cerca(s).then(function(R){L.hidden=false;
@@ -590,7 +592,7 @@ function incForm(app){var P=app&&app.paziente?app.paziente:null,pres=app?presOf(
         L.onclick=function(e){var b=e.target.closest("[data-p]");if(!b)return;paz=R.filter(function(p){return p.id===b.dataset.p})[0];box.querySelector("#iN").value=nomeP(paz);L.hidden=true}})},200)};
       box.querySelector("#iOk").onclick=function(){var imp=num(box.querySelector("#iI").value),nome=P?nomeP(P):box.querySelector("#iN").value.trim(),m=box.querySelector("#iMsg");
         if(!nome){m.className="hint err";m.textContent="Scegli o scrivi il nome del paziente.";return}if(!(imp>0)){m.className="hint err";m.textContent="Inserisci l'importo.";return}
-        var o={studio_id:ST.id,paziente_id:paz?paz.id:null,appuntamento_id:app?app.id:null,data:box.querySelector("#iD").value,importo:imp,metodo:met,descrizione:box.querySelector("#iV").value||null,
+        var o={studio_id:ST.id,paziente_id:paz?paz.id:null,appuntamento_id:app?app.id:null,data:box.querySelector("#iD").value,importo:imp,metodo:met,sede:sedeI||null,descrizione:box.querySelector("#iV").value||null,
           nome:nome,cf:paz&&paz.cf||null,indirizzo:paz&&paz.indirizzo||null,cap:paz&&paz.cap||null,citta:paz&&paz.citta||null,prov:paz&&paz.prov||null,telefono:paz&&paz.telefono||null,email:paz&&paz.email||null,
           bollo:imp>(+ST.soglia_bollo||77.47),opposizione_ts:box.querySelector("#iTS").checked,note:box.querySelector("#iNo").value.trim()||null};
         sb.from("incassi").insert(o).then(function(r){if(r.error)return err(r.error);close();
@@ -618,8 +620,11 @@ function loadFatt(){var B=$("fBox");B.innerHTML='<div class="card glass"><span c
       B.innerHTML='<div class="kpis k3"><div class="kpi glass orange"><small>Da emettere</small><b>'+da.length+'</b><span>'+eur(da.reduce(function(s,x){return s+ +x.importo},0))+'</span></div><div class="kpi glass green"><small>Emesse</small><b>'+L.filter(function(x){return x.fattura_num}).length+'</b><span>ultimi 4 mesi</span></div><div class="kpi glass"><small>Di cui POS</small><b>'+da.filter(function(x){return x.metodo==="POS"}).length+'</b><span>da emettere</span></div></div>'+
         '<div class="card glass"><div class="hrow"><h2>Da emettere</h2>'+(da.length?'<button class="btn ghost small" data-xall>📋 Copia tutte per Excel</button>':'')+'</div>'+(da.length?da.map(fRow).join(""):'<div class="empty">Nessuna fattura da emettere. 🎉</div>')+'</div>'+
         (fatte.length?'<div class="card glass"><h2>Emesse di recente</h2>'+fatte.map(fRow).join("")+'</div>':'');
-      B.onclick=function(e){if(e.target.closest("[data-xall]"))return copia(da.slice().reverse().map(xlsRiga).join("\n"),da.length+" righe copiate: incollale nel file Excel (colonna A).");
-        var b=e.target.closest("[data-fi]");if(!b)return;if(b.dataset.act==="xls"){var xx=L.filter(function(i){return i.id===b.dataset.fi})[0];return copia(xlsRiga(xx),"Riga copiata: incollala nel file Excel (colonna A).")}var x=L.filter(function(i){return i.id===b.dataset.fi})[0];
+      B.onclick=function(e){if(e.target.closest("[data-xall]")){var ns=da.filter(function(x){return !studioDi(x)}).length;return copia(da.slice().reverse().map(xlsRiga).join("\n"),da.length+" righe copiate"+(ns?" ("+ns+" senza studio: tocca «riga Excel» su quelle per sceglierlo)":": incollale nel file Excel (colonna A)."))}
+        var b=e.target.closest("[data-fi]");if(!b)return;if(b.dataset.act==="xls"){var xx=L.filter(function(i){return i.id===b.dataset.fi})[0];if(studioDi(xx))return copia(xlsRiga(xx),"Riga copiata: incollala nel file Excel (colonna A).");
+          return sheet('<h2>In quale studio?</h2><div class="sub">'+esc(xx.nome)+' · '+dmy(xx.data)+'</div><div class="chips" id="xS" style="margin-top:12px">'+studiOpz().map(function(n){return '<button class="chip" data-s="'+esc(n)+'">'+esc(n)+'</button>'}).join("")+'</div>',function(box,close){
+            box.querySelector("#xS").onclick=function(e){var c=e.target.closest("[data-s]");if(!c)return;xx.sede=c.dataset.s;copia(xlsRiga(xx),"Riga copiata: incollala nel file Excel (colonna A).");close();
+              sb.from("incassi").update({sede:xx.sede}).eq("id",xx.id).then(function(r){if(r.error)err(r.error);loadFatt()})}})}var x=L.filter(function(i){return i.id===b.dataset.fi})[0];
         if(b.dataset.act==="crea")fattForm(x);if(b.dataset.act==="segna")segnaForm(x);if(b.dataset.act==="togli")ask("Segnare come non ancora emessa?","","Sì",function(){sb.from("incassi").update({fattura_num:null}).eq("id",x.id).then(function(r){if(r.error)return err(r.error);loadFatt()})});
         if(b.dataset.act==="copia"){navigator.clipboard&&navigator.clipboard.writeText(b.dataset.txt).then(function(){toast("Copiato.")})}}}).catch(err)}
   if(FM==="emesse"){var anno=new Date().getFullYear();q(sb.from("fatture").select("*").eq("studio_id",ST.id).order("anno",{ascending:false}).order("numero",{ascending:false})).then(function(L){
@@ -639,10 +644,13 @@ function loadFatt(){var B=$("fBox");B.innerHTML='<div class="card glass"><span c
       sb.from("studi").update({fiscale:o}).eq("id",ST.id).then(function(r){if(r.error)return err(r.error);ST.fiscale=o;toast("Dati dello studio salvati.");loadFatt()})}}}
 /* riga per il file Excel delle fatture: DATA, DESCRIZIONE, INCASSATO, PAGATO, STUDIO, NR. FAT., PROTOCOLLO T.S., COD FISC, IMPONIBILE, PAG, INTESTATARIO
    (numero fattura e protocollo T.S. restano vuoti: li scrive Ilaria) */
+function studiOpz(){return SEDI.map(function(x){return x.nome}).concat(["Online"])}
+function studioApp(a){if(!a)return "";if(/on.?line/i.test(a.note||""))return "Online";var sd=a.sede||SEDI.filter(function(x){return x.id===a.sede_id})[0];return sd?sd.nome:""}
+function studioDi(x){return x.sede||studioApp(x.app)}
 function xlsEur(n){return (Math.round(n*100)/100).toLocaleString("it-IT",{minimumFractionDigits:2,maximumFractionDigits:2})+" €"}
-function xlsRiga(x){var a=x.app||{},t=(x.descrizione||a.tipo||"")+"",on=/on.?line/i.test((a.note||"")+" "+(x.note||"")+" "+t),
+function xlsRiga(x){var a=x.app||{},t=(x.descrizione||a.tipo||"")+"",on=/on.?line/i.test((a.note||"")+" "+(x.note||"")+" "+t+" "+(x.sede||"")),
     tipo=/prima|1°/i.test(t)?"1°VISITA":/controllo/i.test(t)?"CONTROLLO":t.toUpperCase(),
-    studio=on?"ON-LINE":((a.sede&&a.sede.nome)||"").toUpperCase(),d=(x.data||"").split("-"),
+    sd=studioDi(x),studio=(on||/^online$/i.test(sd))?"ON-LINE":sd.toUpperCase(),d=(x.data||"").split("-"),
     pag={POS:"SUMUP",Contanti:"CONTANTI",Bonifico:"BONIFICO",Satispay:"SATISPAY"}[x.metodo]||(x.metodo||"").toUpperCase();
   return [d[2]+"/"+d[1]+"/"+d[0],((x.nome||"")+" "+tipo+(on&&!/ON-LINE/.test(tipo)?" ON-LINE":"")).toUpperCase().replace(/\s+/g," ").trim(),xlsEur(+x.importo),"",studio,"","",(x.cf||"").toUpperCase(),xlsEur(+x.importo/1.04),pag,""].join("\t")}
 function copia(t,msg){var ok=function(){toast(msg||"Copiato.")};
@@ -650,9 +658,9 @@ function copia(t,msg){var ok=function(){toast(msg||"Copiato.")};
 function copia2(t){var a=document.createElement("textarea");a.value=t;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();var r=false;try{r=document.execCommand("copy")}catch(e){}a.remove();if(!r)toast("Non riesco a copiare: tieni premuto sul testo.");return r}
 function fRow(x){var dati=[x.nome,x.cf,[x.indirizzo,[x.cap,x.citta,x.prov?"("+x.prov+")":""].filter(Boolean).join(" ")].filter(Boolean).join(", ")].filter(Boolean).join(" · ");
   var manca=!(x.cf&&x.indirizzo&&x.citta);
-  return '<div class="irow" style="align-items:flex-start"><div class="chi"><b>'+esc(x.nome||"—")+'</b><small>'+dmy(x.data)+' · '+esc(x.descrizione||"")+' · '+esc(x.metodo)+(x.bollo?" · marca da bollo 2 €":"")+(x.opposizione_ts?" · opposizione TS":"")+'</small>'+
+  return '<div class="irow" style="align-items:flex-start"><div class="chi"><b>'+esc(x.nome||"—")+'</b><small>'+dmy(x.data)+(studioDi(x)?' · '+esc(studioDi(x)):'')+' · '+esc(x.descrizione||"")+' · '+esc(x.metodo)+(x.bollo?" · marca da bollo 2 €":"")+(x.opposizione_ts?" · opposizione TS":"")+'</small>'+
     '<div class="sub" style="font-size:.82rem">'+esc(x.cf||"CF mancante")+' · '+esc(x.indirizzo?[x.indirizzo,x.cap,x.citta,x.prov].filter(Boolean).join(" "):"residenza mancante")+(x.email?" · "+esc(x.email):"")+'<button class="copy" data-fi="'+x.id+'" data-act="copia" data-txt="'+esc(dati)+'">copia dati</button><button class="copy" data-fi="'+x.id+'" data-act="xls">📋 riga Excel</button></div>'+
-    (x.fattura_num?'<span class="pill g">fattura '+esc(x.fattura_num)+'</span>':manca?'<span class="pill o">mancano dati</span>':'')+'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div class="imp">'+eur(x.importo)+'</div>'+
+    (x.fattura_num?'<span class="pill g">fattura '+esc(x.fattura_num)+'</span>':(manca?'<span class="pill o">mancano dati</span> ':'')+(studioDi(x)?'':'<span class="pill o">studio da scegliere</span>'))+'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><div class="imp">'+eur(x.importo)+'</div>'+
     (x.fattura_num?'<button class="btn ghost small" data-fi="'+x.id+'" data-act="togli">Annulla segno</button>':(own()?'<button class="btn small" data-fi="'+x.id+'" data-act="crea">Crea fattura</button>':'')+'<button class="btn ghost small" data-fi="'+x.id+'" data-act="segna">Segna emessa</button>')+'</div></div>'}
 function segnaForm(x){sheet('<h2>Segna la fattura come emessa</h2><div class="sub">'+esc(x.nome)+' · '+eur(x.importo)+' · '+dmy(x.data)+'</div><label>Numero della fattura (facoltativo)</label><input id="sgN" placeholder="Es. 12/2026"><button class="btn block" id="sgOk" style="margin-top:14px">Segna emessa</button>',function(box,close){
   box.querySelector("#sgOk").onclick=function(){sb.from("incassi").update({fattura_num:box.querySelector("#sgN").value.trim()||"Emessa"}).eq("id",x.id).then(function(r){if(r.error)return err(r.error);close();toast("Segnata come emessa.");loadFatt()})}})}
