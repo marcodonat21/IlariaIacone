@@ -636,14 +636,14 @@ function loadFatt(){var B=$("fBox");B.innerHTML='<div class="card glass"><span c
           :(prot?'<button class="fbtn p" data-fmail="'+f.id+'">✉️ Invia al paziente</button>':'<button class="fbtn p" data-fts="'+f.id+'" data-poi="1">Scrivi il protocollo TS e invia</button>');
         return '<div class="frow'+(f.inviata?" fatta":"")+'"><div class="ftop"><div class="chi"><b>FT '+f.numero+' · '+esc(f.nome)+'</b><small>'+dmy(f.data)+' · '+esc(f.metodo)+(b?" · con marca da bollo":"")+(f.protocollo_ts?" · Prot. TS "+esc(f.protocollo_ts):f.opposizione_ts?" · opposizione TS":"")+'</small>'+
         (!f.email?'<div><span class="pill o">manca la mail del paziente: consegnala a mano</span></div>':'')+'</div><div class="imp">'+eur(+f.importo+ +f.bollo)+'</div></div>'+fTrack(b,fase)+
-        '<div class="facts">'+pr+(f.inviata?'<span class="pill g">✓ Inviata</span>':'')+
-          (b&&f.stampata&&!f.inviata?'<button class="fbtn" data-pdf="'+f.id+'">🖨️ Ristampa PDF</button>':'')+(!b||f.inviata||!f.email?'<button class="fbtn" data-pdf="'+f.id+'">📄 PDF</button>':'')+
+        '<div class="facts">'+pr+(f.inviata?'<button class="fbtn s" data-fsave="'+f.id+'">💾 Salva sul PC</button>':'')+
+          (b&&f.stampata&&!f.inviata?'<button class="fbtn" data-pdf="'+f.id+'">🖨️ Ristampa PDF</button>':'')+(!f.inviata&&(!b||!f.email)?'<button class="fbtn" data-pdf="'+f.id+'">📄 PDF</button>':'')+
           (f.inviata&&f.email?'<button class="fbtn" data-'+(b?"scan":"fmail")+'="'+f.id+'">Invia di nuovo</button>':'')+
           '<button class="fbtn" data-fts="'+f.id+'">✏️ N. e protocollo</button>'+(own()&&ult&&ult.id===f.id?'<button class="fbtn del" data-fdel="'+f.id+'">Elimina</button>':'')+'</div></div>'}).join(""):'<div class="empty">Nessuna fattura in questo anno.</div>')+'</div>';
     $("fAnno").onchange=loadFatt;
     B.onclick=function(e){var p=e.target.closest("[data-pdf]");if(p)fattPdf(L.filter(function(f){return f.id===p.dataset.pdf})[0]);
       var fm=e.target.closest("[data-fmail]");if(fm){var ff=L.filter(function(f){return f.id===fm.dataset.fmail})[0];conProt(ff,function(){mailDoc("fattura",ff.id,ff.email,fattHtml(ff),fattNome(ff))})}var sc=e.target.closest("[data-scan]");if(sc){var fs=L.filter(function(f){return f.id===sc.dataset.scan})[0];conProt(fs,function(){scanForm(fs)})}
-      var ft=e.target.closest("[data-fts]");if(ft){var fp=L.filter(function(f){return f.id===ft.dataset.fts})[0];protForm(fp,ft.dataset.poi?function(){mailDoc("fattura",fp.id,fp.email,fattHtml(fp),fattNome(fp))}:null)}if(e.target.closest("[data-new]"))fattForm(null);
+      var fsv=e.target.closest("[data-fsave]");if(fsv)return fattSalva(L.filter(function(f){return f.id===fsv.dataset.fsave})[0]);var ft=e.target.closest("[data-fts]");if(ft){var fp=L.filter(function(f){return f.id===ft.dataset.fts})[0];protForm(fp,ft.dataset.poi?function(){mailDoc("fattura",fp.id,fp.email,fattHtml(fp),fattNome(fp))}:null)}if(e.target.closest("[data-new]"))fattForm(null);
       var d=e.target.closest("[data-fdel]");if(d)ask("Eliminare l'ultima fattura?","Si può eliminare solo l'ultima, per non lasciare buchi nella numerazione.","Sì, elimina",function(){var f=L.filter(function(x){return x.id===d.dataset.fdel})[0];
         sb.from("fatture").delete().eq("id",f.id).then(function(r){if(r.error)return err(r.error);if(f.incasso_id)sb.from("incassi").update({fattura_num:null}).eq("id",f.incasso_id).then(function(){});toast("Fattura eliminata.");loadFatt()})})}}).catch(err)}
   if(FM==="studio"){var s=fisc(),F=[["nome","Nome e titolo"],["qualifica","Qualifica"],["indirizzo","Indirizzo dello studio"],["citta","Città"],["cap","CAP"],["prov","Provincia"],["piva","Partita IVA"],["cf","Codice fiscale"],["albo","Iscrizione all'albo"],["tel","Telefono"],["email","Email"],["iban","IBAN"]];
@@ -751,6 +751,12 @@ function fattHtml(f){var s=fisc(),imp=+f.importo,bol=+f.bollo||0,base=Math.round
     (bol?'<div class="fbollo"><div><span>Spazio per la<br><b>marca da bollo</b><br>da 2,00 €</span></div><div><span>Timbro e firma</span></div></div>':'')+
     '<div class="rft">'+esc([sito,wa?"WhatsApp "+wa:"",s.email||""].filter(Boolean).join("  ·  "))+'</div></div></div>'}
 function fattNome(f){return "Fattura "+f.numero+"-"+f.anno+" "+f.nome}
+function fattArch(f){var d=(f.data||"").split("-");return ("Fattura_n._"+f.numero+"_del_"+d[2]+"-"+d[1]+"-"+d[0]+"_"+(f.nome||"")).replace(/[\\/:*?"<>|]/g,"").replace(/\s+/g,"_")+".pdf"}
+/* salva sul computer la fattura come è stata mandata (la scansione firmata se c'è, altrimenti il PDF) */
+function fattSalva(f){if(f.scansione){toast("Scarico la fattura…");sb.storage.from("fatture").download(f.scansione).then(function(r){if(r.error||!r.data)return toast("Non trovo la scansione: riprova.");
+    var url=URL.createObjectURL(r.data),a=document.createElement("a");a.href=url;a.download=fattArch(f);document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},60000)})}
+  else{toast("Preparo il PDF…");pdfB64(fattHtml(f)).then(function(b){scarica(b,fattArch(f))}).catch(function(){toast("Non sono riuscito a preparare il PDF.")})}}
+function b64Blob(b){var bin=atob(b),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Blob([u],{type:"application/pdf"})}
 /* scarica il PDF della fattura (da stampare se ha la marca da bollo) */
 function fattPdf(f){toast("Preparo il PDF…");pdfB64(fattHtml(f)).then(function(b){scarica(b,fattNome(f)+".pdf");if(f.bollo>0&&!f.stampata){f.stampata=new Date().toISOString();sb.from("fatture").update({stampata:f.stampata}).eq("id",f.id).then(function(){if(FM==="emesse")loadFatt()})}}).catch(function(e){toast(e&&e.message?e.message:"Non sono riuscito a preparare il PDF.")})}
 function scarica(b64,nome){var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
@@ -763,8 +769,10 @@ function scanForm(f){
     var inp=box.querySelector("#scF"),ok=box.querySelector("#scOk"),m=box.querySelector("#scMsg");
     inp.onchange=function(){ok.disabled=!inp.files.length};
     ok.onclick=function(){ok.disabled=true;m.className="hint";m.textContent="Preparo il file…";
-      scanPdf([].slice.call(inp.files)).then(function(b64){if(b64.length>7800000)throw new Error("Il file è troppo grande (max circa 5 MB): scansiona a risoluzione più bassa.");m.textContent="Invio in corso…";
-        return sb.functions.invoke("mail",{body:{tipo:"fattura",id:f.id,pdf:b64,file:fattNome(f)}})}).then(function(r){
+      scanPdf([].slice.call(inp.files)).then(function(b64){if(b64.length>7800000)throw new Error("Il file è troppo grande (max circa 5 MB): scansiona a risoluzione più bassa.");m.textContent="Salvo la scansione…";var path=ST.id+"/"+f.id+".pdf";
+        return sb.storage.from("fatture").upload(path,b64Blob(b64),{upsert:true,contentType:"application/pdf"}).then(function(u){if(u.error)throw new Error("Non sono riuscito a salvare la scansione: riprova.");
+          f.scansione=path;return sb.from("fatture").update({scansione:path}).eq("id",f.id)}).then(function(){m.textContent="Invio in corso…";
+          return sb.functions.invoke("mail",{body:{tipo:"fattura",id:f.id,pdf:b64,file:fattNome(f)}})})}).then(function(r){
         if(r.error||!r.data||!r.data.ok)throw new Error("La mail non è partita: riprova.");close();toast("Fattura inviata a "+f.email+" ✉️");loadFatt()}).catch(function(e){ok.disabled=false;m.className="hint err";m.textContent=e&&e.message?e.message:"La mail non è partita."})}})}
 function leggi(file,come){return new Promise(function(ok,ko){var r=new FileReader();r.onload=function(){ok(r.result)};r.onerror=function(){ko(new Error("Non riesco a leggere il file."))};r[come](file)})}
 function scanPdf(files){var pdf=files.filter(function(x){return /pdf$/i.test(x.type)||/\.pdf$/i.test(x.name)})[0];
@@ -786,7 +794,7 @@ var LIBS=null;function pdfLibs(){return LIBS||(LIBS=Promise.all(["https://cdnjs.
 function pdfB64(html){var fr;return pdfLibs().then(function(){return new Promise(function(ok){
     fr=document.createElement("iframe");fr.setAttribute("aria-hidden","true");fr.style.cssText="position:fixed;left:-10000px;top:0;width:820px;height:1200px;border:0";document.body.appendChild(fr);
     var d=fr.contentDocument;fr.onload=function(){ok(d)};
-    d.open();d.write('<!doctype html><html><head><meta charset="utf-8"><base href="'+location.href+'"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap"><link rel="stylesheet" href="app.css?v=18"><style>html,body{margin:0;padding:0;background:#fff;min-height:0}body:before{display:none}.pdfbox{position:static;left:0;padding:0}</style></head><body><div class="pdfbox">'+html+'</div></body></html>');d.close()})})
+    d.open();d.write('<!doctype html><html><head><meta charset="utf-8"><base href="'+location.href+'"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400;1,700&display=swap"><link rel="stylesheet" href="app.css?v=19"><style>html,body{margin:0;padding:0;background:#fff;min-height:0}body:before{display:none}.pdfbox{position:static;left:0;padding:0}</style></head><body><div class="pdfbox">'+html+'</div></body></html>');d.close()})})
   .then(function(d){var F=d.fonts;return (F?Promise.all(["700 20px 'Playfair Display'","italic 700 20px 'Playfair Display'","italic 400 14px 'Playfair Display'","400 12px Inter","500 12px Inter","600 12px Inter","700 12px Inter"].map(function(f){return F.load(f).catch(function(){})})).then(function(){return F.ready}):Promise.resolve()).then(function(){d.body.offsetHeight;return new Promise(function(ok){setTimeout(ok,300)})}).then(function(){return rast(d.querySelector(".pdfbox"))}).then(function(){
     var P=[].slice.call(d.querySelectorAll(".rp"));if(!P.length)P=[d.querySelector(".pdfbox").firstElementChild];
     var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",orientation:"portrait"}),i=0;

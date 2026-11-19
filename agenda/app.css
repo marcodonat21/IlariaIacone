@@ -493,3 +493,4 @@ html.notte .fbtn{background:rgba(255,255,255,.08);color:#f2f2f7;border-color:rgb
 .ftrack .now{color:var(--red);font-weight:700}.ftrack .now em{background:var(--red);color:#fff}
 .ftrack i{flex:0 0 14px;height:2px;background:var(--line);border-radius:2px}
 .frow.fatta{opacity:.72}
+.fbtn.s{background:rgba(128,158,132,.16);border-color:rgba(128,158,132,.35);color:#2f5d38}
