@@ -510,3 +510,6 @@ html.notte .fbtn{background:rgba(255,255,255,.08);color:#f2f2f7;border-color:rgb
 .cdrow em{font-style:normal;font-size:.78rem;font-weight:700;color:var(--red);white-space:nowrap}
 .cdrow.ok em{color:#3d6b45}
 html.notte .cdrow{background:rgba(255,255,255,.06);color:#f2f2f7;border-color:rgba(255,255,255,.14)}
+
+.fgc1{grid-template-columns:1fr!important;padding-top:0!important}
+.fgcols ul{margin:6px 0 0;padding-left:18px}.fgcols ul li{margin:4px 0}
